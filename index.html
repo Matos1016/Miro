@@ -23,7 +23,7 @@
             align-items: center;
         }
 
-        /* THE FIX: Absolute positioning prevents the 'cut off' centering issue */
+        /* Absolute positioning prevents the 'cut off' centering issue */
         #root {
             width: 1280px;
             height: 720px;
@@ -44,7 +44,6 @@
             overflow: hidden;
         }
 
-        /* Rocket and Confetti Animations remain exactly as you have them */
         @keyframes rocketFinalSequence {
             0% { transform: translate(1000px, 680px) scale(0); opacity: 0; }
             20% { transform: translate(1000px, 500px) scale(1); opacity: 1; }
@@ -75,7 +74,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // JS Resize Engine: This forces the #root to scale to fit the iframe window
         const useWindowResize = () => {
             useEffect(() => {
                 const handleResize = () => {
@@ -86,7 +84,7 @@
                     }
                 };
                 window.addEventListener('resize', handleResize);
-                handleResize(); // Run once on load
+                handleResize();
                 return () => window.removeEventListener('resize', handleResize);
             }, []);
         };
@@ -260,7 +258,7 @@
         };
 
         const App = () => {
-            useWindowResize(); // Activate the resize engine
+            useWindowResize();
             const [rocketActive, setRocketActive] = useState(false);
             const triggerRocket = () => { if (rocketActive) return; setRocketActive(true); setTimeout(() => setRocketActive(false), 7700); };
 
@@ -345,7 +343,8 @@
                     </div>
                     <div className="relative z-50 px-12 h-[80px] shrink-0 flex items-center bg-black/80 backdrop-blur-3xl border-t-2 border-white/10">
                         <div className="flex gap-8 items-center w-full max-w-[1280px] mx-auto overflow-hidden text-white">
-                            <span className="text-[10px] font-black uppercase text-[#FFD02F] tracking-[0.4em] whitespace-nowrap animate-pulse shrink-0">Impact Across Sectors</span>
+                            {/* PULSE REMOVED BELOW */}
+                            <span className="text-[10px] font-black uppercase text-[#FFD02F] tracking-[0.4em] whitespace-nowrap shrink-0">Impact Across Sectors</span>
                             <div className="h-px bg-white/20 flex-1 min-w-[20px]" />
                             <div className="flex gap-3 flex-nowrap items-center shrink-0">
                                 {sectors.map((s) => ( <span key={s} className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap">{s}</span> ))}
