@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Q4 Performance Infographic</title>
+    <title>FY26 Q4 Performance Portal</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -15,21 +15,23 @@
             margin: 0;
             padding: 0;
             overflow: hidden; 
-            background-color: #050038;
+            background-color: #1C1C1E; /* Miro Breakthrough Black */
             height: 100vh;
             width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Absolute positioning prevents the 'cut off' centering issue */
+        /* Portal scaling engine container */
         #root {
             width: 1280px;
             height: 720px;
-            position: absolute; 
             transform-origin: center center;
             flex-shrink: 0;
+            position: absolute;
         }
 
         .infographic-shell {
@@ -38,34 +40,74 @@
             background-color: #050038;
             font-family: 'Inter', sans-serif;
             display: flex;
-            flex-direction: column;
-            border: 12px solid #050038;
+            flex-direction: column; 
+            border: 12px solid #1C1C1E;
             position: relative;
             overflow: hidden;
         }
 
-        @keyframes rocketFinalSequence {
+        .sharp-text {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        /* Smashed Effect for DESTROYED */
+        .destroyed-wrap {
+            position: relative;
+            display: inline-block;
+            color: #FFDD33;
+        }
+        .destroyed-top {
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 60%);
+        }
+        .destroyed-bottom {
+            position: absolute;
+            top: 0;
+            left: 4px;
+            clip-path: polygon(0 60%, 100% 45%, 100% 100%, 0 100%);
+            transform: translateY(3px);
+            filter: brightness(0.9);
+        }
+
+        /* Text Fire Animations for 23 Wins achievement */
+        @keyframes text-flicker {
+            0%, 100% { text-shadow: 0 0 10px #FFDD33, 0 0 20px #FF9C57, 0 0 30px #FF6683; }
+            50% { text-shadow: 0 0 15px #FFDD33, 0 0 30px #FF9C57, 0 0 45px #FF6683; }
+        }
+
+        @keyframes spark-rise {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-60px) scale(0) rotate(90deg); opacity: 0; }
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @keyframes rocketUpwards {
             0% { transform: translate(1000px, 680px) scale(0); opacity: 0; }
-            20% { transform: translate(1000px, 500px) scale(1); opacity: 1; }
-            30% { transform: translate(1000px, 500px) rotate(1.5deg); }
-            40% { transform: translate(1000px, 500px) rotate(-1.5deg); }
-            50% { transform: translate(1000px, 500px) rotate(0deg); }
-            70% { transform: translate(1000px, 50px) rotate(-10deg); }
-            90% { transform: translate(300px, -450px) rotate(-70deg); opacity: 1; }
-            100% { transform: translate(-600px, -900px) rotate(-90deg); opacity: 0; }
+            15% { transform: translate(1000px, 500px) scale(1); opacity: 1; }
+            25% { transform: translate(1000px, 500px) rotate(1deg); }
+            35% { transform: translate(1000px, 500px) rotate(-1deg); }
+            45% { transform: translate(1000px, 500px) rotate(0deg); }
+            65% { transform: translate(950px, 100px) rotate(-5deg); }
+            100% { transform: translate(850px, -1200px) rotate(-8deg); opacity: 1; }
         }
-        @keyframes ultraSlowConfetti {
+
+        /* Rain Cash Physics: Rectangular bills with immediate drift */
+        @keyframes cashRain {
             0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
-            0.5% { opacity: 1; transform: translate(0, -30px) scale(1.2) rotate(0deg); }
-            1% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(180deg); opacity: 1; }
-            100% { transform: translate(var(--fx), var(--fy)) rotate(var(--r)) scale(0.4); opacity: 0; }
+            0.05% { opacity: 1; transform: translate(0, -10px) scale(1) rotate(0deg); }
+            0.2% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--r)); opacity: 1; }
+            100% { transform: translate(var(--fx), var(--fy)) rotate(calc(var(--r) * 2)) scale(0.8); opacity: 0; }
         }
-        @keyframes animate-smoke { 
-            0% { transform: scale(0.5) translateY(0); opacity: 0.8; } 
-            100% { transform: scale(5) translateY(80px); opacity: 0; } 
-        }
+
         @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+        @keyframes animate-smoke { 0% { transform: scale(0.5) translateY(0); opacity: 0.8; } 100% { transform: scale(5) translateY(80px); opacity: 0; } }
+        .animate-smoke { animation: animate-smoke 1.5s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -74,35 +116,28 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const useWindowResize = () => {
+        const useAutoScaler = () => {
             useEffect(() => {
-                const handleResize = () => {
+                const scaler = () => {
                     const root = document.getElementById('root');
                     if (root) {
                         const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
                         root.style.transform = `scale(${scale})`;
                     }
                 };
-                window.addEventListener('resize', handleResize);
-                handleResize();
-                return () => window.removeEventListener('resize', handleResize);
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
             }, []);
         };
 
         const Icon = ({ name, size = 24, className = "", fill = "none" }) => {
             const icons = {
-                target: <path d="m12 12 4.3 4.3M19 12a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z M12 12h.01" />,
-                users: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
-                globe: (
-                    <React.Fragment>
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20" />
-                    </React.Fragment>
-                ),
-                trophy: <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55.47.98.97 1.21C11.47 18.44 12 19 12 19s.53-.56 1.03-.79c.5-.23.97-.66.97-1.21v-2.34c0-2.57-2-4.66-4-4.66s-4 2.09-4 4.66Z" />,
+                graph: <path d="M3 3v18h18M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />,
+                globe: <React.Fragment><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20" /></React.Fragment>,
                 rocket: <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09ZM12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2ZM9 12H4s.5-1 1-4c1.5 0 3 .5 3 .5ZM15 9V4s-1 .5-4 1c0 1.5.5 3 .5 3Z" />,
                 sparkles: <path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" />,
-                popper: <path d="M5.8 11.3 2 22l10.7-3.8M4 3h.01M22 8h.01M15 2h.01M22 20h.01M22 2h.01M7 4h.01M12 6h.01" />
+                speedometer: <React.Fragment><path d="M3.34 19a10 10 0 1 1 17.32 0" /><path d="m12 14 3-3" /><path d="M12 7v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 4.93-1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /></React.Fragment>
             };
             return (
                 <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -111,53 +146,79 @@
             );
         };
 
-        const ConfettiWrapper = ({ children, className = "" }) => {
+        const TextFireSparks = ({ isActive }) => {
+            const [sparks, setSparks] = useState([]);
+            useEffect(() => {
+                if (!isActive) return;
+                const interval = setInterval(() => {
+                    const newSpark = {
+                        id: Math.random(),
+                        left: 10 + Math.random() * 80,
+                        size: 2 + Math.random() * 4,
+                        duration: 0.4 + Math.random() * 0.4,
+                        color: ['#FFDD33', '#FF9C57', '#FF6683'][Math.floor(Math.random() * 3)]
+                    };
+                    setSparks(s => [...s, newSpark].slice(-15));
+                }, 100);
+                return () => clearInterval(interval);
+            }, [isActive]);
+            if (!isActive) return null;
+            return (
+                <div className="absolute inset-0 pointer-events-none">
+                    {sparks.map(s => (
+                        <div key={s.id} className="absolute bottom-0 rounded-full blur-[1px]"
+                            style={{ left: `${s.left}%`, width: s.size, height: s.size, backgroundColor: s.color, animation: `spark-rise ${s.duration}s ease-out forwards` }}
+                        />
+                    ))}
+                </div>
+            );
+        };
+
+        const CashRainWrapper = ({ children, className = "" }) => {
             const [particles, setParticles] = useState([]);
             const activePopRef = useRef(false);
-
             const spawnBurst = () => {
-                const burstSize = 10;
+                const burstSize = 8;
                 const newParticles = Array.from({ length: burstSize }).map(() => ({
                     id: Math.random(),
-                    tx: (Math.random() - 0.5) * 600,
-                    ty: -450 - Math.random() * 400,
-                    fallX: (Math.random() - 0.5) * 500,
-                    fallY: 1000, 
-                    r: Math.random() * 2000,
-                    s: Math.random() * 10 + 4,
-                    c: ['#FFD02F', '#4262FF', '#FFFFFF', '#FFD02F'][Math.floor(Math.random() * 4)],
-                    shape: Math.random() > 0.5 ? '50%' : '2px',
+                    tx: (Math.random() - 0.5) * 600, ty: -450 - Math.random() * 400,
+                    fx: (Math.random() - 0.5) * 800, fy: 1000, 
+                    r: Math.random() * 720,
+                    w: 24, h: 12,
+                    c: ['#6EDB8C', '#297A36', '#B7FBCD', '#47D1C4'][Math.floor(Math.random() * 4)],
                     delay: Math.random() * 0.1
                 }));
-                setParticles(prev => [...prev, ...newParticles].slice(-100));
+                setParticles(prev => [...prev, ...newParticles].slice(-120));
             };
-
             const startCelebration = () => {
                 if (activePopRef.current) return;
                 activePopRef.current = true;
                 let elapsed = 0;
+                const interval = 200; 
                 const timer = setInterval(() => {
                     spawnBurst();
-                    elapsed += 150;
-                    if (elapsed >= 1200) {
+                    elapsed += interval;
+                    if (elapsed >= 5000) { 
                         clearInterval(timer);
                         activePopRef.current = false;
                     }
-                }, 150);
+                }, interval);
             };
-
             return (
                 <div className="relative group h-full w-full" onMouseEnter={startCelebration}>
                     <div className="absolute inset-x-0 top-0 pointer-events-none flex items-center justify-center overflow-visible z-[200]">
                         {particles.map(p => (
-                            <div key={p.id} className="absolute pointer-events-none"
+                            <div key={p.id} className="absolute pointer-events-none flex items-center justify-center text-[8px] font-bold text-white/40"
                                 style={{
-                                    width: p.s, height: p.s, backgroundColor: p.c, borderRadius: p.shape,
-                                    '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, '--fx': `${p.tx + p.fallX}px`, '--fy': `${p.fallY}px`, '--r': `${p.r}deg`,
-                                    animation: `ultraSlowConfetti 120s cubic-bezier(0.1, 0.9, 0.2, 1) forwards`,
-                                    animationDelay: `${p.delay}s`, boxShadow: `0 0 10px ${p.c}88`
+                                    width: p.w, height: p.h, backgroundColor: p.c, borderRadius: '2px',
+                                    '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, '--fx': `${p.fx}px`, '--fy': `${p.fy}px`, '--r': `${p.r}deg`,
+                                    animation: `cashRain 120s cubic-bezier(0.1, 0.9, 0.2, 1) forwards`,
+                                    animationDelay: `${p.delay}s`, boxShadow: `0 2px 5px rgba(0,0,0,0.2)`,
+                                    border: '1px solid rgba(0,0,0,0.1)'
                                 }}
-                            />
+                            >
+                                $
+                            </div>
                         ))}
                     </div>
                     <div className={`relative z-10 h-full w-full ${className}`}>{children}</div>
@@ -168,45 +229,42 @@
         const SpinningGlobe = () => {
             const [rotation, setRotation] = useState(0);
             useEffect(() => {
-                const interval = setInterval(() => setRotation(prev => (prev + 0.3) % 360), 30);
+                const interval = setInterval(() => setRotation(prev => (prev + 0.35) % 360), 30);
                 return () => clearInterval(interval);
             }, []);
-
+            
             const points = [
                 { name: 'AMER', count: 10, angle: 260, y: 0 },
-                { name: 'EMEA', count: 6, angle: 30, y: -20 },
+                { name: 'EMEA', count: 6, angle: 30, y: -25 },
                 { name: 'JPN', count: 4, angle: 140, y: -10 },
                 { name: 'APAC', count: 2, angle: 110, y: 25 },
                 { name: 'LATAM', count: 1, angle: 255, y: 45 },
             ];
 
             const worldMap = "M25,85 c5,-10 20,-15 40,-15 c15,0 30,10 50,5 c15,-5 25,-15 40,-10 c10,5 15,20 10,35 c-5,15 -25,20 -40,15 c-10,-5 -20,-10 -35,-5 c-15,5 -25,15 -45,10 c-15,-5 -20,-20 -20,-35 Z M180,45 c15,-15 45,-5 65,10 c15,10 30,25 20,45 c-10,15 -35,15 -55,10 c-20,-5 -30,-20 -40,-40 c-5,-15 0,-20 10,-25 Z M160,140 c15,-15 40,-5 60,10 c15,10 25,30 15,45 c-10,15 -35,25 -55,15 c-20,-10 -25,-30 -30,-45 c-5,-15 0,-20 10,-25 Z M40,150 c15,-15 40,-5 60,10 c15,15 20,35 10,50 c-10,15 -40,20 -60,10 c-20,-10 -25,-30 -25,-45 c0,-15 5,-20 15,-25 Z M300,90 c15,-15 40,-5 50,15 c10,20 0,40 -15,55 c-15,15 -40,10 -50,-10 c-10,-20 -5,-45 15,-60 Z";
-
+            
             return (
                 <div className="relative w-full aspect-square max-w-[280px] mx-auto flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-blue-600/10 backdrop-blur-md shadow-[inset_0_0_60px_rgba(66,98,255,0.2)] overflow-hidden">
-                        <div className="absolute inset-0 flex opacity-90" style={{ transform: `translateX(${-rotation * 1.5}px)`, width: '400%', transition: 'transform 0.1s linear' }}>
+                    <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-[#47D1C4]/10 backdrop-blur-md shadow-[inset_0_0_60px_rgba(71,209,196,0.15)] overflow-hidden">
+                        <div className="absolute inset-0 flex opacity-80" style={{ transform: `translateX(${-rotation * 1.6}px)`, width: '400%', transition: 'transform 0.1s linear' }}>
                             {[...Array(4)].map((_, i) => (
-                                <svg key={i} viewBox="0 0 400 200" className="h-full w-full opacity-70 shrink-0" preserveAspectRatio="none">
+                                <svg key={i} viewBox="0 0 400 200" className="h-full w-full shrink-0" preserveAspectRatio="none">
                                     <path fill="#FFF" d={worldMap} />
                                 </svg>
                             ))}
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-[#050038]/60 to-white/10 pointer-events-none" />
                     </div>
                     {points.map((p) => {
                         const currentAngle = (p.angle + rotation) % 360;
                         const radians = (currentAngle * Math.PI) / 180;
-                        const x = Math.sin(radians) * 125;
+                        const x = Math.sin(radians) * 115;
                         const zIndex = Math.cos(radians) > 0 ? 30 : 5;
-                        const opacity = Math.max(0.1, (Math.cos(radians) + 1.2) / 2.2);
+                        const opacity = Math.max(0.05, (Math.cos(radians) + 1.2) / 2.2);
                         return (
                             <div key={p.name} className="absolute transition-all duration-75 pointer-events-none flex flex-col items-center"
-                                style={{ transform: `translate(${x}px, ${p.y}px)`, zIndex: zIndex, opacity: opacity, scale: (Math.cos(radians) + 2.5) / 3.5 }}>
-                                <div className="bg-[#FFD02F] text-[#050038] text-[24px] font-black px-3 py-1 rounded-lg shadow-2xl border-2 border-white/40 whitespace-nowrap leading-none">
-                                    {p.name}: {p.count}
-                                </div>
-                                <div className="w-3 h-3 rounded-full bg-white shadow-[0_0_12px_#fff] mt-1" />
+                                style={{ transform: `translate(${x}px, ${p.y}px)`, zIndex, opacity, scale: (Math.cos(radians) + 2.5) / 3.5 }}>
+                                <div className="bg-[#FFDD33] text-[#1C1C1E] text-[20px] font-black px-3 py-1 rounded shadow-xl border-2 border-white/30 whitespace-nowrap leading-none">{p.name}: {p.count}</div>
+                                <div className="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_15px_#fff] mt-1" />
                             </div>
                         );
                     })}
@@ -218,29 +276,23 @@
             const [smoke, setSmoke] = useState([]);
             useEffect(() => {
                 if (!isActive) { setSmoke([]); return; }
-                const interval = setInterval(() => {
-                    setSmoke(prev => [...prev, { id: Math.random(), delay: Math.random() * 0.2 }].slice(-30));
-                }, 50);
+                const interval = setInterval(() => { setSmoke(prev => [...prev, { id: Math.random(), delay: Math.random() * 0.2 }].slice(-30)); }, 50);
                 return () => clearInterval(interval);
             }, [isActive]);
             if (!isActive) return null;
             return (
-                <div className="absolute z-[150] pointer-events-none origin-bottom" style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
-                    <div className="relative flex flex-col items-center">
+                <div className="absolute z-[150] pointer-events-none origin-bottom w-full h-full left-0 top-0" style={{ animation: 'rocketUpwards 7.5s ease-in-out forwards' }}>
+                    <div className="relative flex flex-col items-center w-14 h-22 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                         <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
-                            <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#F1F5F9"/>
-                            <path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#EF4444"/>
-                            <path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#EF4444"/>
-                            <path d="M22 83H38L35 90H25L22 83Z" fill="#1E293B"/>
-                            <circle cx="30" cy="40" r="8" fill="#3B82F6" stroke="white" strokeWidth="2"/>
+                            <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#F1F5F9" stroke="#1C1C1E" strokeWidth="2.5"/>
+                            <path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#FF6683" stroke="#1C1C1E" strokeWidth="1.5"/><path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#FF6683" stroke="#1C1C1E" strokeWidth="1.5"/>
+                            <path d="M22 83H38L35 90H25L22 83Z" fill="#1C1C1E"/><circle cx="30" cy="40" r="8" fill="#47D1C4" stroke="#1C1C1E" strokeWidth="2"/>
                         </svg>
                         <div className="absolute top-[85px] flex flex-col items-center">
-                            <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[2px] z-20" />
-                            <div className="absolute top-2 flex flex-col items-center">
-                                {smoke.map((s) => (
-                                    <div key={s.id} className="w-10 h-10 bg-white/20 rounded-full blur-xl absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
-                                ))}
-                            </div>
+                            <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-[#FFDD33] rounded-full animate-pulse blur-[2px] z-20" />
+                            <div className="absolute top-2 flex flex-col items-center">{smoke.map((s) => (
+                                <div key={s.id} className="w-10 h-10 bg-white/20 rounded-full blur-xl absolute animate-smoke" style={{ animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
+                            ))}</div>
                         </div>
                     </div>
                 </div>
@@ -252,16 +304,19 @@
             const logoUrl = `https://logo.clearbit.com/${domain}?size=64`;
             return (
                 <div className="bg-white border-2 border-gray-100 rounded-lg p-1 h-10 w-full flex items-center justify-center shadow-sm hover:shadow-md transition-all overflow-hidden shrink-0">
-                    {!error ? ( <img src={logoUrl} alt={name} className="max-h-full max-w-full object-contain" onError={() => setError(true)} /> ) : ( <span className="text-[9px] font-black uppercase text-center leading-tight text-black">{name}</span> )}
+                    {!error ? ( <img src={logoUrl} alt={name} className="max-h-full max-w-full object-contain" onError={() => setError(true)} /> ) : ( <span className="text-[10px] font-black uppercase text-center leading-tight text-[#1C1C1E]">{name}</span> )}
                 </div>
             );
         };
 
         const App = () => {
-            useWindowResize();
+            useAutoScaler();
             const [rocketActive, setRocketActive] = useState(false);
+            const [winsFireActive, setWinsFireActive] = useState(false);
             const triggerRocket = () => { if (rocketActive) return; setRocketActive(true); setTimeout(() => setRocketActive(false), 7700); };
+            const handleVelocityHover = () => { setWinsFireActive(true); setTimeout(() => setWinsFireActive(false), 10000); };
 
+            const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Mfg", "Telecom", "Pharma"];
             const companies = [
                 { name: "Netflix", domain: "netflix.com" }, { name: "Airbnb", domain: "airbnb.com" },
                 { name: "Workday", domain: "workday.com" }, { name: "Accenture", domain: "accenture.com" },
@@ -277,77 +332,83 @@
                 { name: "Knitwell Group", domain: "knitwellgroup.com" }
             ];
 
-            const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Mfg", "Telecom", "Pharma"];
-
             return (
                 <div className="infographic-shell select-none shadow-2xl">
                     <RealisticRocket isActive={rocketActive} />
                     <div className="absolute inset-0 opacity-[0.05] pointer-events-none z-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-                    <div className="relative z-40 px-12 h-[160px] shrink-0 flex justify-between items-end pb-6">
-                        <div>
-                            <div className="inline-flex items-center gap-2 bg-[#4262FF] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-lg">
-                                <Icon name="popper" size={14} fill="white" className="mr-1" /> PERFORMANCE OVERVIEW
-                            </div>
-                            <h1 className="text-5xl font-black leading-none italic uppercase tracking-tighter drop-shadow-lg text-white">
-                                GOAL <br />
-                                <div className="relative inline-block text-[#FFD02F] mt-1">
-                                    <span className="relative">
-                                        <span className="absolute inset-0 block" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 48%, 0 52%)' }}>DESTROYED</span>
-                                        <span className="block translate-x-[3px] translate-y-[1px]" style={{ clipPath: 'polygon(0 52%, 100% 48%, 100% 100%, 0 100%)' }}>DESTROYED</span>
-                                    </span>
+                    
+                    {/* Header: Spacious and Title focus */}
+                    <div className="relative z-40 px-12 h-[200px] shrink-0 flex justify-between items-end pb-12">
+                        <div className="sharp-text">
+                            <h1 className="text-7xl font-black leading-none italic uppercase text-white tracking-tighter drop-shadow-lg">
+                                FY26 Q4 GOAL <br />
+                                <div className="destroyed-wrap">
+                                    <span className="destroyed-top">DESTROYED</span>
+                                    <span className="destroyed-bottom">DESTROYED</span>
                                 </div>
-                                <span className="text-white ml-2">BY THE TEAM</span>
+                                <span className="text-white ml-3">BY THE TEAM</span>
                             </h1>
                         </div>
                         <div className="text-right pb-1 shrink-0 text-white">
                             <div className="flex items-center gap-2 justify-end mb-2">
-                                <Icon name="sparkles" size={28} className="text-[#FFD02F] animate-spin-slow" fill="#FFD02F" />
-                                <span className="text-2xl font-black uppercase italic tracking-tighter text-[#FFD02F]">140% OF TARGET</span>
+                                <Icon name="sparkles" size={28} className="text-[#FFDD33] animate-spin-slow" fill="#FFDD33" />
+                                <span className="text-2xl font-black uppercase italic tracking-tighter text-[#FFDD33]">140% OF TARGET</span>
                             </div>
-                            <div className="text-2xl font-black text-white/10 leading-none uppercase tracking-widest">Q4 Win</div>
                         </div>
                     </div>
-                    <div className="relative z-20 px-12 grid grid-cols-12 gap-8 flex-grow min-h-0 mb-6 items-stretch overflow-visible">
-                        <div className="col-span-4 flex flex-col gap-8 h-full overflow-visible">
-                            <ConfettiWrapper className="flex-[1.2]">
-                                <div className="bg-[#FFD02F] text-[#050038] p-8 rounded-[2rem] h-full flex flex-col justify-center shadow-2xl border-b-8 border-[#d4ac25]">
-                                    <div className="flex items-center gap-2 mb-2"> <Icon name="target" size={32} /> <span className="font-black uppercase text-[12px] tracking-widest">Revenue Achieved</span> </div>
+
+                    <div className="relative z-20 px-12 grid grid-cols-12 gap-8 flex-1 min-h-0 mb-12 items-stretch overflow-visible">
+                        <div className="col-span-4 flex flex-col gap-8 h-full">
+                            <CashRainWrapper className="h-1/3 shrink-0">
+                                <div className="bg-[#FFDD33] text-[#1C1C1E] p-4 rounded-[2rem] h-full flex flex-col justify-center items-center shadow-2xl border-b-8 border-[#CFB326]">
+                                    <div className="flex items-center gap-3 mb-1"> <Icon name="graph" size={28} /> <span className="font-black uppercase text-[12px] tracking-widest leading-none">Revenue Achieved</span> </div>
                                     <div className="text-7xl font-black leading-none mb-1 tracking-tighter">$1.41M+</div>
-                                    <div className="text-xl font-bold opacity-90 italic uppercase underline decoration-wavy leading-tight">Goal: $1M</div>
+                                    <div className="text-lg font-bold opacity-100 italic uppercase">
+                                       <span className="bg-[#1C1C1E] text-[#FFDD33] px-3 py-1 rounded shadow-lg">Goal: $1M</span>
+                                    </div>
                                 </div>
-                            </ConfettiWrapper>
-                            <ConfettiWrapper className="flex-1">
-                                <div className="bg-white/10 border-2 border-white/20 backdrop-blur-xl p-8 rounded-[2rem] h-full flex flex-col justify-center relative group overflow-hidden text-white">
-                                    <div className="flex items-center gap-2 mb-2 text-[#FFD02F]"> <Icon name="users" size={32} /> <span className="font-bold uppercase text-[12px] tracking-widest">Velocity</span> </div>
-                                    <div className="text-6xl font-black mb-1 tracking-tighter">23 Wins</div>
-                                    <div className="text-xl text-white/70 font-black italic uppercase">135% Growth</div>
+                            </CashRainWrapper>
+                            <div className="flex-1 relative" onMouseEnter={handleVelocityHover}>
+                                <div className="bg-[#1C1C1E]/40 border-2 border-white/20 backdrop-blur-xl p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10">
+                                    <div className="flex items-center gap-3 mb-2 text-[#FFDD33] relative z-20"> <Icon name="speedometer" size={40} /> <span className="font-bold uppercase text-[16px] tracking-widest">Velocity</span> </div>
+                                    <div className={`text-7xl font-black mb-1 tracking-tighter relative z-20 ${winsFireActive ? 'animate-[text-flicker_0.5s_infinite]' : ''}`}>
+                                        23 Wins
+                                        <TextFireSparks isActive={winsFireActive} />
+                                    </div>
+                                    <div className="text-2xl text-white font-black italic uppercase text-center relative z-20">135% Growth</div>
                                 </div>
-                            </ConfettiWrapper>
-                        </div>
-                        <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-[#4262FF] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl border border-white/10 relative text-white">
-                                <h3 className="text-2xl font-black uppercase mb-2 flex items-center gap-3 italic tracking-tighter"> <Icon name="globe" size={32} /> Global Presence </h3>
-                                <div className="flex-grow flex items-center justify-center relative min-h-0"> <SpinningGlobe /> </div>
-                                <div className="mt-2 p-3 bg-black/20 rounded-xl text-center text-[11px] font-black uppercase tracking-[0.3em] border border-white/5 shrink-0"> 100% REGIONAL COVERAGE </div>
                             </div>
                         </div>
+
+                        {/* Globe Card with integrated Industry Marquee */}
+                        <div className="col-span-4 flex flex-col h-full">
+                            <div className="bg-[#4262FF] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl border border-white/10 relative text-white overflow-hidden">
+                                <h3 className="text-2xl font-black uppercase mb-2 flex items-center gap-3 italic tracking-tighter"> <Icon name="globe" size={32} /> GLOBAL APPEAL </h3>
+                                <div className="flex-grow flex items-center justify-center relative min-h-0"> <SpinningGlobe /> </div>
+                                
+                                {/* Industry Marquee Track */}
+                                <div className="mt-4 bg-black/30 py-3 rounded-xl border border-white/5 relative overflow-hidden shrink-0">
+                                    <div className="absolute top-0 left-0 bottom-0 w-8 bg-gradient-to-r from-black/50 to-transparent z-10" />
+                                    <div className="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-black/50 to-transparent z-10" />
+                                    <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] gap-4 items-center">
+                                        {[...sectors, ...sectors].map((s, i) => (
+                                            <span key={i} className="px-3 py-1 bg-white/10 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-[#FFDD33] shadow-inner">
+                                                {s}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="mt-2 text-center text-[11px] font-black uppercase tracking-[0.2em] text-white/50"> SOLD IN EVERY REGION! </div>
+                            </div>
+                        </div>
+
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-white text-[#050038] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl relative border-4 border-white group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
-                                <div className="absolute top-2 right-2 bg-[#FFD02F] px-2 py-1 rounded-lg rotate-6 shadow-md font-black text-[11px] z-20 uppercase tracking-tighter">23 Wins</div>
-                                <h3 className="text-xl font-black uppercase mb-4 flex items-center gap-2 italic shrink-0"> <span className="flex items-center justify-center bg-blue-100 rounded-lg p-1 mr-1 text-blue-600"><Icon name="rocket" size={20} /></span> Our First Quarter </h3>
+                            <div className="bg-white text-[#1C1C1E] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl relative border-4 border-white group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
+                                <div className="absolute top-2 right-2 bg-[#FFDD33] px-2 py-1 rounded-lg rotate-6 shadow-md font-black text-[11px] z-20 uppercase tracking-tighter">23 Wins</div>
+                                <h3 className="text-2xl font-black uppercase mb-4 flex items-center gap-2 italic shrink-0"> <span className="flex items-center justify-center bg-blue-100 rounded-lg p-1 mr-1 text-blue-600"><Icon name="rocket" size={20} /></span> Our First Quarter </h3>
                                 <div className="grid grid-cols-3 gap-2 flex-grow content-start py-1 min-h-0 overflow-hidden">
                                     {companies.map((co, i) => ( <CompanyLogo key={i} name={co.name} domain={co.domain} /> ))}
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="relative z-50 px-12 h-[80px] shrink-0 flex items-center bg-black/80 backdrop-blur-3xl border-t-2 border-white/10">
-                        <div className="flex gap-8 items-center w-full max-w-[1280px] mx-auto overflow-hidden text-white">
-                            {/* PULSE REMOVED BELOW */}
-                            <span className="text-[10px] font-black uppercase text-[#FFD02F] tracking-[0.4em] whitespace-nowrap shrink-0">Impact Across Sectors</span>
-                            <div className="h-px bg-white/20 flex-1 min-w-[20px]" />
-                            <div className="flex gap-3 flex-nowrap items-center shrink-0">
-                                {sectors.map((s) => ( <span key={s} className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap">{s}</span> ))}
                             </div>
                         </div>
                     </div>
