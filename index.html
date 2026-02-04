@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FY26 Q4 Performance Portal</title>
+    <title>FY26 Q4 Performance Portal - Bright Edition</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden; 
-            background-color: #1C1C1E; /* Miro Breakthrough Black */
+            background-color: #FFFFFF; /* Workspace White */
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -37,11 +37,13 @@
         .infographic-shell {
             width: 1280px;
             height: 720px;
-            background-color: #050038;
+            background-color: #FFFFFF;
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0); /* Miro Board Dot Grid */
+            background-size: 24px 24px;
             font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column; 
-            border: 12px solid #1C1C1E;
+            border: 12px solid #1C1C1E; /* Breakthrough Black Frame */
             position: relative;
             overflow: hidden;
         }
@@ -56,6 +58,7 @@
             position: relative;
             display: inline-block;
             color: #FFDD33;
+            -webkit-text-stroke: 1.5px #1C1C1E;
         }
         .destroyed-top {
             clip-path: polygon(0 0, 100% 0, 100% 45%, 0 60%);
@@ -69,7 +72,7 @@
             filter: brightness(0.9);
         }
 
-        /* Text Fire Animations for 23 Wins achievement */
+        /* Text Fire Animations */
         @keyframes text-flicker {
             0%, 100% { text-shadow: 0 0 10px #FFDD33, 0 0 20px #FF9C57, 0 0 30px #FF6683; }
             50% { text-shadow: 0 0 15px #FFDD33, 0 0 30px #FF9C57, 0 0 45px #FF6683; }
@@ -96,10 +99,10 @@
             100% { transform: translate(850px, -1200px) rotate(-8deg); opacity: 1; }
         }
 
-        /* Rain Cash Physics: Rectangular bills with immediate drift */
+        /* Rain Cash Physics */
         @keyframes cashRain {
             0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
-            0.05% { opacity: 1; transform: translate(0, -10px) scale(1) rotate(0deg); }
+            0.05% { opacity: 1; transform: translate(0, -10px) scale(1.1) rotate(0deg); }
             0.2% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--r)); opacity: 1; }
             100% { transform: translate(var(--fx), var(--fy)) rotate(calc(var(--r) * 2)) scale(0.8); opacity: 0; }
         }
@@ -198,7 +201,7 @@
                 const timer = setInterval(() => {
                     spawnBurst();
                     elapsed += interval;
-                    if (elapsed >= 5000) { 
+                    if (elapsed >= 7000) { 
                         clearInterval(timer);
                         activePopRef.current = false;
                     }
@@ -245,11 +248,11 @@
             
             return (
                 <div className="relative w-full aspect-square max-w-[280px] mx-auto flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-[#47D1C4]/10 backdrop-blur-md shadow-[inset_0_0_60px_rgba(71,209,196,0.15)] overflow-hidden">
-                        <div className="absolute inset-0 flex opacity-80" style={{ transform: `translateX(${-rotation * 1.6}px)`, width: '400%', transition: 'transform 0.1s linear' }}>
+                    <div className="absolute inset-0 rounded-full border-2 border-[#1C1C1E]/20 bg-[#FFFFFF]/30 backdrop-blur-md shadow-[inset_0_0_60px_rgba(28,28,30,0.1)] overflow-hidden">
+                        <div className="absolute inset-0 flex opacity-70" style={{ transform: `translateX(${-rotation * 1.6}px)`, width: '400%', transition: 'transform 0.1s linear' }}>
                             {[...Array(4)].map((_, i) => (
                                 <svg key={i} viewBox="0 0 400 200" className="h-full w-full shrink-0" preserveAspectRatio="none">
-                                    <path fill="#FFF" d={worldMap} />
+                                    <path fill="#1C1C1E" d={worldMap} />
                                 </svg>
                             ))}
                         </div>
@@ -263,8 +266,8 @@
                         return (
                             <div key={p.name} className="absolute transition-all duration-75 pointer-events-none flex flex-col items-center"
                                 style={{ transform: `translate(${x}px, ${p.y}px)`, zIndex, opacity, scale: (Math.cos(radians) + 2.5) / 3.5 }}>
-                                <div className="bg-[#FFDD33] text-[#1C1C1E] text-[20px] font-black px-3 py-1 rounded shadow-xl border-2 border-white/30 whitespace-nowrap leading-none">{p.name}: {p.count}</div>
-                                <div className="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_15px_#fff] mt-1" />
+                                <div className="bg-[#FFDD33] text-[#1C1C1E] text-[20px] font-black px-3 py-1 rounded shadow-xl border-2 border-white whitespace-nowrap leading-none">{p.name}: {p.count}</div>
+                                <div className="w-3.5 h-3.5 rounded-full bg-[#1C1C1E] shadow-[0_0_15px_rgba(0,0,0,0.2)] mt-1" />
                             </div>
                         );
                     })}
@@ -282,16 +285,16 @@
             if (!isActive) return null;
             return (
                 <div className="absolute z-[150] pointer-events-none origin-bottom w-full h-full left-0 top-0" style={{ animation: 'rocketUpwards 7.5s ease-in-out forwards' }}>
-                    <div className="relative flex flex-col items-center w-14 h-22 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                    <div className="relative flex flex-col items-center w-14 h-22 drop-shadow-[0_0_20px_rgba(0,0,0,0.2)]">
                         <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
                             <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#F1F5F9" stroke="#1C1C1E" strokeWidth="2.5"/>
                             <path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#FF6683" stroke="#1C1C1E" strokeWidth="1.5"/><path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#FF6683" stroke="#1C1C1E" strokeWidth="1.5"/>
                             <path d="M22 83H38L35 90H25L22 83Z" fill="#1C1C1E"/><circle cx="30" cy="40" r="8" fill="#47D1C4" stroke="#1C1C1E" strokeWidth="2"/>
                         </svg>
                         <div className="absolute top-[85px] flex flex-col items-center">
-                            <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-[#FFDD33] rounded-full animate-pulse blur-[2px] z-20" />
+                            <div className="w-10 h-24 bg-gradient-to-t from-transparent via-[#FF9C57] to-[#FFDD33] rounded-full animate-pulse blur-[2px] z-20" />
                             <div className="absolute top-2 flex flex-col items-center">{smoke.map((s) => (
-                                <div key={s.id} className="w-10 h-10 bg-white/20 rounded-full blur-xl absolute animate-smoke" style={{ animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
+                                <div key={s.id} className="w-10 h-10 bg-black/5 rounded-full blur-xl absolute animate-smoke" style={{ animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
                             ))}</div>
                         </div>
                     </div>
@@ -303,7 +306,7 @@
             const [error, setError] = useState(false);
             const logoUrl = `https://logo.clearbit.com/${domain}?size=64`;
             return (
-                <div className="bg-white border-2 border-gray-100 rounded-lg p-1 h-10 w-full flex items-center justify-center shadow-sm hover:shadow-md transition-all overflow-hidden shrink-0">
+                <div className="bg-white rounded-lg p-1 h-10 w-full flex items-center justify-center shadow-sm hover:shadow-md transition-all overflow-hidden shrink-0 border-2 border-[#1C1C1E]/5">
                     {!error ? ( <img src={logoUrl} alt={name} className="max-h-full max-w-full object-contain" onError={() => setError(true)} /> ) : ( <span className="text-[10px] font-black uppercase text-center leading-tight text-[#1C1C1E]">{name}</span> )}
                 </div>
             );
@@ -317,6 +320,8 @@
             const handleVelocityHover = () => { setWinsFireActive(true); setTimeout(() => setWinsFireActive(false), 10000); };
 
             const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Mfg", "Telecom", "Pharma"];
+            const industriesColors = ["#FF9C57", "#CE70FC", "#6EDB8C", "#47D1C4"];
+
             const companies = [
                 { name: "Netflix", domain: "netflix.com" }, { name: "Airbnb", domain: "airbnb.com" },
                 { name: "Workday", domain: "workday.com" }, { name: "Accenture", domain: "accenture.com" },
@@ -335,24 +340,25 @@
             return (
                 <div className="infographic-shell select-none shadow-2xl">
                     <RealisticRocket isActive={rocketActive} />
-                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none z-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 0)', backgroundSize: '32px 32px' }} />
                     
-                    {/* Header: Spacious and Title focus */}
+                    {/* Header */}
                     <div className="relative z-40 px-12 h-[200px] shrink-0 flex justify-between items-end pb-12">
                         <div className="sharp-text">
-                            <h1 className="text-7xl font-black leading-none italic uppercase text-white tracking-tighter drop-shadow-lg">
+                            <h1 className="text-7xl font-black leading-none italic uppercase text-[#1C1C1E] tracking-tighter drop-shadow-sm">
                                 FY26 Q4 GOAL <br />
                                 <div className="destroyed-wrap">
                                     <span className="destroyed-top">DESTROYED</span>
                                     <span className="destroyed-bottom">DESTROYED</span>
                                 </div>
-                                <span className="text-white ml-3">BY THE TEAM</span>
+                                <span className="text-[#1C1C1E] ml-3">BY THE TEAM</span>
                             </h1>
                         </div>
-                        <div className="text-right pb-1 shrink-0 text-white">
-                            <div className="flex items-center gap-2 justify-end mb-2">
+                        <div className="text-right pb-1 shrink-0 text-[#1C1C1E]">
+                            <div className="flex items-center gap-3 justify-end mb-2">
                                 <Icon name="sparkles" size={28} className="text-[#FFDD33] animate-spin-slow" fill="#FFDD33" />
-                                <span className="text-2xl font-black uppercase italic tracking-tighter text-[#FFDD33]">140% OF TARGET</span>
+                                <span className="text-2xl font-black uppercase italic tracking-tighter bg-[#FFDD33] text-[#1C1C1E] px-4 py-1.5 rounded-lg shadow-sm">
+                                    140% OF TARGET
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -361,7 +367,7 @@
                         <div className="col-span-4 flex flex-col gap-8 h-full">
                             <CashRainWrapper className="h-1/3 shrink-0">
                                 <div className="bg-[#FFDD33] text-[#1C1C1E] p-4 rounded-[2rem] h-full flex flex-col justify-center items-center shadow-2xl border-b-8 border-[#CFB326]">
-                                    <div className="flex items-center gap-3 mb-1"> <Icon name="graph" size={28} /> <span className="font-black uppercase text-[12px] tracking-widest leading-none">Revenue Achieved</span> </div>
+                                    <div className="flex items-center gap-3 mb-1"> <Icon name="graph" size={28} className="text-[#1C1C1E]" /> <span className="font-black uppercase text-[12px] tracking-widest leading-none">Revenue Achieved</span> </div>
                                     <div className="text-7xl font-black leading-none mb-1 tracking-tighter">$1.41M+</div>
                                     <div className="text-lg font-bold opacity-100 italic uppercase">
                                        <span className="bg-[#1C1C1E] text-[#FFDD33] px-3 py-1 rounded shadow-lg">Goal: $1M</span>
@@ -369,8 +375,8 @@
                                 </div>
                             </CashRainWrapper>
                             <div className="flex-1 relative" onMouseEnter={handleVelocityHover}>
-                                <div className="bg-[#1C1C1E]/40 border-2 border-white/20 backdrop-blur-xl p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10">
-                                    <div className="flex items-center gap-3 mb-2 text-[#FFDD33] relative z-20"> <Icon name="speedometer" size={40} /> <span className="font-bold uppercase text-[16px] tracking-widest">Velocity</span> </div>
+                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10 shadow-2xl">
+                                    <div className="flex items-center gap-3 mb-2 text-[#FFFFFF] relative z-20"> <Icon name="speedometer" size={40} /> <span className="font-bold uppercase text-[16px] tracking-widest">Velocity</span> </div>
                                     <div className={`text-7xl font-black mb-1 tracking-tighter relative z-20 ${winsFireActive ? 'animate-[text-flicker_0.5s_infinite]' : ''}`}>
                                         23 Wins
                                         <TextFireSparks isActive={winsFireActive} />
@@ -380,32 +386,30 @@
                             </div>
                         </div>
 
-                        {/* Globe Card with integrated Industry Marquee */}
+                        {/* Globe Card with integrated Industry Marquee - Centered Text */}
                         <div className="col-span-4 flex flex-col h-full">
-                            <div className="bg-[#4262FF] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl border border-white/10 relative text-white overflow-hidden">
-                                <h3 className="text-2xl font-black uppercase mb-2 flex items-center gap-3 italic tracking-tighter"> <Icon name="globe" size={32} /> GLOBAL APPEAL </h3>
+                            <div className="bg-[#47D1C4] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl border-4 border-[#1C1C1E] relative text-[#1C1C1E] overflow-hidden">
+                                <h3 className="text-2xl font-black uppercase mb-2 flex items-center justify-center gap-3 italic tracking-tighter w-full text-center"> <Icon name="globe" size={32} /> GLOBAL APPEAL </h3>
                                 <div className="flex-grow flex items-center justify-center relative min-h-0"> <SpinningGlobe /> </div>
                                 
-                                {/* Industry Marquee Track */}
-                                <div className="mt-4 bg-black/30 py-3 rounded-xl border border-white/5 relative overflow-hidden shrink-0">
-                                    <div className="absolute top-0 left-0 bottom-0 w-8 bg-gradient-to-r from-black/50 to-transparent z-10" />
-                                    <div className="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-black/50 to-transparent z-10" />
-                                    <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] gap-4 items-center">
+                                <div className="mt-4 bg-[#FFFFFF]/50 py-3 rounded-xl border border-[#1C1C1E]/10 relative overflow-hidden shrink-0 backdrop-blur-sm">
+                                    <div className="flex whitespace-nowrap animate-[marquee_25s_linear_infinite] gap-4 items-center">
                                         {[...sectors, ...sectors].map((s, i) => (
-                                            <span key={i} className="px-3 py-1 bg-white/10 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-[#FFDD33] shadow-inner">
+                                            <span key={i} className="px-3 py-1 bg-[#1C1C1E] border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest" style={{ color: industriesColors[i % 4] }}>
                                                 {s}
                                             </span>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="mt-2 text-center text-[11px] font-black uppercase tracking-[0.2em] text-white/50"> SOLD IN EVERY REGION! </div>
+                                <div className="mt-2 text-center text-[11px] font-black uppercase tracking-[0.2em] text-[#1C1C1E]/60"> SOLD IN EVERY REGION! </div>
                             </div>
                         </div>
 
+                        {/* Customer Card - Centered Text & Standard Logo Styles */}
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-white text-[#1C1C1E] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl relative border-4 border-white group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
+                            <div className="bg-[#EAEAEA] text-[#1C1C1E] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl border-4 border-[#1C1C1E] relative group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
                                 <div className="absolute top-2 right-2 bg-[#FFDD33] px-2 py-1 rounded-lg rotate-6 shadow-md font-black text-[11px] z-20 uppercase tracking-tighter">23 Wins</div>
-                                <h3 className="text-2xl font-black uppercase mb-4 flex items-center gap-2 italic shrink-0"> <span className="flex items-center justify-center bg-blue-100 rounded-lg p-1 mr-1 text-blue-600"><Icon name="rocket" size={20} /></span> Our First Quarter </h3>
+                                <h3 className="text-2xl font-black uppercase mb-4 flex items-center justify-center gap-2 italic shrink-0 w-full text-center"> Our First Quarter </h3>
                                 <div className="grid grid-cols-3 gap-2 flex-grow content-start py-1 min-h-0 overflow-hidden">
                                     {companies.map((co, i) => ( <CompanyLogo key={i} name={co.name} domain={co.domain} /> ))}
                                 </div>
