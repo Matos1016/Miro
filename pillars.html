@@ -30,7 +30,6 @@
             justify-content: center;
             align-items: center;
             font-family: 'Inter', sans-serif;
-            /* Anti-Blur Architecture */
             -webkit-font-smoothing: antialiased;
             text-rendering: geometricPrecision;
         }
@@ -41,9 +40,11 @@
             transform-origin: center center;
             flex-shrink: 0;
             position: relative;
-            /* Force vector re-rasterization */
             perspective: 1000px;
             transform-style: preserve-3d;
+            /* Prevent initial flash of white screen */
+            background-color: white;
+            display: block !important;
         }
 
         .canvas-grid {
@@ -72,7 +73,7 @@
         @keyframes rocket-flight {
             0% { transform: translate(1050px, 850px) rotate(-45deg); opacity: 0; }
             10% { opacity: 1; }
-            30% { transform: translate(600px, 400px) rotate(-60deg); } /* Rumble/Bank */
+            30% { transform: translate(600px, 400px) rotate(-60deg); }
             100% { transform: translate(-200px, -200px) rotate(-90deg); opacity: 1; }
         }
 
@@ -104,28 +105,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
-
-        const AutoScaler = ({ children }) => {
-            const containerRef = useRef(null);
-            
-            useEffect(() => {
-                const scale = () => {
-                    const el = containerRef.current;
-                    if (!el) return;
-                    const winW = window.innerWidth;
-                    const winH = window.innerHeight;
-                    const scaleVal = Math.min(winW / 1280, winH / 720);
-                    // Use translateZ(0) to keep it crisp in Chrome/Miro
-                    el.style.transform = `scale(${scaleVal}) translateZ(0)`;
-                };
-                window.addEventListener('resize', scale);
-                scale();
-                return () => window.removeEventListener('resize', scale);
-            }, []);
-
-            return <div ref={containerRef} id="root-container">{children}</div>;
-        };
+        const { useState, useEffect, useRef } = React;
 
         const SparkSystem = ({ color }) => {
             const [sparks, setSparks] = useState([]);
@@ -167,7 +147,6 @@
                     <path d="M10 50 L0 80 L10 70 Z" fill="#867AFF" />
                     <path d="M50 50 L60 80 L50 70 Z" fill="#867AFF" />
                     <circle cx="30" cy="30" r="8" fill="#FFDD33" />
-                    {/* Flame */}
                     <path d="M20 80 Q30 110 40 80 L30 90 Z" fill="#FFDD33">
                         <animate attributeName="d" values="M20 80 Q30 110 40 80 L30 90 Z;M20 80 Q30 130 40 80 L30 100 Z;M20 80 Q30 110 40 80 L30 90 Z" dur="0.2s" repeatCount="indefinite" />
                     </path>
@@ -183,7 +162,7 @@
             </div>
         );
 
-        const PillarCard = ({ title, body, color, icon: IconPath, delay }) => {
+        const PillarCard = ({ title, body, color, icon: IconPath }) => {
             const [isHovered, setIsHovered] = useState(false);
 
             return (
@@ -192,7 +171,6 @@
                     onMouseLeave={() => setIsHovered(false)}
                     className="group relative h-full bg-white border-[6px] border-[#1C1C1E] rounded-[32px] p-8 overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_20px_0_0_#1C1C1E]"
                 >
-                    {/* Background Fill Animation */}
                     <div 
                         className="absolute inset-0 transition-transform duration-700 ease-in-out -translate-x-full group-hover:translate-x-0" 
                         style={{ backgroundColor: color }}
@@ -226,6 +204,26 @@
         };
 
         const App = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const root = document.getElementById('root');
+                    if (root) {
+                        const winW = window.innerWidth;
+                        const winH = window.innerHeight;
+                        const scaleVal = Math.max(0.1, Math.min(winW / 1280, winH / 720));
+                        root.style.transform = `scale(${scaleVal}) translateZ(0)`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                // Trigger scaling immediately and on a slight delay to handle iFrame mounting
+                scaler();
+                const timeoutId = setTimeout(scaler, 50); 
+                return () => {
+                    window.removeEventListener('resize', scaler);
+                    clearTimeout(timeoutId);
+                };
+            }, []);
+
             const data = [
                 {
                     title: "Velocity",
@@ -248,34 +246,31 @@
             ];
 
             return (
-                <AutoScaler>
-                    <div className="w-[1280px] h-[720px] bg-white canvas-grid border-[12px] border-[#1C1C1E] relative overflow-hidden flex flex-col p-12">
-                        <Rocket />
-                        
-                        <header className="mb-12 relative z-20">
-                            <div className="inline-block bg-[#1C1C1E] text-[#FFDD33] px-4 py-1 headline-text text-[14px] mb-4">
-                                FY27 North Star Strategy
-                            </div>
-                            <h1 className="headline-text text-[84px] text-[#1C1C1E]">
-                                Vision into <span className="bg-[#FFDD33] px-4 shadow-[8px_8px_0_0_#1C1C1E]">Velocity</span>
-                            </h1>
-                        </header>
-
-                        <div className="flex-1 grid grid-cols-3 gap-8 relative z-20">
-                            {data.map((p, i) => (
-                                <PillarCard key={i} {...p} delay={i * 0.1} />
-                            ))}
+                <div className="w-[1280px] h-[720px] bg-white canvas-grid border-[12px] border-[#1C1C1E] relative overflow-hidden flex flex-col p-12">
+                    <Rocket />
+                    
+                    <header className="mb-12 relative z-20">
+                        <div className="inline-block bg-[#1C1C1E] text-[#FFDD33] px-4 py-1 headline-text text-[14px] mb-4">
+                            FY27 North Star Strategy
                         </div>
+                        <h1 className="headline-text text-[84px] text-[#1C1C1E]">
+                            Vision into <span className="bg-[#FFDD33] px-4 shadow-[8px_8px_0_0_#1C1C1E]">Velocity</span>
+                        </h1>
+                    </header>
 
-                        <footer className="mt-8 flex justify-between items-end headline-text text-[14px] opacity-40">
-                            <div>Interactive Dashboard // Miro Canvas Edition</div>
-                            <div>© Miro Professional Services Group</div>
-                        </footer>
-
-                        {/* Visual Decoration */}
-                        <div className="absolute top-[-50px] right-[-50px] w-64 h-64 border-[40px] border-[#47D1C4] rounded-full opacity-10" />
+                    <div className="flex-1 grid grid-cols-3 gap-8 relative z-20">
+                        {data.map((p, i) => (
+                            <PillarCard key={i} {...p} />
+                        ))}
                     </div>
-                </AutoScaler>
+
+                    <footer className="mt-8 flex justify-between items-end headline-text text-[14px] opacity-40">
+                        <div>Interactive Dashboard // Miro Canvas Edition</div>
+                        <div>© Miro Professional Services Group</div>
+                    </footer>
+
+                    <div className="absolute top-[-50px] right-[-50px] w-64 h-64 border-[40px] border-[#47D1C4] rounded-full opacity-10" />
+                </div>
             );
         };
 
