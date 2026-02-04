@@ -23,6 +23,8 @@
             align-items: center;
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         #root {
@@ -31,6 +33,9 @@
             transform-origin: center center;
             flex-shrink: 0;
             position: absolute;
+            /* Force GPU rendering to prevent scaling blur in iFrames */
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
 
         .canvas-bg {
@@ -48,11 +53,10 @@
 
         /* --- Animations --- */
         @keyframes arrow-flight {
-            /* Starts from bottom right (approx 450px right, 650px down) */
+            /* From bottom right into bullseye center */
             0% { transform: translate(450px, 650px) rotate(-135deg); opacity: 0; }
             15% { opacity: 1; }
-            /* Lands with the tip (60px point) exactly at 56, 56 center */
-            /* Landing calc: Target(56,56) - TipOffset(60,10) = (-4, 46) */
+            /* Landing calc: TargetCenter(56,56) - TipOffset(60,10) = (-4, 46) */
             100% { transform: translate(-4px, 46px) rotate(-135deg); opacity: 1; }
         }
 
@@ -69,7 +73,6 @@
             100% { stroke-dashoffset: 0; opacity: 0; }
         }
 
-        /* Highlighting Logic */
         .highlight-box {
             background-color: #FFDD33;
             padding: 0 16px;
@@ -78,7 +81,6 @@
             box-shadow: 4px 4px 0px #1C1C1E;
         }
 
-        /* Trendline Logic */
         .full-card-graph {
             transition: opacity 0.4s ease-in-out;
             opacity: 0.1;
@@ -94,6 +96,12 @@
         .group:hover .draw-path {
             stroke-dashoffset: 0;
         }
+
+        .smooth-transform {
+            backface-visibility: hidden;
+            -webkit-font-smoothing: subpixel-antialiased;
+            will-change: transform;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +116,7 @@
                     const root = document.getElementById('root');
                     if (root) {
                         const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
-                        root.style.transform = `scale(${scale})`;
+                        root.style.transform = `scale(${scale}) translateZ(0)`;
                     }
                 };
                 window.addEventListener('resize', scaler);
@@ -206,7 +214,7 @@
             const [isHovered, setIsHovered] = useState(false);
 
             const renderAnimatedTitle = () => {
-                const baseClass = "text-[30px] font-black italic uppercase leading-tight mb-4 transition-all duration-300 relative z-30";
+                const baseClass = "text-[30px] font-black italic uppercase leading-tight mb-4 transition-all duration-300 relative z-30 smooth-transform";
                 return (
                     <h2 className={`${baseClass} ${isHovered ? 'text-white translate-x-1' : 'text-[#1C1C1E]'}`}>
                         {title}
@@ -216,7 +224,7 @@
 
             return (
                 <div 
-                    className="group relative h-full flex flex-col p-8 rounded-[2rem] border-[4px] border-[#1C1C1E] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_16px_0_0_#1C1C1E] overflow-hidden"
+                    className="group relative h-full flex flex-col p-8 rounded-[2rem] border-[4px] border-[#1C1C1E] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_16px_0_0_#1C1C1E] overflow-hidden smooth-transform"
                     style={{ backgroundColor: color }}
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
@@ -226,7 +234,7 @@
                     {effectType === 'circuit' && <CircuitBoardSystem active={isHovered} />}
                     
                     <div 
-                        className="bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white mb-6 shadow-md relative z-30"
+                        className="bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white mb-6 shadow-md relative z-30 smooth-transform"
                         style={{ 
                             animation: (isHovered && effectType === 'arrow') ? 'target-jolt 0.2s 0.3s ease-out' : 'none'
                         }}
@@ -234,14 +242,14 @@
                         <Icon name={icon} size={24} />
                     </div>
                     
-                    <div className="relative z-30 flex-1 flex flex-col">
+                    <div className="relative z-30 flex-1 flex flex-col smooth-transform">
                         {renderAnimatedTitle()}
-                        <p className={`text-[16px] font-bold leading-snug transition-colors duration-300 ${isHovered ? 'text-white' : 'text-[#1C1C1E]'} opacity-90`}>
+                        <p className={`text-[16px] font-bold leading-snug transition-colors duration-300 ${isHovered ? 'text-white' : 'text-[#1C1C1E]'} opacity-90 smooth-transform`}>
                             {body}
                         </p>
                     </div>
                     
-                    <div className="mt-6 pt-4 relative z-30">
+                    <div className="mt-6 pt-4 relative z-30 smooth-transform">
                         <div className={`h-1.5 rounded-full transition-all duration-500 ${isHovered ? 'w-full bg-[#1C1C1E]' : 'w-16 bg-[#1C1C1E]/20'}`}></div>
                     </div>
                 </div>
@@ -258,8 +266,8 @@
                             <span className="bg-[#1C1C1E] text-white px-3 py-0.5 text-xs font-black uppercase tracking-widest rounded">FY27 NORTH STAR</span>
                             <div className="h-[1px] flex-1 bg-[#1C1C1E]/10"></div>
                         </div>
-                        <h1 className="text-[52px] font-black italic uppercase leading-none text-[#1C1C1E] tracking-tighter whitespace-nowrap">
-                            PROSERV STRATEGIC <span className="highlight-box">PILLARS</span>
+                        <h1 className="text-[52px] font-black italic uppercase leading-none text-[#1C1C1E] tracking-tighter whitespace-nowrap smooth-transform">
+                            PROSERVE: <span className="highlight-box smooth-transform">STRATEGIC PILLARS</span>
                         </h1>
                     </div>
 
@@ -288,8 +296,8 @@
                     </div>
 
                     <div className="absolute bottom-6 left-10 right-10 flex justify-between items-center opacity-30 pointer-events-none">
-                        <div className="text-[#1C1C1E] font-black italic uppercase text-[10px] tracking-[0.2em]">Vision into Velocity</div>
-                        <div className="text-[#1C1C1E] font-black italic uppercase text-[10px] tracking-[0.2em]">© FY27 Miro PS Strategy</div>
+                        <div className="text-[#1C1C1E] font-black italic uppercase text-[10px] tracking-[0.2em] smooth-transform">Vision into Velocity</div>
+                        <div className="text-[#1C1C1E] font-black italic uppercase text-[10px] tracking-[0.2em] smooth-transform">© FY27 Miro PS Strategy</div>
                     </div>
                 </div>
             );
