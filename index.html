@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Q4 Performance Infographic</title>
-    <!-- Dependencies: React, ReactDOM, Babel (for JSX), and Tailwind CSS -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -12,46 +11,57 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
         
-        body {
+        /* Forces the page to take up exactly the iframe size with no scrolling */
+        html, body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #050038;
+            height: 100%;
+            width: 100%;
             display: flex;
-            flex-direction: column;
-            align-items: center; /* Centers content */
-            overflow-x: hidden;  /* Prevents side-scrolling */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* This container maintains your 16:9 design and scales to fit */
+        #root {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+        }
+
+        /* AUTO-SCALE MAGIC: Scales the design down if the Miro window is smaller than 1280x720 */
+        @media (max-width: 1280px), (max-height: 720px) {
+            #root {
+                transform: scale(calc(min(100vw / 1280, 100vh / 720)));
+            }
+        }
+
+        .infographic-shell {
+            width: 100%;
+            height: 100%;
             background-color: #050038;
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-        }
-
-        /* Responsive Container for Miro iFrame */
-        .container {
-            width: 100%;
-            max-width: 800px;
-            aspect-ratio: 16 / 9; /* Maintains 16:9 ratio in Miro */
-            position: relative;
-            background-color: #050038;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
+            border: 12px solid #050038;
+            position: relative;
             overflow: hidden;
-            border: 8px solid #050038;
-            border-radius: 12px;
         }
 
-        /* Rocket Flight path: Updated to percentages for responsiveness */
         @keyframes rocketFinalSequence {
-            0% { transform: translate(80%, 90%) scale(0); opacity: 0; }
-            20% { transform: translate(80%, 70%) scale(1); opacity: 1; }
-            30% { transform: translate(80%, 70%) rotate(1.5deg); }
-            40% { transform: translate(80%, 70%) rotate(-1.5deg); }
-            50% { transform: translate(80%, 70%) rotate(0deg); }
-            70% { transform: translate(80%, 10%) rotate(-10deg); }
-            90% { transform: translate(25%, -60%) rotate(-70deg); opacity: 1; }
-            100% { transform: translate(-50%, -120%) rotate(-90deg); opacity: 0; }
+            0% { transform: translate(1000px, 680px) scale(0); opacity: 0; }
+            20% { transform: translate(1000px, 500px) scale(1); opacity: 1; }
+            30% { transform: translate(1000px, 500px) rotate(1.5deg); }
+            40% { transform: translate(1000px, 500px) rotate(-1.5deg); }
+            50% { transform: translate(1000px, 500px) rotate(0deg); }
+            70% { transform: translate(1000px, 50px) rotate(-10deg); }
+            90% { transform: translate(300px, -450px) rotate(-70deg); opacity: 1; }
+            100% { transform: translate(-600px, -900px) rotate(-90deg); opacity: 0; }
         }
 
-        /* High-visibility Confetti Animation */
         @keyframes ultraSlowConfetti {
             0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
             0.5% { opacity: 1; transform: translate(0, -30px) scale(1.2) rotate(0deg); }
@@ -69,7 +79,7 @@
     </style>
 </head>
 <body>
-    <div id="root" class="w-full flex justify-center"></div>
+    <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -104,12 +114,12 @@
                 const burstSize = 10;
                 const newParticles = Array.from({ length: burstSize }).map(() => ({
                     id: Math.random(),
-                    tx: (Math.random() - 0.5) * 400,
-                    ty: -300 - Math.random() * 200,
-                    fallX: (Math.random() - 0.5) * 300,
-                    fallY: 800, 
+                    tx: (Math.random() - 0.5) * 600,
+                    ty: -450 - Math.random() * 400,
+                    fallX: (Math.random() - 0.5) * 500,
+                    fallY: 1000, 
                     r: Math.random() * 2000,
-                    s: Math.random() * 8 + 4,
+                    s: Math.random() * 10 + 4,
                     c: ['#FFD02F', '#4262FF', '#FFFFFF', '#FFD02F'][Math.floor(Math.random() * 4)],
                     shape: Math.random() > 0.5 ? '50%' : '2px',
                     delay: Math.random() * 0.1
@@ -168,9 +178,9 @@
             const worldMap = "M25,85 c5,-10 20,-15 40,-15 c15,0 30,10 50,5 c15,-5 25,-15 40,-10 c10,5 15,20 10,35 c-5,15 -25,20 -40,15 c-10,-5 -20,-10 -35,-5 c-15,5 -25,15 -45,10 c-15,-5 -20,-20 -20,-35 Z M180,45 c15,-15 45,-5 65,10 c15,10 30,25 20,45 c-10,15 -35,15 -55,10 c-20,-5 -30,-20 -40,-40 c-5,-15 0,-20 10,-25 Z M160,140 c15,-15 40,-5 60,10 c15,10 25,30 15,45 c-10,15 -35,25 -55,15 c-20,-10 -25,-30 -30,-45 c-5,-15 0,-20 10,-25 Z M40,150 c15,-15 40,-5 60,10 c15,15 20,35 10,50 c-10,15 -40,20 -60,10 c-20,-10 -25,-30 -25,-45 c0,-15 5,-20 15,-25 Z M300,90 c15,-15 40,-5 50,15 c10,20 0,40 -15,55 c-15,15 -40,10 -50,-10 c-10,-20 -5,-45 15,-60 Z";
 
             return (
-                <div className="relative w-full aspect-square max-w-[200px] mx-auto flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-blue-600/10 backdrop-blur-md shadow-[inset_0_0_40px_rgba(66,98,255,0.2)] overflow-hidden">
-                        <div className="absolute inset-0 flex opacity-90" style={{ transform: `translateX(${-rotation * 1.2}px)`, width: '400%', transition: 'transform 0.1s linear' }}>
+                <div className="relative w-full aspect-square max-w-[280px] mx-auto flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-blue-600/10 backdrop-blur-md shadow-[inset_0_0_60px_rgba(66,98,255,0.2)] overflow-hidden">
+                        <div className="absolute inset-0 flex opacity-90" style={{ transform: `translateX(${-rotation * 1.5}px)`, width: '400%', transition: 'transform 0.1s linear' }}>
                             {[...Array(4)].map((_, i) => (
                                 <svg key={i} viewBox="0 0 400 200" className="h-full w-full opacity-70 shrink-0" preserveAspectRatio="none">
                                     <path fill="#FFF" d={worldMap} />
@@ -182,16 +192,16 @@
                     {points.map((p) => {
                         const currentAngle = (p.angle + rotation) % 360;
                         const radians = (currentAngle * Math.PI) / 180;
-                        const x = Math.sin(radians) * 90;
+                        const x = Math.sin(radians) * 125;
                         const zIndex = Math.cos(radians) > 0 ? 30 : 5;
                         const opacity = Math.max(0.1, (Math.cos(radians) + 1.2) / 2.2);
                         return (
                             <div key={p.name} className="absolute transition-all duration-75 pointer-events-none flex flex-col items-center"
-                                style={{ transform: `translate(${x}px, ${p.y}px)`, zIndex: zIndex, opacity: opacity, scale: (Math.cos(radians) + 2.5) / 4.5 }}>
-                                <div className="bg-[#FFD02F] text-[#050038] text-[18px] font-black px-2 py-0.5 rounded-lg shadow-2xl border-2 border-white/30 whitespace-nowrap leading-none">
+                                style={{ transform: `translate(${x}px, ${p.y}px)`, zIndex: zIndex, opacity: opacity, scale: (Math.cos(radians) + 2.5) / 3.5 }}>
+                                <div className="bg-[#FFD02F] text-[#050038] text-[24px] font-black px-3 py-1 rounded-lg shadow-2xl border-2 border-white/40 whitespace-nowrap leading-none">
                                     {p.name}: {p.count}
                                 </div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_10px_#fff] mt-1" />
+                                <div className="w-3 h-3 rounded-full bg-white shadow-[0_0_12px_#fff] mt-1" />
                             </div>
                         );
                     })}
@@ -210,20 +220,20 @@
             }, [isActive]);
             if (!isActive) return null;
             return (
-                <div className="absolute z-[150] pointer-events-none origin-bottom w-full h-full left-0 top-0" style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
-                    <div className="relative flex flex-col items-center w-12 h-20">
-                        <svg width="40" height="70" viewBox="0 0 60 100" fill="none">
+                <div className="absolute z-[150] pointer-events-none origin-bottom" style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
+                    <div className="relative flex flex-col items-center">
+                        <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
                             <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#F1F5F9"/>
                             <path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#EF4444"/>
                             <path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#EF4444"/>
                             <path d="M22 83H38L35 90H25L22 83Z" fill="#1E293B"/>
                             <circle cx="30" cy="40" r="8" fill="#3B82F6" stroke="white" strokeWidth="2"/>
                         </svg>
-                        <div className="absolute top-[60px] flex flex-col items-center">
-                            <div className="w-8 h-16 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[1px] z-20" />
+                        <div className="absolute top-[85px] flex flex-col items-center">
+                            <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[2px] z-20" />
                             <div className="absolute top-2 flex flex-col items-center">
                                 {smoke.map((s) => (
-                                    <div key={s.id} className="w-8 h-8 bg-white/20 rounded-full blur-lg absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 40}px`, left: `${(Math.random()-0.5)*40}px` }} />
+                                    <div key={s.id} className="w-10 h-10 bg-white/20 rounded-full blur-xl absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
                                 ))}
                             </div>
                         </div>
@@ -236,8 +246,8 @@
             const [error, setError] = useState(false);
             const logoUrl = `https://logo.clearbit.com/${domain}?size=64`;
             return (
-                <div className="bg-white border border-gray-100 rounded-lg p-1 h-8 w-full flex items-center justify-center shadow-sm hover:shadow-md transition-all overflow-hidden shrink-0">
-                    {!error ? ( <img src={logoUrl} alt={name} className="max-h-full max-w-full object-contain" onError={() => setError(true)} /> ) : ( <span className="text-[8px] font-black uppercase text-center leading-tight text-black">{name}</span> )}
+                <div className="bg-white border-2 border-gray-100 rounded-lg p-1 h-10 w-full flex items-center justify-center shadow-sm hover:shadow-md transition-all overflow-hidden shrink-0">
+                    {!error ? ( <img src={logoUrl} alt={name} className="max-h-full max-w-full object-contain" onError={() => setError(true)} /> ) : ( <span className="text-[9px] font-black uppercase text-center leading-tight text-black">{name}</span> )}
                 </div>
             );
         };
@@ -264,68 +274,71 @@
             const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Mfg", "Telecom", "Pharma"];
 
             return (
-                <div className="container select-none">
+                <div className="infographic-shell select-none shadow-2xl">
                     <RealisticRocket isActive={rocketActive} />
-                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none z-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none z-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 0)', backgroundSize: '32px 32px' }} />
                     
                     {/* Header with Title */}
-                    <div className="relative z-40 px-8 pt-4 h-[120px] shrink-0 flex justify-between items-end pb-4">
+                    <div className="relative z-40 px-12 h-[160px] shrink-0 flex justify-between items-end pb-6">
                         <div>
-                            <div className="inline-flex items-center gap-2 bg-[#4262FF] text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-1 shadow-lg">
-                                <Icon name="popper" size={12} fill="white" className="mr-1" /> PERFORMANCE OVERVIEW
+                            <div className="inline-flex items-center gap-2 bg-[#4262FF] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-lg">
+                                <Icon name="popper" size={14} fill="white" className="mr-1" /> PERFORMANCE OVERVIEW
                             </div>
-                            <h1 className="text-3xl font-black leading-none italic uppercase tracking-tighter drop-shadow-lg text-white">
+                            <h1 className="text-5xl font-black leading-none italic uppercase tracking-tighter drop-shadow-lg text-white">
                                 GOAL <br />
                                 <div className="relative inline-block text-[#FFD02F] mt-1">
                                     <span className="relative">
                                         <span className="absolute inset-0 block" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 48%, 0 52%)' }}>DESTROYED</span>
-                                        <span className="block translate-x-[2px] translate-y-[1px]" style={{ clipPath: 'polygon(0 52%, 100% 48%, 100% 100%, 0 100%)' }}>DESTROYED</span>
+                                        <span className="block translate-x-[3px] translate-y-[1px]" style={{ clipPath: 'polygon(0 52%, 100% 48%, 100% 100%, 0 100%)' }}>DESTROYED</span>
                                     </span>
                                 </div>
                                 <span className="text-white ml-2">BY THE TEAM</span>
                             </h1>
                         </div>
                         <div className="text-right pb-1 shrink-0 text-white">
-                            <div className="flex items-center gap-2 justify-end mb-1">
-                                <Icon name="sparkles" size={20} className="text-[#FFD02F] animate-spin-slow" fill="#FFD02F" />
-                                <span className="text-lg font-black uppercase italic tracking-tighter text-[#FFD02F]">140% OF TARGET</span>
+                            <div className="flex items-center gap-2 justify-end mb-2">
+                                <Icon name="sparkles" size={28} className="text-[#FFD02F] animate-spin-slow" fill="#FFD02F" />
+                                <span className="text-2xl font-black uppercase italic tracking-tighter text-[#FFD02F]">140% OF TARGET</span>
                             </div>
-                            <div className="text-lg font-black text-white/10 leading-none uppercase tracking-widest">Q4 Win</div>
+                            <div className="text-2xl font-black text-white/10 leading-none uppercase tracking-widest">Q4 Win</div>
                         </div>
                     </div>
 
                     {/* Main Content Grid */}
-                    <div className="relative z-20 px-8 grid grid-cols-12 gap-4 flex-grow min-h-0 mb-4 items-stretch overflow-visible">
-                        <div className="col-span-4 flex flex-col gap-4 h-full overflow-visible">
+                    <div className="relative z-20 px-12 grid grid-cols-12 gap-8 flex-grow min-h-0 mb-6 items-stretch overflow-visible">
+                        {/* Metrics Column */}
+                        <div className="col-span-4 flex flex-col gap-8 h-full overflow-visible">
                             <ConfettiWrapper className="flex-[1.2]">
-                                <div className="bg-[#FFD02F] text-[#050038] p-4 rounded-[1.5rem] h-full flex flex-col justify-center shadow-2xl border-b-6 border-[#d4ac25]">
-                                    <div className="flex items-center gap-2 mb-1"> <Icon name="target" size={24} /> <span className="font-black uppercase text-[9px] tracking-widest">Revenue Achieved</span> </div>
-                                    <div className="text-5xl font-black leading-none mb-1 tracking-tighter">$1.41M+</div>
-                                    <div className="text-base font-bold opacity-90 italic uppercase underline decoration-wavy leading-tight">Goal: $1M</div>
+                                <div className="bg-[#FFD02F] text-[#050038] p-8 rounded-[2rem] h-full flex flex-col justify-center shadow-2xl border-b-8 border-[#d4ac25]">
+                                    <div className="flex items-center gap-2 mb-2"> <Icon name="target" size={32} /> <span className="font-black uppercase text-[12px] tracking-widest">Revenue Achieved</span> </div>
+                                    <div className="text-7xl font-black leading-none mb-1 tracking-tighter">$1.41M+</div>
+                                    <div className="text-xl font-bold opacity-90 italic uppercase underline decoration-wavy leading-tight">Goal: $1M</div>
                                 </div>
                             </ConfettiWrapper>
                             <ConfettiWrapper className="flex-1">
-                                <div className="bg-white/10 border-2 border-white/20 backdrop-blur-xl p-4 rounded-[1.5rem] h-full flex flex-col justify-center relative group overflow-hidden text-white">
-                                    <div className="flex items-center gap-2 mb-1 text-[#FFD02F]"> <Icon name="users" size={24} /> <span className="font-bold uppercase text-[9px] tracking-widest">Velocity</span> </div>
-                                    <div className="text-4xl font-black mb-1 tracking-tighter">23 Wins</div>
-                                    <div className="text-lg text-white/70 font-black italic uppercase">135% Growth</div>
+                                <div className="bg-white/10 border-2 border-white/20 backdrop-blur-xl p-8 rounded-[2rem] h-full flex flex-col justify-center relative group overflow-hidden text-white">
+                                    <div className="flex items-center gap-2 mb-2 text-[#FFD02F]"> <Icon name="users" size={32} /> <span className="font-bold uppercase text-[12px] tracking-widest">Velocity</span> </div>
+                                    <div className="text-6xl font-black mb-1 tracking-tighter">23 Wins</div>
+                                    <div className="text-xl text-white/70 font-black italic uppercase">135% Growth</div>
                                 </div>
                             </ConfettiWrapper>
                         </div>
 
+                        {/* Globe Column */}
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-[#4262FF] p-4 rounded-[1.5rem] h-full flex flex-col shadow-2xl border border-white/10 relative text-white">
-                                <h3 className="text-lg font-black uppercase mb-2 flex items-center gap-3 italic tracking-tighter"> <Icon name="globe" size={24} /> Global Presence </h3>
+                            <div className="bg-[#4262FF] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl border border-white/10 relative text-white">
+                                <h3 className="text-2xl font-black uppercase mb-2 flex items-center gap-3 italic tracking-tighter"> <Icon name="globe" size={32} /> Global Presence </h3>
                                 <div className="flex-grow flex items-center justify-center relative min-h-0"> <SpinningGlobe /> </div>
-                                <div className="mt-2 p-2 bg-black/20 rounded-xl text-center text-[8px] font-black uppercase tracking-[0.3em] border border-white/5 shrink-0"> 100% REGIONAL COVERAGE </div>
+                                <div className="mt-2 p-3 bg-black/20 rounded-xl text-center text-[11px] font-black uppercase tracking-[0.3em] border border-white/5 shrink-0"> 100% REGIONAL COVERAGE </div>
                             </div>
                         </div>
 
+                        {/* Customer Column */}
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-white text-[#050038] rounded-[1.5rem] p-4 h-full flex flex-col shadow-2xl relative border-4 border-white group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
-                                <div className="absolute top-1 right-1 bg-[#FFD02F] px-1.5 py-0.5 rounded-lg rotate-6 shadow-md font-black text-[8px] z-20 uppercase tracking-tighter">23 Wins</div>
-                                <h3 className="text-base font-black uppercase mb-2 flex items-center gap-2 italic shrink-0"> <span className="flex items-center justify-center bg-blue-100 rounded-lg p-1 mr-1 text-blue-600"><Icon name="rocket" size={14} /></span> Our First Quarter </h3>
-                                <div className="grid grid-cols-3 gap-1 flex-grow content-start py-1 min-h-0 overflow-hidden">
+                            <div className="bg-white text-[#050038] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl relative border-4 border-white group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
+                                <div className="absolute top-2 right-2 bg-[#FFD02F] px-2 py-1 rounded-lg rotate-6 shadow-md font-black text-[11px] z-20 uppercase tracking-tighter">23 Wins</div>
+                                <h3 className="text-xl font-black uppercase mb-4 flex items-center gap-2 italic shrink-0"> <span className="flex items-center justify-center bg-blue-100 rounded-lg p-1 mr-1 text-blue-600"><Icon name="rocket" size={20} /></span> Our First Quarter </h3>
+                                <div className="grid grid-cols-3 gap-2 flex-grow content-start py-1 min-h-0 overflow-hidden">
                                     {companies.map((co, i) => ( <CompanyLogo key={i} name={co.name} domain={co.domain} /> ))}
                                 </div>
                             </div>
@@ -333,13 +346,13 @@
                     </div>
 
                     {/* Footer Bar */}
-                    <div className="relative z-50 px-8 h-[60px] shrink-0 flex items-center bg-black/80 backdrop-blur-3xl border-t-2 border-white/10">
-                        <div className="flex gap-4 items-center w-full overflow-hidden text-white">
-                            <span className="text-[8px] font-black uppercase text-[#FFD02F] tracking-[0.4em] whitespace-nowrap animate-pulse shrink-0">Impact Across Sectors</span>
-                            <div className="h-px bg-white/20 flex-1 min-w-[10px]" />
-                            <div className="flex gap-2 flex-nowrap items-center shrink-0">
+                    <div className="relative z-50 px-12 h-[80px] shrink-0 flex items-center bg-black/80 backdrop-blur-3xl border-t-2 border-white/10">
+                        <div className="flex gap-8 items-center w-full max-w-[1280px] mx-auto overflow-hidden text-white">
+                            <span className="text-[10px] font-black uppercase text-[#FFD02F] tracking-[0.4em] whitespace-nowrap animate-pulse shrink-0">Impact Across Sectors</span>
+                            <div className="h-px bg-white/20 flex-1 min-w-[20px]" />
+                            <div className="flex gap-3 flex-nowrap items-center shrink-0">
                                 {sectors.map((s) => ( 
-                                    <span key={s} className="px-2 py-0.5 bg-white/10 border border-white/20 rounded-full text-[7px] font-black uppercase tracking-widest whitespace-nowrap">
+                                    <span key={s} className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
                                         {s}
                                     </span> 
                                 ))}
