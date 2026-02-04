@@ -12,49 +12,40 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
         
         html, body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden; 
-            background-color: #050038;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; padding: 0; overflow: hidden; 
+            background-color: #050038; height: 100vh; width: 100vw;
+            display: flex; justify-content: center; align-items: center;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Fixed design dimensions */
         #root {
-            width: 1280px;
-            height: 720px;
+            width: 1280px; height: 720px;
             transform-origin: center center;
+            position: absolute;
             flex-shrink: 0;
-            position: absolute; /* Ensures scaling doesn't push the box out of alignment */
         }
 
         .infographic-shell {
-            width: 1280px;
-            height: 720px;
+            width: 1280px; height: 720px;
             background-color: #050038;
             font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             border: 12px solid #050038;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sharp-text {
-            transform: translateZ(0);
-            backface-visibility: hidden;
+            position: relative; overflow: hidden;
         }
 
         @keyframes rocketFinalSequence {
             0% { transform: translate(1000px, 680px) scale(0); opacity: 0; }
             20% { transform: translate(1000px, 500px) scale(1); opacity: 1; }
+            70% { transform: translate(1000px, 50px) rotate(-10deg); }
             100% { transform: translate(-600px, -900px) rotate(-90deg); opacity: 0; }
+        }
+
+        @keyframes ultraSlowConfetti {
+            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
+            0.5% { opacity: 1; transform: translate(0, -30px) scale(1.2) rotate(0deg); }
+            1% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(180deg); opacity: 1; }
+            100% { transform: translate(var(--fx), var(--fy)) rotate(var(--r)) scale(0.4); opacity: 0; }
         }
 
         @keyframes animate-smoke { 
@@ -72,7 +63,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // JS ENGINE: This is what makes it resize perfectly in Miro
         const useAutoScaler = () => {
             useEffect(() => {
                 const scaler = () => {
@@ -109,19 +99,55 @@
             );
         };
 
+        const ConfettiWrapper = ({ children, className = "" }) => {
+            const [particles, setParticles] = useState([]);
+            const activePopRef = useRef(false);
+            const spawnBurst = () => {
+                const burstSize = 10;
+                const newParticles = Array.from({ length: burstSize }).map(() => ({
+                    id: Math.random(),
+                    tx: (Math.random() - 0.5) * 600, ty: -450 - Math.random() * 400,
+                    fallX: (Math.random() - 0.5) * 500, fallY: 1000, 
+                    r: Math.random() * 2000, s: Math.random() * 10 + 4,
+                    c: ['#FFD02F', '#4262FF', '#FFFFFF', '#FFD02F'][Math.floor(Math.random() * 4)],
+                    shape: Math.random() > 0.5 ? '50%' : '2px', delay: Math.random() * 0.1
+                }));
+                setParticles(prev => [...prev, ...newParticles].slice(-100));
+            };
+            const startCelebration = () => {
+                if (activePopRef.current) return;
+                activePopRef.current = true;
+                let elapsed = 0;
+                const timer = setInterval(() => {
+                    spawnBurst(); elapsed += 150;
+                    if (elapsed >= 1200) { clearInterval(timer); activePopRef.current = false; }
+                }, 150);
+            };
+            return (
+                <div className="relative group h-full w-full" onMouseEnter={startCelebration}>
+                    <div className="absolute inset-x-0 top-0 pointer-events-none flex items-center justify-center overflow-visible z-[200]">
+                        {particles.map(p => (
+                            <div key={p.id} className="absolute pointer-events-none"
+                                style={{
+                                    width: p.s, height: p.s, backgroundColor: p.c, borderRadius: p.shape,
+                                    '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, '--fx': `${p.tx + p.fallX}px`, '--fy': `${p.fallY}px`, '--r': `${p.r}deg`,
+                                    animation: `ultraSlowConfetti 12s cubic-bezier(0.1, 0.9, 0.2, 1) forwards`,
+                                    animationDelay: `${p.delay}s`, boxShadow: `0 0 10px ${p.c}88`
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className={`relative z-10 h-full w-full ${className}`}>{children}</div>
+                </div>
+            );
+        };
+
         const SpinningGlobe = () => {
             const [rotation, setRotation] = useState(0);
             useEffect(() => {
                 const interval = setInterval(() => setRotation(prev => (prev + 0.3) % 360), 30);
                 return () => clearInterval(interval);
             }, []);
-            const points = [
-                { name: 'AMER', count: 10, angle: 260, y: 0 },
-                { name: 'EMEA', count: 6, angle: 30, y: -20 },
-                { name: 'JPN', count: 4, angle: 140, y: -10 },
-                { name: 'APAC', count: 2, angle: 110, y: 25 },
-                { name: 'LATAM', count: 1, angle: 255, y: 45 },
-            ];
             const worldMap = "M25,85 c5,-10 20,-15 40,-15 c15,0 30,10 50,5 c15,-5 25,-15 40,-10 c10,5 15,20 10,35 c-5,15 -25,20 -40,15 c-10,-5 -20,-10 -35,-5 c-15,5 -25,15 -45,10 c-15,-5 -20,-20 -20,-35 Z M180,45 c15,-15 45,-5 65,10 c15,10 30,25 20,45 c-10,15 -35,15 -55,10 c-20,-5 -30,-20 -40,-40 c-5,-15 0,-20 10,-25 Z M160,140 c15,-15 40,-5 60,10 c15,10 25,30 15,45 c-10,15 -35,25 -55,15 c-20,-10 -25,-30 -30,-45 c-5,-15 0,-20 10,-25 Z M40,150 c15,-15 40,-5 60,10 c15,15 20,35 10,50 c-10,15 -40,20 -60,10 c-20,-10 -25,-30 -25,-45 c0,-15 5,-20 15,-25 Z M300,90 c15,-15 40,-5 50,15 c10,20 0,40 -15,55 c-15,15 -40,10 -50,-10 c-10,-20 -5,-45 15,-60 Z";
             return (
                 <div className="relative w-full aspect-square max-w-[280px] mx-auto flex items-center justify-center">
@@ -138,10 +164,47 @@
             );
         };
 
+        const RealisticRocket = ({ isActive }) => {
+            const [smoke, setSmoke] = useState([]);
+            useEffect(() => {
+                if (!isActive) { setSmoke([]); return; }
+                const interval = setInterval(() => {
+                    setSmoke(prev => [...prev, { id: Math.random(), delay: Math.random() * 0.2 }].slice(-30));
+                }, 50);
+                return () => clearInterval(interval);
+            }, [isActive]);
+            if (!isActive) return null;
+            return (
+                <div className="absolute z-[150] pointer-events-none origin-bottom" style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
+                    <div className="relative flex flex-col items-center">
+                        <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
+                            <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#F1F5F9"/><path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#EF4444"/><path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#EF4444"/><path d="M22 83H38L35 90H25L22 83Z" fill="#1E293B"/><circle cx="30" cy="40" r="8" fill="#3B82F6" stroke="white" strokeWidth="2"/>
+                        </svg>
+                        <div className="absolute top-[85px] flex flex-col items-center">
+                            <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[2px] z-20" />
+                            {smoke.map((s) => (
+                                <div key={s.id} className="w-10 h-10 bg-white/20 rounded-full blur-xl absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const CompanyLogo = ({ name, domain }) => {
+            const [error, setError] = useState(false);
+            const logoUrl = `https://logo.clearbit.com/${domain}?size=64`;
+            return (
+                <div className="bg-white border-2 border-gray-100 rounded-lg p-1 h-10 w-full flex items-center justify-center shadow-sm overflow-hidden shrink-0">
+                    {!error ? <img src={logoUrl} alt={name} className="max-h-full max-w-full object-contain" onError={() => setError(true)} /> : <span className="text-[9px] font-black uppercase text-center text-black">{name}</span>}
+                </div>
+            );
+        };
+
         const App = () => {
-            useAutoScaler(); // Activate the scaling engine
+            useAutoScaler();
             const [rocketActive, setRocketActive] = useState(false);
-            const triggerRocket = () => { if (rocketActive) return; setRocketActive(true); setTimeout(() => setRocketActive(false), 7700); };
+            const triggerRocket = () => { if (!rocketActive) { setRocketActive(true); setTimeout(() => setRocketActive(false), 7700); } };
 
             const companies = [
                 { name: "Netflix", domain: "netflix.com" }, { name: "Airbnb", domain: "airbnb.com" },
@@ -158,70 +221,53 @@
                 { name: "Knitwell Group", domain: "knitwellgroup.com" }
             ];
 
-            const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Mfg", "Telecom", "Pharma"];
-
             return (
                 <div className="infographic-shell select-none shadow-2xl">
+                    <RealisticRocket isActive={rocketActive} />
+                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none z-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 0)', backgroundSize: '32px 32px' }} />
                     <div className="relative z-40 px-12 h-[160px] shrink-0 flex justify-between items-end pb-6">
-                        <div className="sharp-text">
-                            <div className="inline-flex items-center gap-2 bg-[#4262FF] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2">
+                        <div>
+                            <div className="inline-flex items-center gap-2 bg-[#4262FF] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-lg">
                                 <Icon name="popper" size={14} fill="white" className="mr-1" /> PERFORMANCE OVERVIEW
                             </div>
-                            <h1 className="text-5xl font-black leading-none italic uppercase text-white">
-                                GOAL <br />
-                                <span className="text-[#FFD02F]">DESTROYED</span> BY THE TEAM
+                            <h1 className="text-5xl font-black italic uppercase text-white leading-tight">
+                                GOAL <span className="text-[#FFD02F]">DESTROYED</span> BY THE TEAM
                             </h1>
                         </div>
                     </div>
-
                     <div className="relative z-20 px-12 grid grid-cols-12 gap-8 flex-grow min-h-0 mb-6 items-stretch">
                         <div className="col-span-4 flex flex-col gap-8 h-full">
-                            <div className="bg-[#FFD02F] text-[#050038] p-8 rounded-[2rem] h-full flex flex-col justify-center shadow-2xl">
-                                <div className="text-7xl font-black leading-none mb-1 tracking-tighter">$1.41M+</div>
-                                <div className="text-xl font-bold italic uppercase underline">Goal: $1M</div>
-                            </div>
+                            <ConfettiWrapper>
+                                <div className="bg-[#FFD02F] text-[#050038] p-8 rounded-[2rem] h-full flex flex-col justify-center shadow-2xl">
+                                    <div className="text-7xl font-black leading-none tracking-tighter">$1.41M+</div>
+                                    <div className="text-xl font-bold uppercase underline">Goal: $1M</div>
+                                </div>
+                            </ConfettiWrapper>
                             <div className="bg-white/10 border-2 border-white/20 p-8 rounded-[2rem] h-full flex flex-col justify-center text-white">
                                 <div className="text-6xl font-black mb-1">23 Wins</div>
                                 <div className="text-xl text-white/70 font-black italic uppercase">135% Growth</div>
                             </div>
                         </div>
-
-                        <div className="col-span-4 flex flex-col h-full">
-                            <div className="bg-[#4262FF] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl text-white">
-                                <h3 className="text-2xl font-black uppercase mb-2 italic"> <Icon name="globe" size={32} /> Global Presence </h3>
-                                <div className="flex-grow flex items-center justify-center"> <SpinningGlobe /> </div>
-                            </div>
+                        <div className="col-span-4 flex flex-col h-full bg-[#4262FF] p-6 rounded-[2rem] shadow-2xl text-white">
+                            <h3 className="text-2xl font-black uppercase mb-2 italic flex gap-2"> <Icon name="globe" size={32} /> Global Presence </h3>
+                            <div className="flex-grow flex items-center justify-center"> <SpinningGlobe /> </div>
                         </div>
-
-                        <div className="col-span-4 flex flex-col h-full">
-                            <div className="bg-white text-[#050038] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl" onMouseEnter={triggerRocket}>
-                                <h3 className="text-xl font-black uppercase mb-4 italic"> Our First Quarter </h3>
-                                <div className="grid grid-cols-3 gap-2 flex-grow overflow-hidden">
-                                    {companies.map((co, i) => ( <CompanyLogo key={i} name={co.name} domain={co.domain} /> ))}
-                                </div>
+                        <div className="col-span-4 flex flex-col h-full bg-white text-[#050038] rounded-[2rem] p-6 shadow-2xl" onMouseEnter={triggerRocket}>
+                            <h3 className="text-xl font-black uppercase mb-4 italic"> Our First Quarter </h3>
+                            <div className="grid grid-cols-3 gap-2 flex-grow overflow-hidden">
+                                {companies.map((co, i) => <CompanyLogo key={i} name={co.name} domain={co.domain} />)}
                             </div>
                         </div>
                     </div>
-
-                    <div className="relative z-50 px-12 h-[80px] shrink-0 flex items-center bg-black/80 border-t-2 border-white/10">
-                        <div className="flex gap-8 items-center w-full max-w-[1280px] mx-auto text-white sharp-text">
-                            <span className="text-[10px] font-black uppercase text-[#FFD02F] tracking-[0.4em] whitespace-nowrap">Impact Across Sectors</span>
-                            <div className="h-px bg-white/20 flex-1" />
-                            <div className="flex gap-3 shrink-0">
-                                {sectors.map((s) => ( 
-                                    <span key={s} className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
-                                        {s}
-                                    </span> 
-                                ))}
-                            </div>
-                        </div>
+                    <div className="relative z-50 px-12 h-[80px] shrink-0 flex items-center bg-black/80 border-t-2 border-white/10 text-white">
+                        <span className="text-[10px] font-black uppercase text-[#FFD02F] tracking-[0.4em] whitespace-nowrap">Impact Across Sectors</span>
+                        <div className="h-px bg-white/20 flex-1 ml-4" />
                     </div>
                 </div>
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
