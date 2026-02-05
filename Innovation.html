@@ -49,14 +49,12 @@
 
         /* --- Pixel-Perfect Text Stabilization --- */
         .sharp-text {
-            /* Forced high-fidelity rendering */
             -webkit-font-smoothing: antialiased;
             backface-visibility: hidden;
             display: block;
-            /* Explicitly avoiding any transform property to prevent Miro Blur */
             transform: none !important;
             position: relative;
-            z-index: 50; /* Above all background layers */
+            z-index: 50; 
         }
 
         .miro-highlight {
@@ -84,14 +82,12 @@
             background-color: #FFFFFF;
             border: 4px solid #1C1C1E;
             position: relative;
-            /* We use shadow expansion for "lift" instead of movement */
             transition: box-shadow 0.1s steps(2);
         }
         .card-container:hover {
             box-shadow: 0 12px 0px 0px #1C1C1E;
         }
 
-        /* Background Layer for Icons (The "Animation Box") */
         .icon-layer {
             position: absolute;
             top: 2rem;
@@ -102,10 +98,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: none; /* Never intercepts clicks */
+            pointer-events: none;
         }
 
-        /* Foreground Layer for Content (The "Text Box") */
         .content-layer {
             position: relative;
             z-index: 50;
@@ -238,7 +233,6 @@
                     onMouseEnter={() => setIsHovered(true)} 
                     onMouseLeave={() => setIsHovered(false)}
                 >
-                    {/* SEPARATE BACKGROUND LAYER: ICON MOTION */}
                     <div className="icon-layer">
                         <div 
                             className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] relative" 
@@ -249,9 +243,8 @@
                         </div>
                     </div>
 
-                    {/* SEPARATE FOREGROUND LAYER: SHARP CONTENT */}
                     <div className="content-layer px-8 pb-8">
-                        <div className="h-32 shrink-0"></div> {/* Spacer for background icon box */}
+                        <div className="h-32 shrink-0"></div> 
                         <div className="sharp-text flex-1 flex flex-col">
                             <h2 className="text-3xl font-[900] italic uppercase tracking-tighter leading-none mb-2 text-[#1C1C1E]">{title}</h2>
                             <div className="mb-4">
@@ -269,7 +262,6 @@
                         </div>
                     </div>
                     
-                    {/* Hover Visual Anchor (No transform) */}
                     <div className={`absolute bottom-0 left-0 h-1 bg-[#1C1C1E] transition-all duration-500 ease-out ${isHovered ? 'w-full' : 'w-0'}`}></div>
                 </div>
             );
@@ -316,7 +308,7 @@
                 <div className="canvas-bg select-none">
                     <div className="h-[160px] px-12 flex flex-col justify-center relative z-10 sharp-text">
                         <div className="flex items-center gap-4 mb-2">
-                            <span className="bg-[#1C1C1E] text-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] rounded-md">PS INNOVATION HUB</span>
+                            <span className="bg-[#1C1C1E] text-[#F24822] px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] rounded-md">HOT OFF THE PRESSES</span>
                             <div className="h-[2px] flex-1 bg-[#1C1C1E]/10"></div>
                         </div>
                         <h1 className="text-[64px] font-[900] italic uppercase leading-none text-[#1C1C1E] tracking-tighter">
