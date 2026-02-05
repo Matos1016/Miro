@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden; 
-            background-color: #FFFFFF; /* Workspace White */
+            background-color: #FFFFFF;
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -25,7 +25,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Portal scaling engine container */
         #root {
             width: 1280px;
             height: 720px;
@@ -38,42 +37,24 @@
             width: 1280px;
             height: 720px;
             background-color: #FFFFFF;
-            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0); /* Miro Board Dot Grid */
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
             background-size: 24px 24px;
             font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column; 
-            border: 8px solid #1C1C1E; /* Breakthrough Black Frame */
+            border: 8px solid #1C1C1E;
             position: relative;
             overflow: hidden;
         }
 
-        /* Snapshot Principle: Locks glyphs to pixel grid by clearing transforms when static */
+        /* Pixel-Grid Locking Utility */
         .sharp-text {
-            transform: translateZ(0);
+            transform: none !important;
             backface-visibility: hidden;
-            perspective: 1000;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Shattered Effect for "CRUSHED" */
-        .shattered-wrap {
-            position: relative;
-            display: inline-block;
-            color: #FFDD33;
-            -webkit-text-stroke: 1.5px #1C1C1E;
-        }
-        .shard {
-            position: absolute;
-            top: 0;
-            left: 0;
-            transition: transform 0.3s ease-out;
-        }
-        .shard-1 { clip-path: polygon(0 0, 52% 0, 48% 52%, 0 48%); transform: translate(-3px, -2px) rotate(-1deg); }
-        .shard-2 { position: relative; clip-path: polygon(52% 0, 100% 0, 100% 52%, 48% 52%); transform: translate(3px, -2px) rotate(1deg); }
-        .shard-3 { clip-path: polygon(0 48%, 48% 52%, 52% 100%, 0 100%); transform: translate(-3px, 3px) rotate(-0.5deg); filter: brightness(0.95); }
-        .shard-4 { clip-path: polygon(48% 52%, 100% 52%, 100% 100%, 52% 100%); transform: translate(3px, 3px) rotate(0.5deg); filter: brightness(0.9); }
-
-        /* --- Animations --- */
+        /* --- Rocket Animation Layer --- */
         @keyframes rocketFinalSequence {
             0% { transform: translate(1050px, 850px) scale(0); opacity: 1; } 
             15% { transform: translate(1050px, 550px) scale(1); opacity: 1; } 
@@ -90,17 +71,7 @@
             100% { transform: scale(5) translateY(100px); opacity: 0; } 
         }
 
-        @keyframes cashRain {
-            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
-            0.05% { opacity: 1; transform: translate(0, -20px) scale(1.1) rotate(0deg); }
-            0.2% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--r)); opacity: 1; }
-            100% { transform: translate(var(--fx), var(--fy)) rotate(calc(var(--r) * 2)) scale(0.8); opacity: 0; }
-        }
-
-        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
-
-        /* Speedometer Rev Animation */
+        /* --- Speedometer Needle --- */
         @keyframes needle-rev {
             0% { transform: rotate(0deg); }
             25% { transform: rotate(180deg); }
@@ -112,23 +83,45 @@
 
         .rev-needle {
             transform-origin: 12px 14px;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* No transition on hover to avoid sub-pixel interpolation blur */
         }
 
         .group:hover .rev-needle {
             animation: needle-rev 1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
         }
 
-        .rocket-layer {
-            will-change: transform;
-            pointer-events: none;
+        /* Shattered Effect for "CRUSHED" */
+        .shattered-wrap {
+            position: relative;
+            display: inline-block;
+            color: #FFDD33;
+            -webkit-text-stroke: 1.5px #1C1C1E;
         }
-        
-        /* Subtle non-transform animation for global appeal box */
-        .scanning-glow {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        .shard {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .shard-1 { clip-path: polygon(0 0, 52% 0, 48% 52%, 0 48%); transform: translate(-3px, -2px) rotate(-1deg); }
+        .shard-2 { position: relative; clip-path: polygon(52% 0, 100% 0, 100% 52%, 48% 52%); transform: translate(3px, -2px) rotate(1deg); }
+        .shard-3 { clip-path: polygon(0 48%, 48% 52%, 52% 100%, 0 100%); transform: translate(-3px, 3px) rotate(-0.5deg); }
+        .shard-4 { clip-path: polygon(48% 52%, 100% 52%, 100% 100%, 52% 100%); transform: translate(3px, 3px) rotate(0.5deg); }
+
+        @keyframes cashRain {
+            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
+            0.05% { opacity: 1; transform: translate(0, -20px) scale(1.1) rotate(0deg); }
+            0.2% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--r)); opacity: 1; }
+            100% { transform: translate(var(--fx), var(--fy)) rotate(calc(var(--r) * 2)) scale(0.8); opacity: 0; }
+        }
+
+        .animate-spin-slow { animation: spin 8s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Scanning highlight without backdrop-blur */
+        .scanning-line {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
             background-size: 200% 100%;
-            animation: scan 6s linear infinite;
+            animation: scan 4s linear infinite;
         }
         @keyframes scan {
             0% { background-position: 200% 0; }
@@ -181,96 +174,45 @@
             );
         };
 
-        const CashRainWrapper = ({ children, className = "" }) => {
-            const [particles, setParticles] = useState([]);
-            const activePopRef = useRef(false);
-            const spawnBurst = () => {
-                const burstSize = 8;
-                const newParticles = Array.from({ length: burstSize }).map(() => ({
-                    id: Math.random(),
-                    tx: (Math.random() - 0.5) * 600, 
-                    ty: -600 - Math.random() * 400,
-                    fx: (Math.random() - 0.5) * 800, 
-                    fy: 1200, 
-                    r: Math.random() * 720,
-                    w: 24, h: 12,
-                    c: ['#6EDB8C', '#297A36', '#B7FBCD', '#47D1C4'][Math.floor(Math.random() * 4)],
-                    delay: Math.random() * 0.1
-                }));
-                setParticles(prev => [...prev, ...newParticles].slice(-100));
-            };
-            const startCelebration = () => {
-                if (activePopRef.current) return;
-                activePopRef.current = true;
-                let elapsed = 0;
-                const timer = setInterval(() => {
-                    spawnBurst();
-                    elapsed += 200;
-                    if (elapsed >= 5000) { 
-                        clearInterval(timer);
-                        activePopRef.current = false;
-                    }
-                }, 200);
-            };
-            return (
-                <div className="relative group h-full w-full" onMouseEnter={startCelebration}>
-                    <div className="absolute inset-x-0 bottom-0 pointer-events-none flex items-center justify-center overflow-visible z-[200]">
-                        {particles.map(p => (
-                            <div key={p.id} className="absolute pointer-events-none flex items-center justify-center text-[8px] font-bold text-white/40"
-                                style={{
-                                    width: p.w, height: p.h, backgroundColor: p.c, borderRadius: '2px',
-                                    '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, '--fx': `${p.fx}px`, '--fy': `${p.fy}px`, '--r': `${p.r}deg`,
-                                    animation: `cashRain 120s cubic-bezier(0.1, 0.9, 0.2, 1) forwards`,
-                                    animationDelay: `${p.delay}s`, boxShadow: `0 2px 5px rgba(0,0,0,0.2)`,
-                                    border: '1px solid rgba(0,0,0,0.1)'
-                                }}
-                            > $ </div>
-                        ))}
-                    </div>
-                    <div className={`relative z-10 h-full w-full ${className}`}>{children}</div>
-                </div>
-            );
-        };
+        const SectorCarousel = () => {
+            const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Manufacturing", "Telecom", "Pharma"];
+            const colors = ["#FF9C57", "#CE70FC", "#6EDB8C", "#47D1C4"];
+            const [index, setIndex] = useState(0);
 
-        const SpinningGlobe = () => {
-            const [rotation, setRotation] = useState(0);
             useEffect(() => {
-                const interval = setInterval(() => setRotation(prev => (prev + 0.35) % 360), 30);
+                const interval = setInterval(() => {
+                    setIndex(prev => (prev + 1) % sectors.length);
+                }, 4000); 
                 return () => clearInterval(interval);
             }, []);
-            const worldMap = "M25,85 c5,-10 15,-5 25,-10 t20,10 t25,5 t20,-10 t15,10 t-10,20 t-20,10 t-25,-5 t-20,-10 t-30,0 Z M130,25 c10,-10 25,-5 35,5 t20,15 t0,20 t-20,10 t-25,-5 t-10,-20 Z M110,75 c15,-10 35,0 45,15 t15,25 t-10,20 t-30,5 t-20,-15 t0,-30 Z M35,110 c10,-10 30,-5 45,5 t20,20 t-10,25 t-30,10 t-25,-15 t0,-25 Z M190,55 c10,-10 25,-5 35,10 t5,25 t-20,20 t-20,-15 t0,-25 Z";
-            
-            const points = [
-                {n:'AMER', a:260, y:0, c:10},
-                {n:'EMEA', a:30, y:-25, c:6},
-                {n:'JPN', a:140, y:-10, c:4},
-                {n:'APAC', a:110, y:25, c:2},
-                {n:'LATAM', a:255, y:45, c:1}
-            ];
 
             return (
-                <div className="relative w-full aspect-square max-w-[280px] mx-auto flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-2 border-[#1C1C1E]/20 bg-[#FFFFFF]/30 backdrop-blur-md shadow-[inset_0_0_60px_rgba(28,28,30,0.1)] overflow-hidden">
-                        <div className="absolute inset-0 flex opacity-70" style={{ transform: `translateX(${-rotation * 1.6}px)`, width: '400%', transition: 'transform 0.1s linear' }}>
-                            {[...Array(4)].map((_, i) => (
-                                <svg key={i} viewBox="0 0 400 200" className="h-full w-full shrink-0" preserveAspectRatio="none">
-                                    <path fill="#1C1C1E" d={worldMap} />
-                                </svg>
-                            ))}
-                        </div>
+                <div className="mt-4 bg-[#1C1C1E] py-3 rounded-xl border border-white/10 relative overflow-hidden shrink-0 h-[52px] flex items-center justify-center">
+                    <div className="absolute inset-0 scanning-line opacity-20"></div>
+                    <div className="relative w-full h-full">
+                        {sectors.map((s, i) => {
+                            const isActive = i === index;
+                            return (
+                                <div 
+                                    key={s}
+                                    className="absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out"
+                                    style={{ 
+                                        // Using 'top' instead of 'transform' to maintain pixel-perfect text clarity
+                                        top: isActive ? '0' : (i < index ? '-100%' : '100%'),
+                                        opacity: isActive ? 1 : 0,
+                                        visibility: isActive ? 'visible' : 'hidden'
+                                    }}
+                                >
+                                    <span 
+                                        className="px-6 py-1 bg-[#FFFFFF]/10 border border-white/20 rounded-full text-[14px] font-black uppercase tracking-widest sharp-text" 
+                                        style={{ color: colors[i % colors.length] }}
+                                    > 
+                                        {s} 
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
-                    {points.map((p) => {
-                        const currentAngle = (p.a + rotation) % 360;
-                        const radians = (currentAngle * Math.PI) / 180;
-                        const x = Math.sin(radians) * 115;
-                        return (
-                            <div key={p.n} className="absolute transition-all duration-75 pointer-events-none flex flex-col items-center"
-                                style={{ transform: `translate(${x}px, ${p.y}px)`, zIndex: Math.cos(radians) > 0 ? 30 : 5, opacity: Math.max(0.05, (Math.cos(radians) + 1.2) / 2.2), scale: (Math.cos(radians) + 2.5) / 3.5 }}>
-                                <div className="bg-[#FFDD33] text-[#1C1C1E] text-[20px] font-black px-3 py-1 rounded shadow-xl border-2 border-white whitespace-nowrap leading-none">{p.n}: {p.c}</div>
-                                <div className="w-3.5 h-3.5 rounded-full bg-[#1C1C1E] shadow-[0_0_15px_rgba(0,0,0,0.2)] mt-1" />
-                            </div>
-                        );
-                    })}
                 </div>
             );
         };
@@ -284,28 +226,21 @@
                 }, 50);
                 return () => clearInterval(interval);
             }, [isActive]);
-
             if (!isActive) return null;
-
             return (
-                <div className="absolute inset-0 z-[100] pointer-events-none rocket-layer">
-                    <div className="absolute w-20" 
-                         style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
+                <div className="absolute inset-0 z-[100] pointer-events-none" style={{ willChange: 'transform' }}>
+                    <div className="absolute w-20" style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
                         <div className="relative flex flex-col items-center">
                             <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
                                 <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#FFFFFF" stroke="#1C1C1E" strokeWidth="2.5"/>
                                 <path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#EF4444" stroke="#1C1C1E" strokeWidth="1"/>
                                 <path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#EF4444" stroke="#1C1C1E" strokeWidth="1"/>
-                                <path d="M22 83H38L35 90H25L22 83Z" fill="#1E293B"/>
                                 <circle cx="30" cy="40" r="8" fill="#3B82F6" stroke="white" strokeWidth="2"/>
                             </svg>
-                            <div className="absolute top-[85px] flex flex-col items-center">
-                                <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[2px] z-20" />
-                                <div className="absolute top-2 flex flex-col items-center">
-                                    {smoke.map((s) => (
-                                        <div key={s.id} className="w-12 h-12 bg-black/5 rounded-full blur-xl absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
-                                    ))}
-                                </div>
+                            <div className="absolute top-[85px]">
+                                {smoke.map((s) => (
+                                    <div key={s.id} className="w-12 h-12 bg-black/5 rounded-full blur-xl absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -313,68 +248,62 @@
             );
         };
 
-        const CompanyLogo = ({ name, domain }) => {
-            const [error, setError] = useState(false);
-            const logoUrl = `https://logo.clearbit.com/${domain}?size=64`;
+        const SpinningGlobe = () => {
+            const [rotation, setRotation] = useState(0);
+            useEffect(() => {
+                const interval = setInterval(() => setRotation(prev => (prev + 0.35) % 360), 30);
+                return () => clearInterval(interval);
+            }, []);
+            const worldMap = "M25,85 c5,-10 15,-5 25,-10 t20,10 t25,5 t20,-10 t15,10 t-10,20 t-20,10 t-25,-5 t-20,-10 t-30,0 Z M130,25 c10,-10 25,-5 35,5 t20,15 t0,20 t-20,10 t-25,-5 t-10,-20 Z M110,75 c15,-10 35,0 45,15 t15,25 t-10,20 t-30,5 t-20,-15 t0,-30 Z M35,110 c10,-10 30,-5 45,5 t20,20 t-10,25 t-30,10 t-25,-15 t0,-25 Z M190,55 c10,-10 25,-5 35,10 t5,25 t-20,20 t-20,-15 t0,-25 Z";
+            const points = [{n:'AMER', a:260, y:0, c:10}, {n:'EMEA', a:30, y:-25, c:6}, {n:'JPN', a:140, y:-10, c:4}, {n:'APAC', a:110, y:25, c:2}, {n:'LATAM', a:255, y:45, c:1}];
             return (
-                <div className="bg-white rounded-lg p-1 h-10 w-full flex items-center justify-center shadow-sm hover:shadow-md transition-all overflow-hidden shrink-0 border-2 border-[#1C1C1E]/5">
-                    {!error ? ( <img src={logoUrl} alt={name} className="max-h-full max-w-full object-contain" onError={() => setError(true)} /> ) : ( <span className="text-[10px] font-black uppercase text-center leading-tight text-[#1C1C1E]">{name}</span> )}
+                <div className="relative w-full aspect-square max-w-[280px] mx-auto flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-2 border-[#1C1C1E]/20 bg-[#FFFFFF]/30 shadow-[inset_0_0_60px_rgba(28,28,30,0.1)] overflow-hidden">
+                        <div className="absolute inset-0 flex opacity-70" style={{ transform: `translateX(${-rotation * 1.6}px)`, width: '400%' }}>
+                            {[...Array(4)].map((_, i) => ( <svg key={i} viewBox="0 0 400 200" className="h-full w-full shrink-0" preserveAspectRatio="none"> <path fill="#1C1C1E" d={worldMap} /> </svg> ))}
+                        </div>
+                    </div>
+                    {points.map((p) => {
+                        const currentAngle = (p.a + rotation) % 360;
+                        const radians = (currentAngle * Math.PI) / 180;
+                        const x = Math.sin(radians) * 115;
+                        return (
+                            <div key={p.n} className="absolute transition-all duration-75 pointer-events-none flex flex-col items-center"
+                                style={{ transform: `translate(${x}px, ${p.y}px)`, zIndex: Math.cos(radians) > 0 ? 30 : 5, opacity: Math.max(0.05, (Math.cos(radians) + 1.2) / 2.2), scale: (Math.cos(radians) + 2.5) / 3.5 }}>
+                                <div className="bg-[#FFDD33] text-[#1C1C1E] text-[20px] font-black px-3 py-1 rounded shadow-xl border-2 border-white whitespace-nowrap leading-none sharp-text">{p.n}: {p.c}</div>
+                            </div>
+                        );
+                    })}
                 </div>
             );
         };
 
-        // FIXED: Sector Carousel with 'Snap-to-Grid' logic to eliminate blur
-        const SectorCarousel = () => {
-            const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Manufacturing", "Telecom", "Pharma"];
-            const colors = ["#FF9C57", "#CE70FC", "#6EDB8C", "#47D1C4"];
-            const [index, setIndex] = useState(0);
-            const [isMoving, setIsMoving] = useState(false);
-
-            useEffect(() => {
-                const interval = setInterval(() => {
-                    setIsMoving(true);
-                    setIndex(prev => (prev + 1) % sectors.length);
-                    // Clear the moving state after transition to allow pixel grid locking
-                    setTimeout(() => setIsMoving(false), 800);
-                }, 4000); 
-                return () => clearInterval(interval);
-            }, []);
-
+        const CashRainWrapper = ({ children }) => {
+            const [particles, setParticles] = useState([]);
+            const spawnBurst = () => {
+                const newParticles = Array.from({ length: 8 }).map(() => ({
+                    id: Math.random(), tx: (Math.random() - 0.5) * 600, ty: -600 - Math.random() * 400,
+                    fx: (Math.random() - 0.5) * 800, fy: 1200, r: Math.random() * 720,
+                    c: ['#6EDB8C', '#297A36', '#B7FBCD', '#47D1C4'][Math.floor(Math.random() * 4)],
+                    delay: Math.random() * 0.1
+                }));
+                setParticles(prev => [...prev, ...newParticles].slice(-60));
+            };
             return (
-                <div className="mt-4 bg-[#FFFFFF]/50 py-3 rounded-xl border border-[#1C1C1E]/10 relative overflow-hidden shrink-0 backdrop-blur-sm h-[52px] flex items-center justify-center scanning-glow">
-                    <div className="relative w-full h-full flex items-center justify-center">
-                        {sectors.map((s, i) => {
-                            const diff = (i - index + sectors.length) % sectors.length;
-                            const isActive = diff === 0;
-                            const isPast = diff === sectors.length - 1;
-                            const isFuture = diff === 1;
-
-                            let xPos = "100%";
-                            if (isActive) xPos = "0%";
-                            if (isPast) xPos = "-100%";
-                            if (isFuture) xPos = "100%";
-
-                            return (
-                                <div 
-                                    key={s}
-                                    className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ${isMoving ? '' : 'transform-none'}`}
-                                    style={{ 
-                                        // We only apply transform during the motion window
-                                        transform: isMoving ? `translateX(${xPos})` : (isActive ? 'none' : `translateX(${xPos})`), 
-                                        opacity: isActive ? 1 : 0,
-                                        transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                                    }}
-                                >
-                                    <span 
-                                        className="px-6 py-1 bg-[#1C1C1E] border-2 border-white/20 rounded-full text-[14px] font-black uppercase tracking-widest sharp-text shadow-xl" 
-                                        style={{ color: colors[i % colors.length] }}
-                                    > 
-                                        {s} 
-                                    </span>
-                                </div>
-                            );
-                        })}
+                <div className="relative group h-full w-full" onMouseEnter={spawnBurst}>
+                    <div className="absolute inset-x-0 bottom-0 pointer-events-none flex items-center justify-center z-[200]">
+                        {particles.map(p => (
+                            <div key={p.id} className="absolute pointer-events-none flex items-center justify-center text-[8px] font-bold text-white/40"
+                                style={{
+                                    width: 24, height: 12, backgroundColor: p.c, borderRadius: '2px',
+                                    '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, '--fx': `${p.fx}px`, '--fy': `${p.fy}px`, '--r': `${p.r}deg`,
+                                    animation: `cashRain 120s cubic-bezier(0.1, 0.9, 0.2, 1) forwards`,
+                                    animationDelay: `${p.delay}s`
+                                }}
+                            > $ </div>
+                        ))}
                     </div>
+                    {children}
                 </div>
             );
         };
@@ -382,7 +311,7 @@
         const App = () => {
             useAutoScaler();
             const [rocketActive, setRocketActive] = useState(false);
-            const triggerRocket = () => { if (rocketActive) return; setRocketActive(true); setTimeout(() => setRocketActive(false), 7700); };
+            const triggerRocket = () => { if (!rocketActive) { setRocketActive(true); setTimeout(() => setRocketActive(false), 7700); } };
 
             const companies = [
                 { name: "Netflix", domain: "netflix.com" }, { name: "Airbnb", domain: "airbnb.com" },
@@ -400,13 +329,14 @@
             ];
 
             return (
-                <div className="infographic-shell select-none shadow-2xl">
+                <div className="infographic-shell select-none">
                     <RealisticRocket isActive={rocketActive} />
                     
+                    {/* Header */}
                     <div className="relative z-40 px-12 pt-10 h-[140px] shrink-0 flex justify-between items-start">
                         <div className="sharp-text flex-1">
-                            <h1 className="text-[66px] font-black leading-none italic uppercase text-[#1C1C1E] tracking-tighter drop-shadow-sm flex items-center gap-x-6 whitespace-nowrap">
-                                <span className="bg-[#FFDD33] px-6 py-1 rounded-xl shadow-sm inline-block">MOST</span>
+                            <h1 className="text-[66px] font-black leading-none italic uppercase text-[#1C1C1E] tracking-tighter flex items-center gap-x-6 whitespace-nowrap">
+                                <span className="bg-[#FFDD33] px-6 py-1 rounded-xl shadow-md inline-block">MOST</span>
                                 <span>Q4 GOALS</span>
                                 <div className="shattered-wrap">
                                     <span className="shard shard-1">CRUSHED</span>
@@ -419,62 +349,68 @@
                         <div className="text-right pt-4 shrink-0 text-[#1C1C1E]">
                             <div className="flex items-center gap-2 justify-end mb-2">
                                 <Icon name="sparkles" size={28} className="text-[#FFDD33] animate-spin-slow" fill="#FFDD33" />
-                                <span className="text-2xl font-black uppercase italic tracking-tighter bg-[#FFDD33] text-[#1C1C1E] px-4 py-1.5 rounded-lg shadow-sm sharp-text">
+                                <span className="text-2xl font-black uppercase italic tracking-tighter bg-[#FFDD33] text-[#1C1C1E] px-4 py-1.5 rounded-lg shadow-md sharp-text">
                                     140% OF TARGET
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="relative z-20 px-12 grid grid-cols-12 gap-8 flex-1 min-h-0 mb-10 items-stretch overflow-visible">
-                        <div className="col-span-4 flex flex-col gap-8 h-full overflow-visible">
-                            <CashRainWrapper className="h-1/3 shrink-0">
-                                <div className="bg-[#FFDD33] text-[#1C1C1E] p-4 rounded-[2rem] h-full flex flex-col justify-center items-center shadow-2xl border-b-8 border-[#CFB326]">
+                    <div className="relative z-20 px-12 grid grid-cols-12 gap-8 flex-1 min-h-0 mb-10 items-stretch">
+                        {/* Col 1 */}
+                        <div className="col-span-4 flex flex-col gap-8 h-full">
+                            <CashRainWrapper>
+                                <div className="bg-[#FFDD33] text-[#1C1C1E] p-4 rounded-[2rem] h-[180px] flex flex-col justify-center items-center shadow-xl border-b-8 border-[#CFB326]">
                                     <div className="flex items-center gap-3 mb-1"> <Icon name="graph" size={28} className="text-[#1C1C1E]" /> <span className="font-black uppercase text-[16px] tracking-widest leading-none">Revenue Achieved</span> </div>
                                     <div className="text-7xl font-black leading-none mb-1 tracking-tighter sharp-text">$1.41M+</div>
-                                    <div className="text-lg font-bold opacity-100 italic uppercase">
+                                    <div className="text-lg font-bold italic uppercase">
                                        <span className="bg-[#1C1C1E] text-[#FFDD33] px-3 py-1 rounded shadow-lg sharp-text">Goal: $1M</span>
                                     </div>
                                 </div>
                             </CashRainWrapper>
-                            {/* FIXED: Removed container-wide transform hover to eliminate text blur */}
                             <div className="flex-1 relative">
-                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10 shadow-2xl transition-all duration-300 hover:border-white/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-                                    <div className="flex items-center gap-3 mb-2 text-[#FFFFFF] relative z-20 shrink-0"> 
-                                        <Icon name="speedometer" size={54} /> 
-                                        <span className="font-bold uppercase text-[16px] tracking-widest">Velocity</span> 
+                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white shadow-xl transition-all duration-300 hover:border-white/40">
+                                    <div className="flex items-center gap-3 mb-2 relative z-20 shrink-0"> 
+                                        {/* Animation isolated in contain-strict box to prevent card re-rasterization */}
+                                        <div className="w-[60px] h-[60px] overflow-hidden" style={{ contain: 'strict' }}>
+                                            <Icon name="speedometer" size={54} /> 
+                                        </div>
+                                        <span className="font-bold uppercase text-[16px] tracking-widest sharp-text">Velocity</span> 
                                     </div>
-                                    
                                     <div className="flex-grow flex items-center justify-center w-full relative z-20">
-                                        <div className="text-7xl font-black tracking-tighter relative sharp-text">
+                                        <div className="text-7xl font-black tracking-tighter sharp-text">
                                             <span className="relative z-10 text-white">23 Wins</span>
                                         </div>
                                     </div>
-                                    
-                                    <div className="text-2xl text-[#1C1C1E] font-black italic uppercase text-center relative z-20 shrink-0 bg-[#FFDD33] px-4 py-1 rounded-lg sharp-text">
+                                    <div className="text-2xl text-[#1C1C1E] font-black italic uppercase text-center relative z-20 shrink-0 bg-[#FFDD33] px-4 py-1 rounded-lg sharp-text shadow-md">
                                         35% OVER TARGET
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Col 2 */}
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-[#47D1C4] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl border-4 border-[#1C1C1E] relative text-[#1C1C1E] overflow-hidden">
+                            <div className="bg-[#47D1C4] p-6 rounded-[2rem] h-full flex flex-col shadow-xl border-4 border-[#1C1C1E] relative text-[#1C1C1E]">
                                 <h3 className="text-2xl font-black uppercase mb-2 flex items-center justify-center gap-3 italic tracking-tighter w-full text-center sharp-text"> <Icon name="globe" size={32} /> GLOBAL APPEAL </h3>
                                 <div className="flex-grow flex items-center justify-center relative min-h-0"> <SpinningGlobe /> </div>
-                                
                                 <SectorCarousel />
                             </div>
                         </div>
 
+                        {/* Col 3 */}
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-[#EAEAEA] text-[#1C1C1E] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl border-4 border-[#1C1C1E] relative group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
+                            <div className="bg-[#EAEAEA] text-[#1C1C1E] rounded-[2rem] p-6 h-full flex flex-col shadow-xl border-4 border-[#1C1C1E] relative group overflow-visible" onMouseEnter={triggerRocket}>
                                 <h3 className="text-2xl font-black uppercase mb-4 flex items-center justify-center gap-3 italic shrink-0 w-full text-center text-[#867AFF] sharp-text"> 
                                     <Icon name="trophy" size={32} fill="#FFDD33" className="text-[#1C1C1E]" />
                                     OUR FIRST WINS 
                                 </h3>
                                 <div className="grid grid-cols-3 gap-2 flex-grow content-start py-1 min-h-0 overflow-hidden">
-                                    {companies.map((co, i) => ( <CompanyLogo key={i} name={co.name} domain={co.domain} /> ))}
+                                    {companies.map((co, i) => (
+                                        <div key={i} className="bg-white rounded-lg p-1 h-10 w-full flex items-center justify-center shadow-sm border border-[#1C1C1E]/5 overflow-hidden shrink-0">
+                                            <img src={`https://logo.clearbit.com/${co.domain}?size=64`} alt={co.name} className="max-h-full max-w-full object-contain" />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
