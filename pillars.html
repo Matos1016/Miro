@@ -176,36 +176,24 @@
             </div>
         );
 
-        const CircuitBoardSystem = ({ active, icon }) => {
-            const paths = [
-                "M30,30 L150,30 L150,150 L250,150 L250,300 L350,300 L350,550",
-                "M370,50 L370,100 L200,100 L200,200 L100,200 L100,580",
-                "M10,400 L50,400 L50,500 L300,500 L300,590",
-                "M400,450 L320,450 L320,550 L50,550"
-            ];
-
-            return (
-                <div className="bg-effect-layer">
-                    {/* Fixed Icon Position - Always Visible */}
-                    <div className="absolute left-8 top-8 bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md z-10">
-                        <Icon name={icon} size={24} />
-                    </div>
-                    
-                    <svg className="w-full h-full opacity-20" viewBox="0 0 400 600" preserveAspectRatio="none">
-                        <g stroke="white" strokeWidth="4" fill="none" strokeLinecap="round">
-                            {paths.map((d, i) => (
-                                <path 
-                                    key={`draw-${i}`} 
-                                    d={d} 
-                                    className="draw-path" 
-                                    style={{ transitionDelay: `${i * 0.15}s` }}
-                                />
-                            ))}
-                        </g>
-                    </svg>
+        const CircuitBoardSystem = ({ active, icon }) => (
+            <div className="bg-effect-layer">
+                {/* ICON FIXED OUTSIDE SVG CONTEXT FOR RENDER STABILITY */}
+                <div className="absolute left-8 top-8 bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md z-10">
+                    <Icon name={icon} size={24} />
                 </div>
-            );
-        };
+                
+                <svg className="w-full h-full opacity-20" viewBox="0 0 400 600" preserveAspectRatio="none">
+                    <g stroke="white" strokeWidth="4" fill="none" strokeLinecap="round">
+                        {/* REFACTORED TO SINGLE PATH ARCHITECTURE - Exactly like Powering Growth */}
+                        <path 
+                            d="M30,30 L150,30 L150,150 L250,150 L250,300 L350,300 L350,550 M370,50 L370,100 L200,100 L200,200 L100,200 L100,580 M10,400 L50,400 L50,500 L300,500 L300,590 M400,450 L320,450 L320,550 L50,550" 
+                            className="draw-path"
+                        />
+                    </g>
+                </svg>
+            </div>
+        );
 
         const GrowthGraphSystem = ({ active, icon }) => (
             <div className="bg-effect-layer">
