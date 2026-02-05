@@ -49,10 +49,11 @@
 
         /* --- Pixel-Perfect Text Stabilization --- */
         .sharp-text {
-            /* Keep text off the GPU to prevent raster-stretching blur */
-            transform: none !important;
-            backface-visibility: hidden;
+            /* We strictly avoid 'transform' or 'transition' on this class to prevent Miro Blur */
             -webkit-font-smoothing: antialiased;
+            backface-visibility: hidden;
+            display: block;
+            transform: none !important;
         }
 
         .miro-highlight {
@@ -75,20 +76,20 @@
             font-size: 10px;
         }
 
-        /* CARD LIFT SIMULATION (Avoids all transforms) */
+        /* CARD STYLING (Avoids Layer Promotion) */
         .card-container {
             background-color: #FFFFFF;
             border: 4px solid #1C1C1E;
-            transition: border-bottom-width 0.1s ease, transform 0.1s ease;
             position: relative;
             z-index: 10;
+            /* Using padding/border instead of transforms to prevent scaling blur */
+            transition: border-bottom-width 0.1s steps(2);
         }
         .card-container:hover {
             border-bottom-width: 12px;
-            transform: translateY(-4px); /* Very minor lift, offset by border */
         }
 
-        /* Asset Decoupling */
+        /* Asset Decoupling - Absolute isolation from text flow */
         .asset-wrapper {
             position: absolute;
             top: 2rem;
@@ -99,7 +100,6 @@
             align-items: center;
             justify-content: center;
             z-index: 30;
-            image-rendering: -webkit-optimize-contrast;
         }
 
         @keyframes star-burst {
@@ -113,7 +113,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
 
         const useAutoScaler = () => {
             useEffect(() => {
@@ -133,8 +133,6 @@
         const AnimatedIcon = ({ name, active, size = 32 }) => {
             const [tick, setTick] = useState(0);
             
-            // We use JS intervals for rotation instead of CSS animations 
-            // to prevent the browser from flagging the layer as "active-motion"
             useEffect(() => {
                 if (!active) {
                     setTick(0);
@@ -166,7 +164,6 @@
                                 opacity: active && tick % 2 === 0 ? 0.5 : 1,
                                 transform: active && tick % 2 === 0 ? 'scaleY(0.1)' : 'scaleY(1)',
                                 transformOrigin: 'center 14px',
-                                transition: 'transform 0.1s steps(2)'
                             }} 
                         />
                     </g>
@@ -230,7 +227,7 @@
                     <div className="h-32 relative shrink-0">
                         <div className="asset-wrapper">
                             <div 
-                                className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] transition-all duration-300 relative" 
+                                className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] relative" 
                                 style={{ backgroundColor: isHovered ? '#1C1C1E' : color, color: isHovered ? color : '#1C1C1E' }}
                             >
                                 <AnimatedIcon name={icon} active={isHovered} />
@@ -254,7 +251,6 @@
                             ))}
                         </div>
                     </div>
-                    <div className={`absolute bottom-0 left-0 h-1 bg-[#1C1C1E] transition-all duration-500 ease-out ${isHovered ? 'w-full' : 'w-0'}`}></div>
                 </div>
             );
         };
