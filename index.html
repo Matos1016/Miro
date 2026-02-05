@@ -42,7 +42,7 @@
             font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column; 
-            border: 8px solid #1C1C1E;
+            border: 12px solid #1C1C1E;
             position: relative;
             overflow: hidden;
             contain: content;
@@ -82,11 +82,12 @@
             100% { transform: translate(var(--fx), var(--fy)) rotate(calc(var(--r) * 2)) scale(0.8); opacity: 0; }
         }
 
-        /* Speed Streak Logic: Horizontal movement for momentum without card-blur */
+        /* Adjusted Momentum Streak (Moving Right-to-Left) */
         @keyframes momentumStreak {
-            0% { transform: translate3d(-100px, 0, 0) scaleX(0); opacity: 0; }
-            20% { transform: translate3d(0, 0, 0) scaleX(1.5); opacity: 1; }
-            100% { transform: translate3d(400px, 0, 0) scaleX(0.5); opacity: 0; }
+            0% { transform: translate3d(600px, 0, 0) scaleX(2.5); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translate3d(-400px, 0, 0) scaleX(0.5); opacity: 0; }
         }
 
         .shattered-wrap { position: relative; display: inline-block; color: #FFDD33; -webkit-text-stroke: 1.5px #1C1C1E; }
@@ -105,6 +106,29 @@
             animation: scan 4s linear infinite;
         }
         @keyframes scan { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* DECOUPLED LAYER ARCHITECTURE FOR VELOCITY */
+        .velocity-icon-layer {
+            position: absolute;
+            top: 2rem;
+            left: 0;
+            right: 0;
+            height: 64px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .velocity-content-layer {
+            position: relative;
+            z-index: 50;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body>
@@ -201,12 +225,12 @@
                 const interval = setInterval(() => {
                     const newStreak = {
                         id: Math.random(),
-                        top: 20 + Math.random() * 60,
-                        width: 40 + Math.random() * 60,
-                        delay: Math.random() * 0.2
+                        top: 15 + Math.random() * 70, 
+                        width: 60 + Math.random() * 140, 
+                        delay: Math.random() * 0.1
                     };
-                    setStreaks(prev => [...prev, newStreak].slice(-15));
-                }, 100);
+                    setStreaks(prev => [...prev, newStreak].slice(-25)); 
+                }, 50); 
                 return () => clearInterval(interval);
             }, [isActive]);
 
@@ -215,13 +239,15 @@
                     {streaks.map(s => (
                         <div 
                             key={s.id} 
-                            className="absolute h-[2px] bg-white opacity-40 rounded-full"
+                            className="absolute h-[3px] bg-white/50 rounded-full"
                             style={{ 
                                 top: `${s.top}%`, 
                                 width: s.width,
-                                left: '-100px',
-                                animation: `momentumStreak 0.6s linear infinite`,
-                                animationDelay: `${s.delay}s`
+                                right: '-200px',
+                                /* Speed reduced to 0.8s (half speed from previous 0.4s) */
+                                animation: `momentumStreak 0.8s linear infinite`,
+                                animationDelay: `${s.delay}s`,
+                                filter: 'blur(1px)'
                             }}
                         />
                     ))}
@@ -243,7 +269,15 @@
 
             return (
                 <div className="absolute inset-0 z-[500] pointer-events-none">
-                    <div className="absolute w-20" style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards', willChange: 'transform' }}>
+                    <div 
+                        className="absolute w-20" 
+                        style={{ 
+                            animation: 'rocketFinalSequence 7.5s ease-in-out forwards',
+                            willChange: 'transform',
+                            backfaceVisibility: 'hidden',
+                            transformStyle: 'preserve-3d'
+                        }}
+                    >
                         <div className="relative flex flex-col items-center">
                             <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
                                 <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#FFFFFF" stroke="#1C1C1E" strokeWidth="2.5"/>
@@ -251,6 +285,7 @@
                                 <path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#EF4444" stroke="#1C1C1E" strokeWidth="1"/>
                                 <circle cx="30" cy="40" r="8" fill="#3B82F6" stroke="white" strokeWidth="2"/>
                             </svg>
+                            
                             <div className="absolute top-[85px] flex flex-col items-center">
                                 <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[2px] z-20" />
                                 <div className="absolute top-2 flex flex-col items-center">
@@ -404,10 +439,8 @@
                             </CashRainWrapper>
                             
                             <div className="flex-1 relative" onMouseEnter={() => setVelocityHovered(true)} onMouseLeave={() => setVelocityHovered(false)}>
-                                {/* ISOLATED VELOCITY CARD: Uses background streaks to avoid text-layer compositor blur */}
-                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative overflow-hidden text-white shadow-xl">
+                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative overflow-hidden text-white shadow-xl" style={{ contain: 'paint', isolation: 'isolate' }}>
                                     
-                                    {/* MOMENTUM STREAK LAYER - PHYSICALLY SEPARATE FROM TEXT */}
                                     <MomentumStreak isActive={velocityHovered} />
 
                                     <div className="relative z-20 w-full flex flex-col items-center">
@@ -427,7 +460,7 @@
                         </div>
 
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
-                            <div className="bg-[#47D1C4] p-6 rounded-[2rem] h-full flex flex-col shadow-xl border-4 border-[#1C1C1E] relative text-[#1C1C1E] overflow-hidden">
+                            <div className="bg-[#47D1C4] p-6 rounded-[2rem] h-full flex flex-col shadow-xl border-4 border-[#1C1C1E] relative text-[#1C1C1E] overflow-hidden" style={{ contain: 'paint', isolation: 'isolate' }}>
                                 <h3 className="text-2xl font-black uppercase mb-4 flex items-center justify-center gap-3 italic tracking-tighter w-full text-center sharp-text"> 
                                     <span className="bg-[#FFDD33] text-[#1C1C1E] px-6 py-2 rounded-xl flex items-center gap-3 border-2 border-[#1C1C1E] shadow-sm">
                                         <Icon name="globe" size={32} /> 
