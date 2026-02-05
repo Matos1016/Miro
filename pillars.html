@@ -57,12 +57,23 @@
             will-change: transform;
         }
 
-        /* --- Animations --- */
-        @keyframes arrow-flight {
+        /* --- Animations: 45 Degree Spread Trajectories --- */
+        @keyframes arrow-1 {
             0% { transform: translate(500px, 600px) rotate(-135deg); opacity: 0; }
             10% { opacity: 1; }
-            /* Exact Bullseye landing at 56, 56 */
             100% { transform: translate(-4px, 46px) rotate(-135deg); opacity: 1; }
+        }
+
+        @keyframes arrow-2 {
+            0% { transform: translate(700px, 46px) rotate(-180deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translate(-4px, 46px) rotate(-180deg); opacity: 1; }
+        }
+
+        @keyframes arrow-3 {
+            0% { transform: translate(-4px, 600px) rotate(-90deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translate(-4px, 46px) rotate(-90deg); opacity: 1; }
         }
 
         @keyframes target-jolt {
@@ -86,7 +97,6 @@
             box-shadow: 4px 4px 0px #1C1C1E;
         }
 
-        /* BACKGROUND EFFECT LAYER: This stays behind the text layer */
         .bg-effect-layer {
             position: absolute;
             inset: 0;
@@ -94,10 +104,9 @@
             z-index: 10;
             isolation: isolate; 
             overflow: hidden;
-            border-radius: 1.8rem; /* Match card radius */
+            border-radius: 1.8rem; 
         }
 
-        /* TEXT LAYER: Sits strictly on top of effects to prevent rasterization interference */
         .content-layer {
             position: relative;
             z-index: 50;
@@ -105,7 +114,7 @@
             padding: 2rem;
             display: flex;
             flex-direction: column;
-            pointer-events: none; /* Allow hover events to pass through to the card */
+            pointer-events: none;
         }
 
         .draw-path {
@@ -166,34 +175,47 @@
             );
         };
 
-        // NEW: Bullseye and Arrow are bundled into the isolated background layer
+        const SingleArrow = ({ animation, color, delay }) => (
+            <div 
+                className="absolute z-20"
+                style={{ 
+                    left: '0', top: '0',
+                    transformOrigin: '60px 10px',
+                    animation: `${animation} 0.35s cubic-bezier(0.15, 0.85, 0.3, 1) ${delay} forwards`,
+                    opacity: 0
+                }}
+            >
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none" style={{ overflow: 'visible' }}>
+                    {/* Outline Layer (White Halo) */}
+                    <path d="M0 10 L50 10" stroke="white" strokeWidth="7" strokeLinecap="round" />
+                    <path d="M0 5 L8 10 L0 15" fill="white" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
+                    <path d="M50 4 L60 10 L50 16" fill="white" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
+                    
+                    {/* Core Color Layer */}
+                    <path d="M0 10 L50 10" stroke={color} strokeWidth="4" strokeLinecap="round" />
+                    <path d="M0 5 L8 10 L0 15" fill={color} />
+                    <path d="M50 4 L60 10 L50 16" fill={color} />
+                </svg>
+            </div>
+        );
+
         const ArrowHitSystem = ({ active, icon }) => (
             <div className="bg-effect-layer">
-                {/* The Target Icon is now part of the background layer */}
                 <div 
                     className="absolute left-8 top-8 bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md z-10"
                     style={{ 
-                        animation: active ? 'target-jolt 0.2s 0.35s ease-out' : 'none'
+                        animation: active ? 'target-jolt 0.2s 0.45s ease-out' : 'none'
                     }}
                 >
                     <Icon name={icon} size={24} />
                 </div>
 
                 {active && (
-                    <div 
-                        className="absolute z-20"
-                        style={{ 
-                            left: '0', top: '0',
-                            transformOrigin: '60px 10px',
-                            animation: 'arrow-flight 0.35s cubic-bezier(0.15, 0.85, 0.3, 1) forwards'
-                        }}
-                    >
-                        <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
-                            <path d="M0 10 L50 10" stroke="#F24822" strokeWidth="4" strokeLinecap="round" />
-                            <path d="M0 5 L8 10 L0 15" fill="#F24822" />
-                            <path d="M50 4 L60 10 L50 16" fill="#F24822" />
-                        </svg>
-                    </div>
+                    <React.Fragment>
+                        <SingleArrow animation="arrow-1" color="#F24822" delay="0s" />
+                        <SingleArrow animation="arrow-2" color="#47D1C4" delay="0.1s" />
+                        <SingleArrow animation="arrow-3" color="#867AFF" delay="0.2s" />
+                    </React.Fragment>
                 )}
             </div>
         );
@@ -245,14 +267,11 @@
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
-                    {/* EFFECT WRAPPER: Completely separate from the text stack */}
                     {effectType === 'scale' && <GrowthGraphSystem active={isHovered} icon={icon} />}
                     {effectType === 'arrow' && <ArrowHitSystem active={isHovered} icon={icon} />}
                     {effectType === 'circuit' && <CircuitBoardSystem active={isHovered} icon={icon} />}
                     
-                    {/* CONTENT LAYER: Strict top layer for typography */}
                     <div className="content-layer">
-                        {/* Empty spacer to account for the icon in the background layer */}
                         <div className="w-12 h-12 mb-6 shrink-0 opacity-0 pointer-events-none" />
                         
                         <div className="flex-1 flex flex-col pointer-events-auto">
