@@ -191,32 +191,15 @@
                         <Icon name={icon} size={24} />
                     </div>
                     
-                    <svg className="w-full h-full" viewBox="0 0 400 600" preserveAspectRatio="none">
-                        {/* Static Traces - Low Opacity */}
-                        <g stroke="white" strokeWidth="2" fill="none" strokeOpacity="0.1">
+                    <svg className="w-full h-full opacity-20" viewBox="0 0 400 600" preserveAspectRatio="none">
+                        <g stroke="white" strokeWidth="4" fill="none" strokeLinecap="round">
                             {paths.map((d, i) => (
-                                <path key={`static-${i}`} d={d} />
-                            ))}
-                        </g>
-                        
-                        {/* Animated "Draw-In" Traces on Hover - Follows Powering Growth pattern */}
-                        <g stroke="white" strokeWidth="3" fill="none" strokeOpacity="0.4">
-                            {paths.map((d, i) => (
-                                <path key={`draw-${i}`} d={d} className="draw-path" />
-                            ))}
-                        </g>
-
-                        {/* Traveling signal dots - Only visible on hover context */}
-                        <g style={{ opacity: active ? 1 : 0, transition: 'opacity 0.3s' }}>
-                            {paths.map((d, i) => (
-                                <circle key={`signal-${i}`} r="3" fill="white">
-                                    <animateMotion
-                                        path={d}
-                                        dur={`${2 + i * 0.5}s`}
-                                        repeatCount="indefinite"
-                                        begin={`${i * 0.4}s`}
-                                    />
-                                </circle>
+                                <path 
+                                    key={`draw-${i}`} 
+                                    d={d} 
+                                    className="draw-path" 
+                                    style={{ transitionDelay: `${i * 0.15}s` }}
+                                />
                             ))}
                         </g>
                     </svg>
