@@ -50,18 +50,18 @@
 
         /* --- Sharp Text Strategy --- */
         .sharp-text {
-            /* Force GPU layer but keep it static */
             transform: translateZ(0);
             backface-visibility: hidden;
             -webkit-font-smoothing: antialiased;
             display: inline-block;
+            will-change: transform;
         }
 
         /* --- Animations --- */
         @keyframes arrow-flight {
             0% { transform: translate(500px, 600px) rotate(-135deg); opacity: 0; }
             10% { opacity: 1; }
-            /* Lands tip at center of bullseye */
+            /* Exact Bullseye landing */
             100% { transform: translate(-4px, 46px) rotate(-135deg); opacity: 1; }
         }
 
@@ -86,13 +86,13 @@
             box-shadow: 4px 4px 0px #1C1C1E;
         }
 
-        /* Isolated container for effects to prevent paint pollution */
+        /* Isolated container for effects */
         .effect-layer {
             position: absolute;
             inset: 0;
             pointer-events: none;
             z-index: 40;
-            isolation: isolate; /* Create a completely separate stacking context */
+            isolation: isolate; 
         }
 
         .draw-path {
@@ -110,6 +110,12 @@
             padding: 2px 0;
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
+        }
+
+        /* Prevent parent transforms from affecting child text rasterization */
+        .static-card {
+            contain: strict;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -206,7 +212,7 @@
 
             return (
                 <div 
-                    className="group relative h-full rounded-[2rem] border-[4px] border-[#1C1C1E] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_16px_0_0_#1C1C1E] overflow-visible"
+                    className="group relative h-full rounded-[2rem] border-[4px] border-[#1C1C1E] static-card transition-all duration-300 hover:shadow-[0_12px_0_0_#1C1C1E]"
                     style={{ backgroundColor: color }}
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
