@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY26 Year in Review - Miro PS</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #FFFFFF;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+            position: absolute;
+        }
+
+        .canvas-bg {
+            width: 1280px;
+            height: 720px;
+            background-color: #FFFFFF;
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column; 
+            border: 10px solid #1C1C1E;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- Weightless Paper Physics --- */
+        @keyframes flutter-paper {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateX(0px); filter: brightness(1); }
+            25% { transform: rotateX(180deg) rotateY(120deg) rotateZ(90deg) translateX(40px); filter: brightness(1.2); }
+            50% { transform: rotateX(360deg) rotateY(240deg) rotateZ(180deg) translateX(-40px); filter: brightness(0.8); }
+            75% { transform: rotateX(540deg) rotateY(360deg) rotateZ(270deg) translateX(30px); filter: brightness(1.1); }
+            100% { transform: rotateX(720deg) rotateY(480deg) rotateZ(360deg) translateX(0px); filter: brightness(1); }
+        }
+
+        @keyframes cinematic-drift {
+            0% { 
+                opacity: 0;
+                transform: translate(0, 0) scale(0);
+            }
+            /* Sharp initial burst that hits air resistance quickly */
+            2.5% {
+                opacity: 1;
+                transform: translate(calc(var(--tx-peak) * 0.45), calc(var(--ty-peak) * 0.45)) scale(1.6);
+            }
+            10% {
+                opacity: 1;
+                transform: translate(var(--tx-peak), var(--ty-peak)) scale(1);
+            }
+            /* Ultra slow descent from 10% to 100% */
+            90% { opacity: 1; }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx-end), 900px) scale(0.4);
+            }
+        }
+
+        .confetti-piece {
+            position: absolute;
+            bottom: -50px;
+            pointer-events: none;
+        }
+
+        .confetti-inner {
+            width: 100%;
+            height: 100%;
+            animation: flutter-paper var(--f-speed) infinite ease-in-out;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* --- Miro Style Branding --- */
+        .highlight-box {
+            background-color: #FFDD33;
+            padding: 2px 14px;
+            border-radius: 6px;
+            display: inline-block;
+            box-shadow: 4px 4px 0px #1C1C1E;
+        }
+
+        .tag-red {
+            background-color: #1C1C1E;
+            color: #F24822;
+            padding: 5px 14px;
+            border-radius: 4px;
+            font-weight: 900;
+            letter-spacing: 0.35em;
+            display: inline-block;
+        }
+
+        .card-shadow {
+            box-shadow: 8px 8px 0px #1C1C1E;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 10;
+        }
+        .card-shadow:hover {
+            box-shadow: 16px 16px 0px #1C1C1E;
+            transform: translate(-6px, -6px);
+            z-index: 50;
+        }
+
+        .sticky-note {
+            box-shadow: 4px 4px 0px rgba(28, 28, 30, 0.1);
+        }
+
+        .tight-text {
+            letter-spacing: -0.05em;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const useAutoScaler = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const root = document.getElementById('root');
+                    if (root) {
+                        const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+                        root.style.transform = `scale(${scale})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+        };
+
+        const Icon = ({ name, size = 28 }) => {
+            const icons = {
+                chart: <path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3" />,
+                blueprint: <path d="M3 3h18v18H3V3zM3 9h18M9 3v18" />,
+                bolt: <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />,
+                ai: <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            };
+            return (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {icons[name]}
+                </svg>
+            );
+        };
+
+        const ConfettiLayer = ({ isForeground, trigger }) => {
+            const [pieces, setPieces] = useState([]);
+            const pieceIdCounter = useRef(0);
+
+            useEffect(() => {
+                if (trigger === 0) return;
+
+                const colors = ['#FFDD33', '#47D1C4', '#867AFF', '#F24822', '#1C1C1E'];
+                const totalCount = isForeground ? 200 : 350; 
+                
+                const newBatch = Array.from({ length: totalCount }).map(() => {
+                    const id = pieceIdCounter.current++;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const side = Math.random() > 0.5 ? 'left' : 'right';
+                    
+                    // Angles: shoot high towards center
+                    const angleRange = side === 'left' ? [15, 80] : [100, 165];
+                    const angle = (Math.random() * (angleRange[1] - angleRange[0]) + angleRange[0]) * (Math.PI / 180);
+                    
+                    const velocity = (1400 + Math.random() * 1800) * (isForeground ? 1 : 0.85);
+                    const peakX = Math.cos(angle) * (velocity * 0.45);
+                    const peakY = -Math.sin(angle) * (velocity * 0.45);
+                    
+                    // Drift: paper drifts far horizontally
+                    const endX = peakX + (side === 'left' ? (Math.random() * 1500 - 300) : (Math.random() * -1500 + 300));
+                    
+                    const shape = Math.floor(Math.random() * 3); 
+                    const size = 10 + Math.random() * 12;
+
+                    return {
+                        id,
+                        color,
+                        shape,
+                        size,
+                        side,
+                        style: {
+                            width: `${size}px`,
+                            height: shape === 0 ? `${size * 0.65}px` : `${size}px`,
+                            left: side === 'left' ? '-40px' : 'auto',
+                            right: side === 'right' ? '-40px' : 'auto',
+                            '--tx-peak': `${peakX}px`,
+                            '--ty-peak': `${peakY}px`,
+                            '--tx-end': `${endX}px`,
+                            '--f-speed': `${3.5 + Math.random() * 6}s`, // Drastically slowed flutter
+                            animation: `cinematic-drift ${25 + Math.random() * 15}s cubic-bezier(0.15, 0.85, 0.35, 1) forwards`,
+                            zIndex: isForeground ? 100 : 5
+                        }
+                    };
+                });
+
+                setPieces(newBatch);
+                // Long cleanup to allow full 40s cycle
+                const timer = setTimeout(() => setPieces([]), 45000);
+                return () => clearTimeout(timer);
+            }, [isForeground, trigger]);
+
+            return (
+                <div className={`absolute inset-0 pointer-events-none overflow-hidden ${isForeground ? 'z-[100]' : 'z-[5]'}`}>
+                    {pieces.map(p => (
+                        <div key={`${trigger}-${p.id}`} className="confetti-piece" style={p.style}>
+                            <div className="confetti-inner" style={{ 
+                                backgroundColor: p.color,
+                                borderRadius: p.shape === 1 ? '50%' : p.shape === 2 ? '0%' : '1px',
+                                clipPath: p.shape === 2 ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none'
+                            }} />
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const PillarCard = ({ title, desc, matters, icon, color, onHoverTrigger }) => (
+            <div 
+                className="card-shadow flex flex-col h-full bg-white border-[4px] border-[#1C1C1E] rounded-[2rem] p-8 relative overflow-hidden group"
+                onMouseEnter={() => { if(onHoverTrigger) onHoverTrigger(); }}
+            >
+                <div 
+                    className="absolute -right-6 -top-6 w-24 h-24 opacity-10 rounded-full transition-transform duration-500 group-hover:scale-[6]"
+                    style={{ backgroundColor: color }}
+                />
+                
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 text-[#1C1C1E] shadow-sm relative z-10" style={{ backgroundColor: color }}>
+                    <Icon name={icon} />
+                </div>
+
+                <div className="relative z-10 flex-grow">
+                    <h2 className="text-[28px] font-black italic uppercase leading-none tracking-tighter text-[#1C1C1E] mb-4 tight-text">
+                        {title}
+                    </h2>
+                    <p className="text-[14px] font-bold text-[#1C1C1E]/70 leading-snug">
+                        {desc}
+                    </p>
+                </div>
+
+                <div className="mt-6 pt-6 border-t-2 border-[#1C1C1E]/5 relative z-10">
+                    <div className="sticky-note bg-[#1C1C1E] text-white p-4 rounded-xl">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[#FFDD33] block mb-1 text-center">Impact:</span>
+                        <p className="text-[13px] font-bold italic leading-tight text-center">
+                            {matters}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const App = () => {
+            useAutoScaler();
+            const [confettiTrigger, setConfettiTrigger] = useState(0);
+
+            const handleTrigger = () => {
+                setConfettiTrigger(prev => prev + 1);
+            };
+
+            const items = [
+                {
+                    title: "ARR Model Shift",
+                    desc: "Transitioned from one-time projects to recurring, subscription-based revenue via MOST (240-hr model) and TAM.",
+                    matters: "Predictable growth engine, not just a delivery function.",
+                    icon: "chart",
+                    color: "#47D1C4",
+                    isTrigger: true
+                },
+                {
+                    title: "Standardized Blueprints",
+                    desc: "Launched shared blueprints to unify engagement kickoff and delivery across all regions.",
+                    matters: "Consistent, high-quality experience regardless of region.",
+                    icon: "blueprint",
+                    color: "#FFDD33"
+                },
+                {
+                    title: "First PS Hackathon",
+                    desc: "A first-ever team-wide innovation event that shipped production tools for efficiency.",
+                    matters: "Unlocked bottom-up innovation and built a team of builders.",
+                    icon: "bolt",
+                    color: "#CE70FC"
+                },
+                {
+                    title: "AI-Powered Scale",
+                    desc: "Automating frameworks and artifacts using Sidekicks & NotebookLM to scale expertise.",
+                    matters: "Scales expertise and velocity without scaling manual effort.",
+                    icon: "ai",
+                    color: "#867AFF"
+                }
+            ];
+
+            return (
+                <div className="canvas-bg select-none">
+                    <ConfettiLayer isForeground={false} trigger={confettiTrigger} />
+
+                    <div className="h-[160px] px-12 pt-6 flex flex-col justify-start relative z-20">
+                        <div className="flex items-center gap-3 mb-4">
+                            <span className="tag-red text-[10px] font-black uppercase shrink-0">FY26 YEAR IN REVIEW</span>
+                            <div className="h-[1px] flex-1 bg-[#1C1C1E]/10"></div>
+                        </div>
+                        
+                        <div className="flex items-end gap-6 overflow-visible">
+                            <h1 className="text-[82px] font-black italic uppercase leading-[0.8] tracking-tighter text-[#1C1C1E] tight-text shrink-0">
+                                WHAT WE <span className="highlight-box">BUILT</span>
+                            </h1>
+                            <p className="mb-2 text-[22px] font-bold text-[#47D1C4] italic leading-tight max-w-xl">
+                                Building the foundations for recurring growth and automated excellence.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 px-12 pb-14 grid grid-cols-4 gap-8 relative z-20">
+                        {items.map((item, i) => (
+                            <PillarCard 
+                                key={i} 
+                                {...item} 
+                                onHoverTrigger={item.isTrigger ? handleTrigger : null} 
+                            />
+                        ))}
+                    </div>
+
+                    <ConfettiLayer isForeground={true} trigger={confettiTrigger} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
