@@ -46,6 +46,13 @@
             overflow: hidden;
         }
 
+        /* --- Text Stabilization --- */
+        .sharp-text {
+            transform: translateZ(0); /* Force GPU layer for text stability */
+            backface-visibility: hidden;
+            perspective: 1000;
+        }
+
         .miro-highlight {
             background-color: #FFDD33;
             padding: 0 12px;
@@ -66,7 +73,7 @@
             font-size: 10px;
         }
 
-        /* --- Snap-to-Grid Animations (Zero Blur) --- */
+        /* --- Snap-to-Grid Animations (Discrete Motion) --- */
         @keyframes snap-spin {
             0% { transform: rotate(0deg); }
             25% { transform: rotate(90deg); }
@@ -104,11 +111,18 @@
         }
 
         .hover-lift {
-            transition: all 0.25s cubic-bezier(0.2, 1, 0.3, 1);
+            transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.2, 1, 0.3, 1);
+            will-change: transform;
         }
         .hover-lift:hover {
             transform: translateY(-8px);
             box-shadow: 0 16px 0px 0px #1C1C1E;
+        }
+
+        /* Isolated container for motion assets */
+        .asset-isolation {
+            isolation: isolate;
+            transform: translateZ(0);
         }
     </style>
 </head>
@@ -136,7 +150,7 @@
         const AnimatedIcon = ({ name, active, size = 32 }) => {
             const icons = {
                 refresh: (
-                    <g style={{ transformOrigin: 'center', animation: active ? 'snap-spin 2s steps(4) infinite' : 'none' }}>
+                    <g style={{ transformOrigin: 'center', animation: active ? 'snap-spin 1.5s steps(4) infinite' : 'none' }}>
                         <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                     </g>
                 ),
@@ -163,7 +177,7 @@
             };
 
             return (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="asset-isolation">
                     {icons[name]}
                 </svg>
             );
@@ -179,7 +193,7 @@
                 { id: 5, tx: '0px', ty: '-40px', fx: '0px', fy: '-70px', delay: '0.4s' }
             ];
             return (
-                <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 pointer-events-none asset-isolation">
                     {stars.map(s => (
                         <div key={s.id} className="absolute top-1/2 left-1/2 w-4 h-4" style={{ color: starColor, '--tx': s.tx, '--ty': s.ty, '--fx': s.fx, '--fy': s.fy, animation: `star-burst 0.8s infinite`, animationDelay: s.delay }}>
                             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -194,17 +208,24 @@
         const Card = ({ title, goal, features, icon, color, effectType }) => {
             const [isHovered, setIsHovered] = useState(false);
             return (
-                <div className="hover-lift relative h-full bg-white border-4 border-[#1C1C1E] rounded-[2.5rem] p-8 flex flex-col overflow-hidden" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-                    <div className="relative mb-6 z-20">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] transition-all duration-300 relative" style={{ backgroundColor: isHovered ? '#1C1C1E' : color, color: isHovered ? color : '#1C1C1E' }}>
+                <div 
+                    className="hover-lift relative h-full bg-white border-4 border-[#1C1C1E] rounded-[2.5rem] p-8 flex flex-col overflow-hidden" 
+                    onMouseEnter={() => setIsHovered(true)} 
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    <div className="relative mb-6 z-20 asset-isolation">
+                        <div 
+                            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] transition-all duration-300 relative" 
+                            style={{ backgroundColor: isHovered ? '#1C1C1E' : color, color: isHovered ? color : '#1C1C1E' }}
+                        >
                             <AnimatedIcon name={icon} active={isHovered} />
                             {effectType === 'stars' && <CelebrationStars active={isHovered} starColor={color} />}
                         </div>
                     </div>
-                    <div className="relative z-20 flex-1 flex flex-col">
+                    <div className="relative z-20 flex-1 flex flex-col sharp-text">
                         <h2 className="text-3xl font-[900] italic uppercase tracking-tighter leading-none mb-2 text-[#1C1C1E]">{title}</h2>
                         <div className="mb-4">
-                            <span className="cool-highlight mb-1.5 block w-fit">Why it's cool</span>
+                            <span className="cool-highlight mb-1.5 block w-fit">Impact Goal</span>
                             <p className="text-[15px] font-bold leading-tight text-[#1C1C1E] opacity-90">{goal}</p>
                         </div>
                         <div className="space-y-2.5 mt-auto">
@@ -226,61 +247,68 @@
             const projects = [
                 {
                     title: "Project Tracker 2.0",
-                    goal: "Eliminate manual project tracking by automatically syncing Salesforce assignments into Google Sheets.",
-                    features: ["Real-time case syncing", "Status auto-flow", "Direct Salesforce hyperlinks", "Personalized UserID views"],
+                    goal: "Eliminate manual overhead by syncing Salesforce assignments directly into Google Sheets workflow.",
+                    features: ["Real-time case syncing", "Status auto-flow", "Salesforce deep-linking", "Custom resource views"],
                     icon: "refresh",
                     color: "#47D1C4", 
                     effectType: "spin"
                 },
                 {
                     title: "MOST Engagement Planner",
-                    goal: "Help AEs and CSMs quickly articulate value, scope, and effort for MOST engagements.",
-                    features: ["Outcome-driven design", "Instant deck generation", "240-hour auto-breakdown", "Pre-sale continuity"],
+                    goal: "Instant value-based scoping for MOST engagements to drive pre-sale velocity.",
+                    features: ["Outcome-driven architecture", "One-click deck generation", "Auto-hour breakdown", "Stakeholder continuity"],
                     icon: "calendar",
                     color: "#867AFF", 
                     effectType: "flip"
                 },
                 {
                     title: "Success Story Builder",
-                    goal: "Empowers the team to instantly transform raw customer wins into a scalable library of high-impact proof points for the entire sales cycle.",
-                    features: ["Structured capture guide", "Polished reusable assets", "Pre-sales discovery ready", "Scalable impact library"],
+                    goal: "Transform raw customer wins into high-impact sales assets in minutes.",
+                    features: ["Structured capture guides", "Polished asset output", "Searchable victory library", "Proof-point discovery"],
                     icon: "award",
                     color: "#FFDD33", 
                     effectType: "stars"
                 },
                 {
                     title: "TimeCop Automation",
-                    goal: "Eliminate friction and missed entries in billable time tracking with zero effort.",
-                    features: ["Fast, low-effort logging", "High compliance/No manual recall", "Hackathon winning build", "Clean utilization data"],
+                    goal: "Reduce billable leakage with zero-friction compliance tracking.",
+                    features: ["Zero-effort logging", "Compliance auto-checks", "Hackathon-winning engine", "Clean utilization data"],
                     icon: "clock",
                     color: "#CE70FC", 
                     effectType: "clock-spin"
                 }
             ];
+
             return (
                 <div className="canvas-bg select-none">
-                    <div className="h-[160px] px-12 flex flex-col justify-center relative z-10">
+                    <div className="h-[160px] px-12 flex flex-col justify-center relative z-10 sharp-text">
                         <div className="flex items-center gap-4 mb-2">
-                            <span className="bg-[#1C1C1E] text-[#FF6683] px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] rounded-md">HOT OFF THE PRESSES</span>
+                            <span className="bg-[#1C1C1E] text-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] rounded-md">PS INNOVATION HUB</span>
                             <div className="h-[2px] flex-1 bg-[#1C1C1E]/10"></div>
                         </div>
                         <h1 className="text-[64px] font-[900] italic uppercase leading-none text-[#1C1C1E] tracking-tighter">
                             AUTOMATION <span className="miro-highlight">& EFFICIENCY</span> TOOLS
                         </h1>
                     </div>
+
                     <div className="flex-1 px-12 pb-16 grid grid-cols-4 gap-6">
                         {projects.map((p, idx) => (
                             <Card key={idx} {...p} />
                         ))}
                     </div>
-                    <div className="absolute bottom-6 left-12 right-12 flex justify-between items-center opacity-30 pointer-events-none">
+
+                    <div className="absolute bottom-6 left-12 right-12 flex justify-between items-center opacity-30 pointer-events-none sharp-text">
                         <div className="text-[#1C1C1E] font-black italic uppercase text-[12px] tracking-[0.2em]">Growth - Excellence - Efficiency</div>
-                        <div className="text-[#1C1C1E] font-black italic uppercase text-[12px] tracking-[0.2em]">© FY26 Miro PS Innovations</div>
+                        <div className="text-[#1C1C1E] font-black italic uppercase text-[12px] tracking-[0.2em]">© FY26 Miro ProServ</div>
                     </div>
-                    <div className="absolute -bottom-10 -right-10 text-[200px] font-[900] italic uppercase text-[#1C1C1E]/[0.02] tracking-tighter pointer-events-none">PS</div>
+                    
+                    <div className="absolute -bottom-10 -right-10 text-[220px] font-[900] italic uppercase text-[#1C1C1E]/[0.03] tracking-tighter pointer-events-none">
+                        MIRO
+                    </div>
                 </div>
             );
         };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
