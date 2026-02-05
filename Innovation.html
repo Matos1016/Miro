@@ -49,11 +49,14 @@
 
         /* --- Pixel-Perfect Text Stabilization --- */
         .sharp-text {
-            /* We strictly avoid 'transform' or 'transition' on this class to prevent Miro Blur */
+            /* Forced high-fidelity rendering */
             -webkit-font-smoothing: antialiased;
             backface-visibility: hidden;
             display: block;
+            /* Explicitly avoiding any transform property to prevent Miro Blur */
             transform: none !important;
+            position: relative;
+            z-index: 50; /* Above all background layers */
         }
 
         .miro-highlight {
@@ -76,30 +79,41 @@
             font-size: 10px;
         }
 
-        /* CARD STYLING (Avoids Layer Promotion) */
+        /* DECOUPLED LAYER ARCHITECTURE */
         .card-container {
             background-color: #FFFFFF;
             border: 4px solid #1C1C1E;
             position: relative;
-            z-index: 10;
-            /* Using padding/border instead of transforms to prevent scaling blur */
-            transition: border-bottom-width 0.1s steps(2);
+            /* We use shadow expansion for "lift" instead of movement */
+            transition: box-shadow 0.1s steps(2);
         }
         .card-container:hover {
-            border-bottom-width: 12px;
+            box-shadow: 0 12px 0px 0px #1C1C1E;
         }
 
-        /* Asset Decoupling - Absolute isolation from text flow */
-        .asset-wrapper {
+        /* Background Layer for Icons (The "Animation Box") */
+        .icon-layer {
             position: absolute;
             top: 2rem;
             left: 2rem;
             width: 64px;
             height: 64px;
+            z-index: 10;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 30;
+            pointer-events: none; /* Never intercepts clicks */
+        }
+
+        /* Foreground Layer for Content (The "Text Box") */
+        .content-layer {
+            position: relative;
+            z-index: 50;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            pointer-events: auto;
         }
 
         @keyframes star-burst {
@@ -224,33 +238,39 @@
                     onMouseEnter={() => setIsHovered(true)} 
                     onMouseLeave={() => setIsHovered(false)}
                 >
-                    <div className="h-32 relative shrink-0">
-                        <div className="asset-wrapper">
-                            <div 
-                                className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] relative" 
-                                style={{ backgroundColor: isHovered ? '#1C1C1E' : color, color: isHovered ? color : '#1C1C1E' }}
-                            >
-                                <AnimatedIcon name={icon} active={isHovered} />
-                                {effectType === 'stars' && <CelebrationStars active={isHovered} starColor={color} />}
-                            </div>
+                    {/* SEPARATE BACKGROUND LAYER: ICON MOTION */}
+                    <div className="icon-layer">
+                        <div 
+                            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] relative" 
+                            style={{ backgroundColor: isHovered ? '#1C1C1E' : color, color: isHovered ? color : '#1C1C1E' }}
+                        >
+                            <AnimatedIcon name={icon} active={isHovered} />
+                            {effectType === 'stars' && <CelebrationStars active={isHovered} starColor={color} />}
                         </div>
                     </div>
 
-                    <div className="px-8 pb-8 flex-1 flex flex-col sharp-text">
-                        <h2 className="text-3xl font-[900] italic uppercase tracking-tighter leading-none mb-2 text-[#1C1C1E]">{title}</h2>
-                        <div className="mb-4">
-                            <span className="cool-highlight mb-1.5 block w-fit">Impact Goal</span>
-                            <p className="text-[15px] font-bold leading-tight text-[#1C1C1E] opacity-90">{goal}</p>
-                        </div>
-                        <div className="space-y-2.5 mt-auto">
-                            {features.map((f, i) => (
-                                <div key={i} className="flex items-start gap-2.5 group">
-                                    <div className="w-2 h-2 rounded-sm bg-[#1C1C1E] mt-1 shrink-0"></div>
-                                    <span className="text-[13px] font-bold text-[#1C1C1E]/70 leading-tight">{f}</span>
-                                </div>
-                            ))}
+                    {/* SEPARATE FOREGROUND LAYER: SHARP CONTENT */}
+                    <div className="content-layer px-8 pb-8">
+                        <div className="h-32 shrink-0"></div> {/* Spacer for background icon box */}
+                        <div className="sharp-text flex-1 flex flex-col">
+                            <h2 className="text-3xl font-[900] italic uppercase tracking-tighter leading-none mb-2 text-[#1C1C1E]">{title}</h2>
+                            <div className="mb-4">
+                                <span className="cool-highlight mb-1.5 block w-fit">Impact Goal</span>
+                                <p className="text-[15px] font-bold leading-tight text-[#1C1C1E] opacity-90">{goal}</p>
+                            </div>
+                            <div className="space-y-2.5 mt-auto">
+                                {features.map((f, i) => (
+                                    <div key={i} className="flex items-start gap-2.5 group">
+                                        <div className="w-2 h-2 rounded-sm bg-[#1C1C1E] mt-1 shrink-0"></div>
+                                        <span className="text-[13px] font-bold text-[#1C1C1E]/70 leading-tight">{f}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
+                    
+                    {/* Hover Visual Anchor (No transform) */}
+                    <div className={`absolute bottom-0 left-0 h-1 bg-[#1C1C1E] transition-all duration-500 ease-out ${isHovered ? 'w-full' : 'w-0'}`}></div>
                 </div>
             );
         };
