@@ -61,7 +61,7 @@
         @keyframes arrow-flight {
             0% { transform: translate(500px, 600px) rotate(-135deg); opacity: 0; }
             10% { opacity: 1; }
-            /* Exact Bullseye landing */
+            /* Exact Bullseye landing at 56, 56 */
             100% { transform: translate(-4px, 46px) rotate(-135deg); opacity: 1; }
         }
 
@@ -86,13 +86,26 @@
             box-shadow: 4px 4px 0px #1C1C1E;
         }
 
-        /* Isolated container for effects */
-        .effect-layer {
+        /* BACKGROUND EFFECT LAYER: This stays behind the text layer */
+        .bg-effect-layer {
             position: absolute;
             inset: 0;
             pointer-events: none;
-            z-index: 40;
+            z-index: 10;
             isolation: isolate; 
+            overflow: hidden;
+            border-radius: 1.8rem; /* Match card radius */
+        }
+
+        /* TEXT LAYER: Sits strictly on top of effects to prevent rasterization interference */
+        .content-layer {
+            position: relative;
+            z-index: 50;
+            height: 100%;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none; /* Allow hover events to pass through to the card */
         }
 
         .draw-path {
@@ -112,7 +125,6 @@
             -webkit-box-decoration-break: clone;
         }
 
-        /* Prevent parent transforms from affecting child text rasterization */
         .static-card {
             contain: strict;
             overflow: hidden;
@@ -154,11 +166,22 @@
             );
         };
 
-        const ArrowHitSystem = ({ active }) => (
-            <div className="effect-layer overflow-hidden rounded-[2rem]">
+        // NEW: Bullseye and Arrow are bundled into the isolated background layer
+        const ArrowHitSystem = ({ active, icon }) => (
+            <div className="bg-effect-layer">
+                {/* The Target Icon is now part of the background layer */}
+                <div 
+                    className="absolute left-8 top-8 bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md z-10"
+                    style={{ 
+                        animation: active ? 'target-jolt 0.2s 0.35s ease-out' : 'none'
+                    }}
+                >
+                    <Icon name={icon} size={24} />
+                </div>
+
                 {active && (
                     <div 
-                        className="absolute"
+                        className="absolute z-20"
                         style={{ 
                             left: '0', top: '0',
                             transformOrigin: '60px 10px',
@@ -175,8 +198,11 @@
             </div>
         );
 
-        const CircuitBoardSystem = ({ active }) => (
-            <div className={`effect-layer overflow-hidden rounded-[2rem] transition-colors duration-500 ${active ? 'bg-white/10' : 'bg-transparent'}`}>
+        const CircuitBoardSystem = ({ active, icon }) => (
+            <div className={`bg-effect-layer transition-colors duration-500 ${active ? 'bg-white/10' : 'bg-transparent'}`}>
+                <div className="absolute left-8 top-8 bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md">
+                    <Icon name={icon} size={24} />
+                </div>
                 <svg className="w-full h-full opacity-60" viewBox="0 0 400 600" preserveAspectRatio="none">
                     <g stroke="#1C1C1E" strokeWidth="2" fill="none" strokeOpacity="0.2">
                         <path d="M60,60 L60,150 L300,150 L300,400 L50,400 L50,550" />
@@ -194,8 +220,11 @@
             </div>
         );
 
-        const GrowthGraph = ({ active }) => (
-            <div className="effect-layer overflow-hidden rounded-[2rem]">
+        const GrowthGraphSystem = ({ active, icon }) => (
+            <div className="bg-effect-layer">
+                <div className="absolute left-8 top-8 bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md">
+                    <Icon name={icon} size={24} />
+                </div>
                 <svg viewBox="0 0 400 600" className="w-full h-full opacity-20" preserveAspectRatio="none">
                     <path 
                         d="M0,580 C50,550 100,560 150,480 C200,400 250,420 300,300 C350,180 380,100 400,20" 
@@ -208,30 +237,25 @@
         const PillarCard = ({ title, body, icon, color, effectType }) => {
             const [isHovered, setIsHovered] = useState(false);
             const isExcellence = title === "Delivering Excellence";
-            const isEfficiency = title === "Driving Efficiency";
 
             return (
                 <div 
-                    className="group relative h-full rounded-[2rem] border-[4px] border-[#1C1C1E] static-card transition-all duration-300 hover:shadow-[0_12px_0_0_#1C1C1E]"
+                    className="group relative h-full rounded-[2rem] border-[4px] border-[#1C1C1E] static-card transition-all duration-300 hover:shadow-[0_12px_0_0_#1C1C1E] cursor-default"
                     style={{ backgroundColor: color }}
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
-                    {effectType === 'scale' && <GrowthGraph active={isHovered} />}
-                    {effectType === 'arrow' && <ArrowHitSystem active={isHovered} />}
-                    {effectType === 'circuit' && <CircuitBoardSystem active={isHovered} />}
+                    {/* EFFECT WRAPPER: Completely separate from the text stack */}
+                    {effectType === 'scale' && <GrowthGraphSystem active={isHovered} icon={icon} />}
+                    {effectType === 'arrow' && <ArrowHitSystem active={isHovered} icon={icon} />}
+                    {effectType === 'circuit' && <CircuitBoardSystem active={isHovered} icon={icon} />}
                     
-                    <div className="relative z-30 h-full p-8 flex flex-col">
-                        <div 
-                            className={`bg-[#1C1C1E] w-12 h-12 rounded-xl flex items-center justify-center text-white mb-6 shadow-md relative ${isEfficiency ? 'z-50' : 'z-30'}`}
-                            style={{ 
-                                animation: (isHovered && effectType === 'arrow') ? 'target-jolt 0.2s 0.35s ease-out' : 'none'
-                            }}
-                        >
-                            <Icon name={icon} size={24} />
-                        </div>
+                    {/* CONTENT LAYER: Strict top layer for typography */}
+                    <div className="content-layer">
+                        {/* Empty spacer to account for the icon in the background layer */}
+                        <div className="w-12 h-12 mb-6 shrink-0 opacity-0 pointer-events-none" />
                         
-                        <div className="flex-1 flex flex-col relative z-30">
+                        <div className="flex-1 flex flex-col pointer-events-auto">
                             <h2 className="text-[30px] font-black italic uppercase leading-tight mb-4 transition-all duration-300">
                                 <span className={`sharp-text ${(isHovered && isExcellence) ? 'text-[#FFDD33] bg-[#1C1C1E] px-2 rounded-lg' : isHovered ? 'text-white' : 'text-[#1C1C1E]'}`}>
                                     {title}
@@ -244,7 +268,7 @@
                             </p>
                         </div>
                         
-                        <div className="mt-6 pt-4 relative z-30">
+                        <div className="mt-6 pt-4 shrink-0">
                             <div className={`h-1.5 rounded-full transition-all duration-500 ${isHovered ? 'w-full bg-[#1C1C1E]' : 'w-16 bg-[#1C1C1E]/20'}`}></div>
                         </div>
                     </div>
