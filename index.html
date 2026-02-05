@@ -48,7 +48,7 @@
             overflow: hidden;
         }
 
-        /* Snapshot Principle: Locks glyphs to pixel grid between motions */
+        /* Snapshot Principle: Locks glyphs to pixel grid by clearing transforms when static */
         .sharp-text {
             transform: translateZ(0);
             backface-visibility: hidden;
@@ -124,11 +124,11 @@
             pointer-events: none;
         }
         
-        /* Scanning Glow Effect for Carousel */
+        /* Subtle non-transform animation for global appeal box */
         .scanning-glow {
-            background: linear-gradient(90deg, transparent, rgba(255,221,51,0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             background-size: 200% 100%;
-            animation: scan 4s linear infinite;
+            animation: scan 6s linear infinite;
         }
         @keyframes scan {
             0% { background-position: 200% 0; }
@@ -323,15 +323,19 @@
             );
         };
 
-        // Snappy Step-Marquee Carousel with "Manufacturing" update
+        // FIXED: Sector Carousel with 'Snap-to-Grid' logic to eliminate blur
         const SectorCarousel = () => {
             const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Manufacturing", "Telecom", "Pharma"];
             const colors = ["#FF9C57", "#CE70FC", "#6EDB8C", "#47D1C4"];
             const [index, setIndex] = useState(0);
+            const [isMoving, setIsMoving] = useState(false);
 
             useEffect(() => {
                 const interval = setInterval(() => {
+                    setIsMoving(true);
                     setIndex(prev => (prev + 1) % sectors.length);
+                    // Clear the moving state after transition to allow pixel grid locking
+                    setTimeout(() => setIsMoving(false), 800);
                 }, 4000); 
                 return () => clearInterval(interval);
             }, []);
@@ -353,11 +357,12 @@
                             return (
                                 <div 
                                     key={s}
-                                    className="absolute inset-0 flex items-center justify-center transition-all duration-700 cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                                    className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ${isMoving ? '' : 'transform-none'}`}
                                     style={{ 
-                                        transform: `translateX(${xPos})`, 
+                                        // We only apply transform during the motion window
+                                        transform: isMoving ? `translateX(${xPos})` : (isActive ? 'none' : `translateX(${xPos})`), 
                                         opacity: isActive ? 1 : 0,
-                                        filter: isActive ? 'none' : 'blur(4px)'
+                                        transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                                     }}
                                 >
                                     <span 
@@ -432,8 +437,9 @@
                                     </div>
                                 </div>
                             </CashRainWrapper>
+                            {/* FIXED: Removed container-wide transform hover to eliminate text blur */}
                             <div className="flex-1 relative">
-                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10 shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10 shadow-2xl transition-all duration-300 hover:border-white/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
                                     <div className="flex items-center gap-3 mb-2 text-[#FFFFFF] relative z-20 shrink-0"> 
                                         <Icon name="speedometer" size={54} /> 
                                         <span className="font-bold uppercase text-[16px] tracking-widest">Velocity</span> 
