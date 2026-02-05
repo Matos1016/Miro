@@ -24,6 +24,7 @@
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         #root {
@@ -48,16 +49,18 @@
             overflow: hidden;
         }
 
-        /* --- Sharp Text Strategy --- */
+        /* --- Pixel-Perfect Text Stabilization --- */
         .sharp-text {
-            transform: translateZ(0);
+            /* Forced high-fidelity rendering */
+            transform: translateZ(0); 
             backface-visibility: hidden;
             -webkit-font-smoothing: antialiased;
             display: inline-block;
-            will-change: transform;
+            position: relative;
+            z-index: 60; /* Above all effect layers */
         }
 
-        /* --- Animations: 45 Degree Spread Trajectories --- */
+        /* --- Animations --- */
         @keyframes arrow-1 {
             0% { transform: translate(500px, 600px) rotate(-135deg); opacity: 0; }
             10% { opacity: 1; }
@@ -97,16 +100,18 @@
             box-shadow: 4px 4px 0px #1C1C1E;
         }
 
+        /* EFFECT WRAPPER: Isolated Stacking Context */
         .bg-effect-layer {
             position: absolute;
             inset: 0;
             pointer-events: none;
             z-index: 10;
-            isolation: isolate; 
+            isolation: isolate; /* Crucial for preventing paint pollution */
             overflow: hidden;
             border-radius: 1.8rem; 
         }
 
+        /* CONTENT LAYER: Foreground content stack */
         .content-layer {
             position: relative;
             z-index: 50;
@@ -121,6 +126,7 @@
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
             transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: stroke-dashoffset; /* Optimize path animation */
         }
         .group:hover .draw-path {
             stroke-dashoffset: 0;
@@ -135,7 +141,7 @@
         }
 
         .static-card {
-            contain: strict;
+            contain: content; /* Helps isolate layout/paint cycles */
             overflow: hidden;
         }
     </style>
@@ -182,16 +188,15 @@
                     left: '0', top: '0',
                     transformOrigin: '60px 10px',
                     animation: `${animation} 0.35s cubic-bezier(0.15, 0.85, 0.3, 1) ${delay} forwards`,
-                    opacity: 0
+                    opacity: 0,
+                    willChange: 'transform, opacity'
                 }}
             >
                 <svg width="60" height="20" viewBox="0 0 60 20" fill="none" style={{ overflow: 'visible' }}>
-                    {/* Outline Layer (White Halo) */}
                     <path d="M0 10 L50 10" stroke="white" strokeWidth="7" strokeLinecap="round" />
                     <path d="M0 5 L8 10 L0 15" fill="white" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
                     <path d="M50 4 L60 10 L50 16" fill="white" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
                     
-                    {/* Core Color Layer */}
                     <path d="M0 10 L50 10" stroke={color} strokeWidth="4" strokeLinecap="round" />
                     <path d="M0 5 L8 10 L0 15" fill={color} />
                     <path d="M50 4 L60 10 L50 16" fill={color} />
@@ -231,10 +236,10 @@
                         <path d="M60,60 L250,60 L250,250 L350,250 L350,580" />
                     </g>
                     <g stroke="#FFDD33" strokeWidth="4" fill="none" strokeLinecap="round">
-                        <path d="M60,60 L60,150 L300,150 L300,400 L50,400 L50,550" 
+                        <path className="draw-path" d="M60,60 L60,150 L300,150 L300,400 L50,400 L50,550" 
                             style={{ strokeDasharray: '40, 1000', animation: active ? 'circuit-flow 2.5s linear infinite' : 'none' }} 
                         />
-                        <path d="M60,60 L250,60 L250,250 L350,250 L350,580" 
+                        <path className="draw-path" d="M60,60 L250,60 L250,250 L350,250 L350,580" 
                             style={{ strokeDasharray: '50, 1000', animation: active ? 'circuit-flow 3s linear infinite' : 'none', animationDelay: '0.5s' }} 
                         />
                     </g>
@@ -267,10 +272,12 @@
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
+                    {/* BACKGROUND LAYER: Isolated background animations */}
                     {effectType === 'scale' && <GrowthGraphSystem active={isHovered} icon={icon} />}
                     {effectType === 'arrow' && <ArrowHitSystem active={isHovered} icon={icon} />}
                     {effectType === 'circuit' && <CircuitBoardSystem active={isHovered} icon={icon} />}
                     
+                    {/* FOREGROUND LAYER: Text strictly separated from animated sibling context */}
                     <div className="content-layer">
                         <div className="w-12 h-12 mb-6 shrink-0 opacity-0 pointer-events-none" />
                         
