@@ -48,9 +48,11 @@
             overflow: hidden;
         }
 
+        /* Snapshot Principle: Locks glyphs to pixel grid between motions */
         .sharp-text {
             transform: translateZ(0);
             backface-visibility: hidden;
+            perspective: 1000;
         }
 
         /* Shattered Effect for "CRUSHED" */
@@ -71,10 +73,10 @@
         .shard-3 { clip-path: polygon(0 48%, 48% 52%, 52% 100%, 0 100%); transform: translate(-3px, 3px) rotate(-0.5deg); filter: brightness(0.95); }
         .shard-4 { clip-path: polygon(48% 52%, 100% 52%, 100% 100%, 52% 100%); transform: translate(3px, 3px) rotate(0.5deg); filter: brightness(0.9); }
 
-        /* --- ROCKET LOGIC: BOTTOM ENTRY --- */
+        /* --- Animations --- */
         @keyframes rocketFinalSequence {
-            0% { transform: translate(1050px, 850px) scale(0); opacity: 1; } /* Starts BELOW the screen */
-            15% { transform: translate(1050px, 550px) scale(1); opacity: 1; } /* Enters in front of Col 3 */
+            0% { transform: translate(1050px, 850px) scale(0); opacity: 1; } 
+            15% { transform: translate(1050px, 550px) scale(1); opacity: 1; } 
             25% { transform: translate(1050px, 550px) rotate(1.5deg); }
             35% { transform: translate(1050px, 550px) rotate(-1.5deg); }
             45% { transform: translate(1050px, 550px) rotate(0deg); }
@@ -88,18 +90,6 @@
             100% { transform: scale(5) translateY(100px); opacity: 0; } 
         }
 
-        /* 23 Wins Fire Highlight Logic */
-        @keyframes spark-rise {
-            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translateY(-80px) scale(0) rotate(90deg); opacity: 0; }
-        }
-        @keyframes text-flicker {
-            0%, 100% { text-shadow: 0 0 15px #FFDD33, 0 0 30px #FF9C57, 0 0 45px #FF6683; }
-            50% { text-shadow: 0 0 25px #FFDD33, 0 0 50px #FF9C57, 0 0 75px #FF6683; }
-        }
-
-        /* Confetti / Cash physics */
         @keyframes cashRain {
             0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
             0.05% { opacity: 1; transform: translate(0, -20px) scale(1.1) rotate(0deg); }
@@ -110,15 +100,39 @@
         @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin-slow 8s linear infinite; }
 
-        /* Marquee Scrolling Logic for Industries */
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        /* Speedometer Rev Animation */
+        @keyframes needle-rev {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(180deg); }
+            40% { transform: rotate(150deg); }
+            60% { transform: rotate(235deg); } 
+            80% { transform: rotate(210deg); }
+            100% { transform: rotate(0deg); }
         }
-        .marquee-content {
-            display: flex;
-            white-space: nowrap;
-            animation: marquee 25s linear infinite;
+
+        .rev-needle {
+            transform-origin: 12px 14px;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .group:hover .rev-needle {
+            animation: needle-rev 1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+        }
+
+        .rocket-layer {
+            will-change: transform;
+            pointer-events: none;
+        }
+        
+        /* Scanning Glow Effect for Carousel */
+        .scanning-glow {
+            background: linear-gradient(90deg, transparent, rgba(255,221,51,0.1), transparent);
+            background-size: 200% 100%;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
@@ -148,41 +162,22 @@
                 graph: <path d="M3 3v18h18M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />,
                 globe: <React.Fragment><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20" /></React.Fragment>,
                 sparkles: <path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" />,
-                speedometer: <React.Fragment><path d="M3.34 19a10 10 0 1 1 17.32 0" /><path d="m12 14 3-3" /><path d="M12 7v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 4.93-1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /></React.Fragment>,
+                speedometer: (
+                    <React.Fragment>
+                        <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+                        <path d="M12 7v2M4.93 4.93l1.41 1.41M17.66 4.93l-1.41 1.41M2 12h2M20 12h2" opacity="0.4" />
+                        <g className="rev-needle">
+                            <line x1="12" y1="14" x2="4.5" y2="18.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                            <circle cx="12" cy="14" r="1.5" fill="currentColor" />
+                        </g>
+                    </React.Fragment>
+                ),
                 trophy: <path d="M6 4h12v6a6 6 0 0 1-12 0V4ZM4 6h2v3H4a1.5 1.5 0 0 1 0-3ZM18 6h2a1.5 1.5 0 0 1 0 3h-2V6ZM12 16v4M8 20h8" />
             };
             return (
                 <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                     {icons[name]}
                 </svg>
-            );
-        };
-
-        const TextFireSparks = ({ isActive }) => {
-            const [sparks, setSparks] = useState([]);
-            useEffect(() => {
-                if (!isActive) return;
-                const interval = setInterval(() => {
-                    const newSpark = {
-                        id: Math.random(),
-                        left: Math.random() * 100,
-                        size: 6 + Math.random() * 12,
-                        duration: 0.4 + Math.random() * 0.4,
-                        color: ['#FFDD33', '#FF9C57', '#FF6683'][Math.floor(Math.random() * 3)]
-                    };
-                    setSparks(s => [...s, newSpark].slice(-25));
-                }, 50);
-                return () => clearInterval(interval);
-            }, [isActive]);
-            if (!isActive) return null;
-            return (
-                <div className="absolute inset-0 pointer-events-none z-0 overflow-visible">
-                    {sparks.map(s => (
-                        <div key={s.id} className="absolute bottom-2 rounded-full blur-[3px] opacity-80"
-                            style={{ left: `${s.left}%`, width: s.size, height: s.size, backgroundColor: s.color, animation: `spark-rise ${s.duration}s ease-out forwards` }}
-                        />
-                    ))}
-                </div>
             );
         };
 
@@ -245,7 +240,6 @@
             }, []);
             const worldMap = "M25,85 c5,-10 15,-5 25,-10 t20,10 t25,5 t20,-10 t15,10 t-10,20 t-20,10 t-25,-5 t-20,-10 t-30,0 Z M130,25 c10,-10 25,-5 35,5 t20,15 t0,20 t-20,10 t-25,-5 t-10,-20 Z M110,75 c15,-10 35,0 45,15 t15,25 t-10,20 t-30,5 t-20,-15 t0,-30 Z M35,110 c10,-10 30,-5 45,5 t20,20 t-10,25 t-30,10 t-25,-15 t0,-25 Z M190,55 c10,-10 25,-5 35,10 t5,25 t-20,20 t-20,-15 t0,-25 Z";
             
-            // Numeric values added back to points
             const points = [
                 {n:'AMER', a:260, y:0, c:10},
                 {n:'EMEA', a:30, y:-25, c:6},
@@ -294,23 +288,24 @@
             if (!isActive) return null;
 
             return (
-                <div className="absolute z-[150] pointer-events-none left-0 top-0 w-20" 
-                     style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
-                    <div className="relative flex flex-col items-center">
-                        {/* Solid High-Fi Rocket Body - No Transparency */}
-                        <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
-                            <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#FFFFFF" stroke="#1C1C1E" strokeWidth="2.5"/>
-                            <path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#EF4444" stroke="#1C1C1E" strokeWidth="1"/>
-                            <path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#EF4444" stroke="#1C1C1E" strokeWidth="1"/>
-                            <path d="M22 83H38L35 90H25L22 83Z" fill="#1E293B"/>
-                            <circle cx="30" cy="40" r="8" fill="#3B82F6" stroke="white" strokeWidth="2"/>
-                        </svg>
-                        <div className="absolute top-[85px] flex flex-col items-center">
-                            <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[2px] z-20" />
-                            <div className="absolute top-2 flex flex-col items-center">
-                                {smoke.map((s) => (
-                                    <div key={s.id} className="w-12 h-12 bg-black/5 rounded-full blur-xl absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
-                                ))}
+                <div className="absolute inset-0 z-[100] pointer-events-none rocket-layer">
+                    <div className="absolute w-20" 
+                         style={{ animation: 'rocketFinalSequence 7.5s ease-in-out forwards' }}>
+                        <div className="relative flex flex-col items-center">
+                            <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
+                                <path d="M30 0C30 0 10 30 10 65C10 75 18.9543 83 30 83C41.0457 83 50 75 50 65C50 30 30 0 30 0Z" fill="#FFFFFF" stroke="#1C1C1E" strokeWidth="2.5"/>
+                                <path d="M10 60L0 90C0 90 5 95 10 90L10 60Z" fill="#EF4444" stroke="#1C1C1E" strokeWidth="1"/>
+                                <path d="M50 60L60 90C60 90 55 95 50 90L50 60Z" fill="#EF4444" stroke="#1C1C1E" strokeWidth="1"/>
+                                <path d="M22 83H38L35 90H25L22 83Z" fill="#1E293B"/>
+                                <circle cx="30" cy="40" r="8" fill="#3B82F6" stroke="white" strokeWidth="2"/>
+                            </svg>
+                            <div className="absolute top-[85px] flex flex-col items-center">
+                                <div className="w-10 h-24 bg-gradient-to-t from-transparent via-orange-600 to-yellow-300 rounded-full animate-pulse blur-[2px] z-20" />
+                                <div className="absolute top-2 flex flex-col items-center">
+                                    {smoke.map((s) => (
+                                        <div key={s.id} className="w-12 h-12 bg-black/5 rounded-full blur-xl absolute" style={{ animation: 'animate-smoke 1.5s ease-out forwards', animationDelay: `${s.delay}s`, top: `${Math.random() * 50}px`, left: `${(Math.random()-0.5)*50}px` }} />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -328,15 +323,61 @@
             );
         };
 
+        // Snappy Step-Marquee Carousel with "Manufacturing" update
+        const SectorCarousel = () => {
+            const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Manufacturing", "Telecom", "Pharma"];
+            const colors = ["#FF9C57", "#CE70FC", "#6EDB8C", "#47D1C4"];
+            const [index, setIndex] = useState(0);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setIndex(prev => (prev + 1) % sectors.length);
+                }, 4000); 
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="mt-4 bg-[#FFFFFF]/50 py-3 rounded-xl border border-[#1C1C1E]/10 relative overflow-hidden shrink-0 backdrop-blur-sm h-[52px] flex items-center justify-center scanning-glow">
+                    <div className="relative w-full h-full flex items-center justify-center">
+                        {sectors.map((s, i) => {
+                            const diff = (i - index + sectors.length) % sectors.length;
+                            const isActive = diff === 0;
+                            const isPast = diff === sectors.length - 1;
+                            const isFuture = diff === 1;
+
+                            let xPos = "100%";
+                            if (isActive) xPos = "0%";
+                            if (isPast) xPos = "-100%";
+                            if (isFuture) xPos = "100%";
+
+                            return (
+                                <div 
+                                    key={s}
+                                    className="absolute inset-0 flex items-center justify-center transition-all duration-700 cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+                                    style={{ 
+                                        transform: `translateX(${xPos})`, 
+                                        opacity: isActive ? 1 : 0,
+                                        filter: isActive ? 'none' : 'blur(4px)'
+                                    }}
+                                >
+                                    <span 
+                                        className="px-6 py-1 bg-[#1C1C1E] border-2 border-white/20 rounded-full text-[14px] font-black uppercase tracking-widest sharp-text shadow-xl" 
+                                        style={{ color: colors[i % colors.length] }}
+                                    > 
+                                        {s} 
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
         const App = () => {
             useAutoScaler();
             const [rocketActive, setRocketActive] = useState(false);
-            const [winsFireActive, setWinsFireActive] = useState(false);
             const triggerRocket = () => { if (rocketActive) return; setRocketActive(true); setTimeout(() => setRocketActive(false), 7700); };
-            const handleVelocityHover = () => { setWinsFireActive(true); setTimeout(() => setWinsFireActive(false), 10000); };
-
-            const sectors = ["Finance", "Tech", "Retail", "Design", "Logistics", "Media", "Consulting", "Mfg", "Telecom", "Pharma"];
-            const industriesColors = ["#FF9C57", "#CE70FC", "#6EDB8C", "#47D1C4"];
 
             const companies = [
                 { name: "Netflix", domain: "netflix.com" }, { name: "Airbnb", domain: "airbnb.com" },
@@ -357,7 +398,6 @@
                 <div className="infographic-shell select-none shadow-2xl">
                     <RealisticRocket isActive={rocketActive} />
                     
-                    {/* Header */}
                     <div className="relative z-40 px-12 pt-10 h-[140px] shrink-0 flex justify-between items-start">
                         <div className="sharp-text flex-1">
                             <h1 className="text-[66px] font-black leading-none italic uppercase text-[#1C1C1E] tracking-tighter drop-shadow-sm flex items-center gap-x-6 whitespace-nowrap">
@@ -374,7 +414,7 @@
                         <div className="text-right pt-4 shrink-0 text-[#1C1C1E]">
                             <div className="flex items-center gap-2 justify-end mb-2">
                                 <Icon name="sparkles" size={28} className="text-[#FFDD33] animate-spin-slow" fill="#FFDD33" />
-                                <span className="text-2xl font-black uppercase italic tracking-tighter bg-[#FFDD33] text-[#1C1C1E] px-4 py-1.5 rounded-lg shadow-sm">
+                                <span className="text-2xl font-black uppercase italic tracking-tighter bg-[#FFDD33] text-[#1C1C1E] px-4 py-1.5 rounded-lg shadow-sm sharp-text">
                                     140% OF TARGET
                                 </span>
                             </div>
@@ -386,24 +426,26 @@
                             <CashRainWrapper className="h-1/3 shrink-0">
                                 <div className="bg-[#FFDD33] text-[#1C1C1E] p-4 rounded-[2rem] h-full flex flex-col justify-center items-center shadow-2xl border-b-8 border-[#CFB326]">
                                     <div className="flex items-center gap-3 mb-1"> <Icon name="graph" size={28} className="text-[#1C1C1E]" /> <span className="font-black uppercase text-[16px] tracking-widest leading-none">Revenue Achieved</span> </div>
-                                    <div className="text-7xl font-black leading-none mb-1 tracking-tighter">$1.41M+</div>
+                                    <div className="text-7xl font-black leading-none mb-1 tracking-tighter sharp-text">$1.41M+</div>
                                     <div className="text-lg font-bold opacity-100 italic uppercase">
-                                       <span className="bg-[#1C1C1E] text-[#FFDD33] px-3 py-1 rounded shadow-lg">Goal: $1M</span>
+                                       <span className="bg-[#1C1C1E] text-[#FFDD33] px-3 py-1 rounded shadow-lg sharp-text">Goal: $1M</span>
                                     </div>
                                 </div>
                             </CashRainWrapper>
-                            <div className="flex-1 relative" onMouseEnter={handleVelocityHover}>
-                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10 shadow-2xl">
-                                    <div className="flex items-center gap-3 mb-2 text-[#FFFFFF] relative z-20 shrink-0"> <Icon name="speedometer" size={40} /> <span className="font-bold uppercase text-[16px] tracking-widest">Velocity</span> </div>
+                            <div className="flex-1 relative">
+                                <div className="bg-[#CE70FC] border-4 border-[#1C1C1E] p-8 rounded-[2rem] h-full flex flex-col justify-center items-center relative group overflow-hidden text-white z-10 shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                                    <div className="flex items-center gap-3 mb-2 text-[#FFFFFF] relative z-20 shrink-0"> 
+                                        <Icon name="speedometer" size={54} /> 
+                                        <span className="font-bold uppercase text-[16px] tracking-widest">Velocity</span> 
+                                    </div>
                                     
                                     <div className="flex-grow flex items-center justify-center w-full relative z-20">
-                                        <div className={`text-7xl font-black tracking-tighter relative ${winsFireActive ? 'animate-[text-flicker_0.5s_infinite]' : ''}`}>
+                                        <div className="text-7xl font-black tracking-tighter relative sharp-text">
                                             <span className="relative z-10 text-white">23 Wins</span>
-                                            <TextFireSparks isActive={winsFireActive} />
                                         </div>
                                     </div>
                                     
-                                    <div className="text-2xl text-[#1C1C1E] font-black italic uppercase text-center relative z-20 shrink-0 bg-[#FFDD33] px-4 py-1 rounded-lg">
+                                    <div className="text-2xl text-[#1C1C1E] font-black italic uppercase text-center relative z-20 shrink-0 bg-[#FFDD33] px-4 py-1 rounded-lg sharp-text">
                                         35% OVER TARGET
                                     </div>
                                 </div>
@@ -412,22 +454,16 @@
 
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
                             <div className="bg-[#47D1C4] p-6 rounded-[2rem] h-full flex flex-col shadow-2xl border-4 border-[#1C1C1E] relative text-[#1C1C1E] overflow-hidden">
-                                <h3 className="text-2xl font-black uppercase mb-2 flex items-center justify-center gap-3 italic tracking-tighter w-full text-center"> <Icon name="globe" size={32} /> GLOBAL APPEAL </h3>
+                                <h3 className="text-2xl font-black uppercase mb-2 flex items-center justify-center gap-3 italic tracking-tighter w-full text-center sharp-text"> <Icon name="globe" size={32} /> GLOBAL APPEAL </h3>
                                 <div className="flex-grow flex items-center justify-center relative min-h-0"> <SpinningGlobe /> </div>
                                 
-                                <div className="mt-4 bg-[#FFFFFF]/50 py-3 rounded-xl border border-[#1C1C1E]/10 relative overflow-hidden shrink-0 backdrop-blur-sm">
-                                    <div className="marquee-content gap-4 items-center">
-                                        {[...sectors, ...sectors].map((s, i) => (
-                                            <span key={i} className="px-3 py-1 bg-[#1C1C1E] border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest" style={{ color: industriesColors[i % 4] }}> {s} </span>
-                                        ))}
-                                    </div>
-                                </div>
+                                <SectorCarousel />
                             </div>
                         </div>
 
                         <div className="col-span-4 flex flex-col h-full overflow-visible">
                             <div className="bg-[#EAEAEA] text-[#1C1C1E] rounded-[2rem] p-6 h-full flex flex-col shadow-2xl border-4 border-[#1C1C1E] relative group shrink-0 overflow-visible" onMouseEnter={triggerRocket}>
-                                <h3 className="text-2xl font-black uppercase mb-4 flex items-center justify-center gap-3 italic shrink-0 w-full text-center text-[#867AFF]"> 
+                                <h3 className="text-2xl font-black uppercase mb-4 flex items-center justify-center gap-3 italic shrink-0 w-full text-center text-[#867AFF] sharp-text"> 
                                     <Icon name="trophy" size={32} fill="#FFDD33" className="text-[#1C1C1E]" />
                                     OUR FIRST WINS 
                                 </h3>
