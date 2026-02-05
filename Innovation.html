@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PS Innovation Hub - Vibrant Edition</title>
+    <title>PS Innovation Hub - High-Fi Motion</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -66,10 +66,29 @@
             font-size: 10px;
         }
 
-        /* --- Crisp Animations (No Blur) --- */
-        @keyframes full-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        /* --- Snap-to-Grid Animations (Zero Blur) --- */
+        @keyframes snap-spin {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes clock-tick {
+            0% { transform: rotate(0deg); }
+            8.33% { transform: rotate(30deg); }
+            16.66% { transform: rotate(60deg); }
+            25% { transform: rotate(90deg); }
+            33.33% { transform: rotate(120deg); }
+            41.66% { transform: rotate(150deg); }
+            50% { transform: rotate(180deg); }
+            58.33% { transform: rotate(210deg); }
+            66.66% { transform: rotate(240deg); }
+            75% { transform: rotate(270deg); }
+            83.33% { transform: rotate(300deg); }
+            91.66% { transform: rotate(330deg); }
+            100% { transform: rotate(360deg); }
         }
 
         @keyframes calendar-flip {
@@ -117,7 +136,7 @@
         const AnimatedIcon = ({ name, active, size = 32 }) => {
             const icons = {
                 refresh: (
-                    <g style={{ transformOrigin: 'center', animation: active ? 'full-spin 1.5s linear infinite' : 'none' }}>
+                    <g style={{ transformOrigin: 'center', animation: active ? 'snap-spin 2s steps(4) infinite' : 'none' }}>
                         <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                     </g>
                 ),
@@ -138,7 +157,7 @@
                 clock: (
                     <g>
                         <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14" style={{ transformOrigin: '12px 12px', animation: active ? 'full-spin 1s linear infinite' : 'none' }} />
+                        <polyline points="12 6 12 12 16 14" style={{ transformOrigin: '12px 12px', animation: active ? 'clock-tick 2s steps(12) infinite' : 'none' }} />
                     </g>
                 )
             };
@@ -152,7 +171,6 @@
 
         const CelebrationStars = ({ active, starColor }) => {
             if (!active) return null;
-            
             const stars = [
                 { id: 1, tx: '-30px', ty: '-30px', fx: '-50px', fy: '-50px', delay: '0s' },
                 { id: 2, tx: '30px', ty: '-30px', fx: '50px', fy: '-50px', delay: '0.1s' },
@@ -160,20 +178,10 @@
                 { id: 4, tx: '-40px', ty: '10px', fx: '-60px', fy: '15px', delay: '0.3s' },
                 { id: 5, tx: '0px', ty: '-40px', fx: '0px', fy: '-70px', delay: '0.4s' }
             ];
-
             return (
                 <div className="absolute inset-0 pointer-events-none">
                     {stars.map(s => (
-                        <div 
-                            key={s.id}
-                            className="absolute top-1/2 left-1/2 w-4 h-4"
-                            style={{ 
-                                color: starColor,
-                                '--tx': s.tx, '--ty': s.ty, '--fx': s.fx, '--fy': s.fy,
-                                animation: `star-burst 0.8s infinite`,
-                                animationDelay: s.delay
-                            }}
-                        >
+                        <div key={s.id} className="absolute top-1/2 left-1/2 w-4 h-4" style={{ color: starColor, '--tx': s.tx, '--ty': s.ty, '--fx': s.fx, '--fy': s.fy, animation: `star-burst 0.8s infinite`, animationDelay: s.delay }}>
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2l2.4 7.2h7.6l-6.2 4.5 2.4 7.3-6.2-4.5-6.2 4.5 2.4-7.3-6.2-4.5h7.6z" />
                             </svg>
@@ -185,41 +193,20 @@
 
         const Card = ({ title, goal, features, icon, color, effectType }) => {
             const [isHovered, setIsHovered] = useState(false);
-
             return (
-                <div 
-                    className="hover-lift relative h-full bg-white border-4 border-[#1C1C1E] rounded-[2.5rem] p-8 flex flex-col overflow-hidden"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                >
-                    {/* Icon Container */}
-                    <div className="relative mb-8 z-20">
-                        <div 
-                            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] transition-all duration-300 relative"
-                            style={{ 
-                                backgroundColor: isHovered ? '#1C1C1E' : color,
-                                color: isHovered ? color : '#1C1C1E' 
-                            }}
-                        >
+                <div className="hover-lift relative h-full bg-white border-4 border-[#1C1C1E] rounded-[2.5rem] p-8 flex flex-col overflow-hidden" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+                    <div className="relative mb-6 z-20">
+                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#1C1C1E] border-2 border-[#1C1C1E] transition-all duration-300 relative" style={{ backgroundColor: isHovered ? '#1C1C1E' : color, color: isHovered ? color : '#1C1C1E' }}>
                             <AnimatedIcon name={icon} active={isHovered} />
-                            
-                            {/* Shooting Stars specifically for Award icon */}
                             {effectType === 'stars' && <CelebrationStars active={isHovered} starColor={color} />}
                         </div>
                     </div>
-
                     <div className="relative z-20 flex-1 flex flex-col">
-                        <h2 className="text-3xl font-[900] italic uppercase tracking-tighter leading-none mb-4 text-[#1C1C1E]">
-                            {title}
-                        </h2>
-
-                        <div className="mb-6">
+                        <h2 className="text-3xl font-[900] italic uppercase tracking-tighter leading-none mb-2 text-[#1C1C1E]">{title}</h2>
+                        <div className="mb-4">
                             <span className="cool-highlight mb-1.5 block w-fit">Why it's cool</span>
-                            <p className="text-[15px] font-bold leading-tight text-[#1C1C1E] opacity-90">
-                                {goal}
-                            </p>
+                            <p className="text-[15px] font-bold leading-tight text-[#1C1C1E] opacity-90">{goal}</p>
                         </div>
-
                         <div className="space-y-2.5 mt-auto">
                             {features.map((f, i) => (
                                 <div key={i} className="flex items-start gap-2.5 group">
@@ -229,8 +216,6 @@
                             ))}
                         </div>
                     </div>
-
-                    {/* Bottom Progress Bar */}
                     <div className={`absolute bottom-0 left-0 h-2 bg-[#1C1C1E] transition-all duration-500 ease-out ${isHovered ? 'w-full' : 'w-0'}`}></div>
                 </div>
             );
@@ -238,7 +223,6 @@
 
         const App = () => {
             useAutoScaler();
-
             const projects = [
                 {
                     title: "Project Tracker 2.0",
@@ -258,7 +242,7 @@
                 },
                 {
                     title: "Success Story Builder",
-                    goal: "Make it fast and consistent to capture, package, and reuse real customer outcomes.",
+                    goal: "Empowers the team to instantly transform raw customer wins into a scalable library of high-impact proof points for the entire sales cycle.",
                     features: ["Structured capture guide", "Polished reusable assets", "Pre-sales discovery ready", "Scalable impact library"],
                     icon: "award",
                     color: "#FFDD33", 
@@ -273,41 +257,30 @@
                     effectType: "clock-spin"
                 }
             ];
-
             return (
                 <div className="canvas-bg select-none">
-                    {/* Header */}
                     <div className="h-[160px] px-12 flex flex-col justify-center relative z-10">
                         <div className="flex items-center gap-4 mb-2">
-                            <span className="bg-[#1C1C1E] text-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] rounded-md">PS INNOVATION HUB</span>
+                            <span className="bg-[#1C1C1E] text-[#FF6683] px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em] rounded-md">HOT OFF THE PRESSES</span>
                             <div className="h-[2px] flex-1 bg-[#1C1C1E]/10"></div>
                         </div>
                         <h1 className="text-[64px] font-[900] italic uppercase leading-none text-[#1C1C1E] tracking-tighter">
                             AUTOMATION <span className="miro-highlight">& EFFICIENCY</span> TOOLS
                         </h1>
                     </div>
-
-                    {/* Main Grid */}
                     <div className="flex-1 px-12 pb-16 grid grid-cols-4 gap-6">
                         {projects.map((p, idx) => (
                             <Card key={idx} {...p} />
                         ))}
                     </div>
-
-                    {/* Footer Labels */}
                     <div className="absolute bottom-6 left-12 right-12 flex justify-between items-center opacity-30 pointer-events-none">
                         <div className="text-[#1C1C1E] font-black italic uppercase text-[12px] tracking-[0.2em]">Growth - Excellence - Efficiency</div>
                         <div className="text-[#1C1C1E] font-black italic uppercase text-[12px] tracking-[0.2em]">© FY26 Miro PS Innovations</div>
                     </div>
-
-                    {/* Background Ghost Text */}
-                    <div className="absolute -bottom-10 -right-10 text-[200px] font-[900] italic uppercase text-[#1C1C1E]/[0.02] tracking-tighter pointer-events-none">
-                        PS
-                    </div>
+                    <div className="absolute -bottom-10 -right-10 text-[200px] font-[900] italic uppercase text-[#1C1C1E]/[0.02] tracking-tighter pointer-events-none">PS</div>
                 </div>
             );
         };
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
