@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY27 PS Expectations Dashboard</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #F4F4F4;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+            position: absolute;
+            background-color: #FFFFFF;
+        }
+
+        .canvas-bg {
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
+            background-size: 24px 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .miro-italic-header {
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+            line-height: 0.9;
+        }
+
+        .highlight-yellow {
+            background-color: #FFDD33;
+            padding: 0 16px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 4px 4px 0px #1C1C1E;
+            transform: skewX(-2deg);
+        }
+
+        .role-card {
+            border: 2px solid #1C1C1E;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            padding: 0.75rem;
+            border-radius: 1rem;
+        }
+
+        .nav-tab {
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab.active {
+            background-color: #1C1C1E;
+            color: #FFDD33;
+        }
+
+        .bullet-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 99px;
+            background-color: #1C1C1E;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .sharp-text {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const PILLARS = {
+            OVERVIEW: 'overview',
+            GROWTH: 'growth',
+            EXCELLENCE: 'excellence',
+            EFFICIENCY: 'efficiency'
+        };
+
+        const DATA = {
+            growth: {
+                title: "Powering Growth",
+                color: "#FFDD33",
+                description: "We drive measurable customer and business growth by accelerating adoption, expanding impact, and ensuring our work fuels commercial success through a multi-product strategy.",
+                expectations: [
+                    "Own Business Impact: Define outcomes early, align delivery to strategic goals, and proactively surface risks or growth opportunities.",
+                    "Translate Capabilities into Outcomes: Position Miro (including Miro AI) in terms of customer-relevant outcomes, not features.",
+                    "Drive Multi-Product Adoption: Act as a trusted advisor guiding customers beyond basic use cases to unlock full platform value.",
+                    "Partner for Commercial Impact: Collaborate with Sales, CS, and Product to influence renewals, expansions, and long-term success.",
+                    "Connect Customer Goals to Miro Value: Translate objectives into clear outcomes, identifying scope expansion via MOST and related services.",
+                    "Use Discovery as a Growth Lever: Deeply understand customer context, maturity, and constraints before proposing solutions."
+                ],
+                roles: [
+                    { title: "Implementation Consultant", bullets: ["Execute engagements that drive successful onboardings and drive value", "Apply defined frameworks consistently while learning to recognize expansion signals", "Discover and escalate growth opportunities or risks to senior roles and the account team"] },
+                    { title: "AI Technical Architect", bullets: ["Translate Miro AI capabilities into differentiated, outcome-driven customer value", "Influence adoption of AI workflows that materially change how customers work", "Help define best practices for AI-enabled services delivery"] },
+                    { title: "Technical Architect", bullets: ["Ensure technical decisions enable long-term adoption and scalability", "Surface architectural risks that could limit expansion or value realization", "Partner with Product and Engineering when customer needs expose platform gaps"] },
+                    { title: "Innovation Architect", bullets: ["Shape new or expanded customer outcomes through assigned engagements", "Influence account strategy by connecting customer ambition to innovative Miro use cases", "Create reusable outcome narratives that Sales, CS, and PS can leverage"] }
+                ]
+            },
+            excellence: {
+                title: "Delivering Excellence",
+                color: "#47D1C4",
+                description: "We deliver consistently high-quality experiences that reflect Miro's standards and brand. Excellence is defined by outcomes, clarity, and accountability.",
+                expectations: [
+                    "Deliver High-Quality Facilitation and Storytelling: Provide structured thinking, strong facilitation, and clear narratives tailored to the audience.",
+                    "Own Customer Outcomes End-to-End: Take accountability for results, not just scoped tasks, with clear success criteria.",
+                    "Apply Sound Judgment in Ambiguity: Use first-principles thinking to navigate complexity rather than defaulting to templates.",
+                    "Practice Intellectual Honesty: Challenge assumptions, provide candid feedback, and escalate risks early to protect outcomes.",
+                    "Maintain High Delivery Standards: Ensure reliability, follow-through, and a consistently strong customer experience.",
+                    "Elevate the Team Through Knowledge Sharing: Share frameworks, assets, and learnings that raise delivery quality across the team."
+                ],
+                roles: [
+                    { title: "Implementation Consultant", bullets: ["Deliver reliable, high-quality execution aligned to defined success criteria", "Communicate clearly with customers and internal stakeholders while driving outcomes", "Demonstrate steady growth in delivery confidence and craft"] },
+                    { title: "AI Technical Architect", bullets: ["Ensure AI-enabled solutions are trustworthy, explainable, and outcome-driven", "Leverage AI to add value versus noise and guide stakeholders through creative solutions", "Raise the bar across the department through strategic customer outcomes and enablement"] },
+                    { title: "Technical Architect", bullets: ["Develop creative solutions by staying at the forefront of Miro's technical capabilities", "Balance feasibility, efficiency, and long-term maintainability with early risk identification", "Deliver technically sound, scalable solutions aligned to customer context"] },
+                    { title: "Innovation Architect", bullets: ["Lead discovery-heavy, ambiguous engagements with clarity and confidence", "Set the bar for outcome quality, narrative clarity, and strategic framing", "Coach others on advisory skills, customer storytelling, and raise the bard across the team"] }
+                ]
+            },
+            efficiency: {
+                title: "Driving Efficiency",
+                color: "#867AFF",
+                description: "We scale impact by working smarter—using AI, simplification, and repeatable patterns to increase velocity while reducing friction.",
+                expectations: [
+                    "Simplify How We Work: Proactively reduce complexity in processes, documentation, and handoffs.",
+                    "Prioritize High-Value Work: Focus time and effort on work that drives the greatest customer and business impact.",
+                    "Operate with Discipline: Manage time, utilization, and commitments responsibly, meeting agreed delivery expectations.",
+                    "Adapt and Improve Continuously: Learn new tools and ways of working quickly to support ongoing improvement and scale.",
+                    "Adopt an AI-First Working Model: Use Miro AI as default accelerator for synthesis, planning, and delivery while retaining judgment.",
+                    "Build Reusable Leverage: Create and contribute assets, patterns, or playbooks that increase team efficiency over time."
+                ],
+                roles: [
+                    { title: "Implementation Consultant", bullets: ["Use provided tools and AI workflows to reduce admin work and discover efficiencies", "Improve established processes while identifying simplification opportunities", "Demonstrate increasing efficiency and autonomy in your processes and responsibilities"] },
+                    { title: "AI Technical Architect", bullets: ["Ensure AI increases leverage internally and with customers rather than add complexity", "Develop effective AI use cases, prompts, or flows with the broader team to drive efficiencies", "Lead adoption of AI-first delivery workflows internally and for customer engagements"] },
+                    { title: "Technical Architect", bullets: ["Take the lead on navigating technical solutions by leveraging an evolving tech stack", "Reduce rework through better upfront design, documentation, and leadership", "Standardize technical approaches and improve the quality of our approach"] },
+                    { title: "Innovation Architect", bullets: ["Develop repeatable advisory patterns that reduce bespoke overhead", "Identify inefficiencies in advisory motions and own improvements", "Use AI to accelerate synthesis, planning, and storytelling"] }
+                ]
+            }
+        };
+
+        const App = () => {
+            const [activePillar, setActivePillar] = useState(PILLARS.OVERVIEW);
+
+            useEffect(() => {
+                const scaler = () => {
+                    const root = document.getElementById('root');
+                    if (root) {
+                        const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+                        root.style.transform = `scale(${scale})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+
+            const renderOverview = () => (
+                <div className="flex-1 flex flex-col p-10 animate-in fade-in duration-500">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="bg-[#1C1C1E] text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded">STRATEGIC EDGE</div>
+                        <div className="h-px flex-1 bg-[#1C1C1E]/10"></div>
+                    </div>
+                    
+                    <h1 className="miro-italic-header text-[78px] text-[#1C1C1E] mb-8">
+                        PROFESSIONAL <br/> 
+                        <span className="flex items-center gap-6">
+                            SERVICES 
+                            <span className="highlight-yellow">EXPECTATIONS</span>
+                        </span>
+                    </h1>
+                    
+                    <div className="grid grid-cols-12 gap-10 mb-8">
+                        <div className="col-span-8 space-y-6">
+                            <p className="text-xl font-bold leading-tight text-[#1C1C1E]">
+                                Professional Services acts as Miro's strategic edge by turning customer vision into velocity. 
+                                We drive measurable growth by accelerating adoption, expanding impact, and ensuring commercial success.
+                            </p>
+                            <div className="grid grid-cols-2 gap-8">
+                                <div className="p-5 border-2 border-[#1C1C1E] rounded-2xl bg-[#F9F9F9]">
+                                    <h3 className="text-xs font-black italic uppercase text-[#1C1C1E]/40 mb-2">Scope Matters</h3>
+                                    <ul className="space-y-2 text-[13px] font-bold leading-tight">
+                                        <li>• <span className="underline">Implementation Consultants</span>: Execution quality, reliability, learning progression.</li>
+                                        <li>• <span className="underline">Architect Roles</span>: Judgment, customer outcomes, strategic impact.</li>
+                                    </ul>
+                                </div>
+                                <div className="p-5 border-2 border-[#1C1C1E] rounded-2xl bg-[#FFDD33]/10">
+                                    <h3 className="text-xs font-black italic uppercase text-[#1C1C1E]/40 mb-2">The Balanced Scorecard</h3>
+                                    <p className="text-[13px] font-bold leading-tight">
+                                        We value <span className="italic underline">Outcomes over activity</span>, <span className="italic underline">Judgment over process</span>, and <span className="italic underline">Metrics as directional</span> evidence of impact.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-span-4 bg-[#1C1C1E] text-white p-6 rounded-[2rem] flex flex-col justify-center">
+                            <h3 className="text-xs font-black italic uppercase text-white/40 mb-4 tracking-widest">Performance Reviews</h3>
+                            <p className="text-sm font-bold mb-4 italic">"Be your biggest advocate. Articulate your wins with:"</p>
+                            <div className="bg-white/10 p-4 rounded-xl font-black text-center text-sm italic tracking-tight uppercase">
+                                context → action → outcome → impact
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-6 mt-auto">
+                        <button onClick={() => setActivePillar(PILLARS.GROWTH)} className="h-28 border-4 border-[#1C1C1E] rounded-[2rem] flex items-center px-8 hover:bg-[#FFDD33] transition-all group shadow-[6px_6px_0px_#1C1C1E]">
+                            <span className="miro-italic-header text-2xl">Powering Growth</span>
+                            <span className="ml-auto text-3xl group-hover:translate-x-2 transition-transform">→</span>
+                        </button>
+                        <button onClick={() => setActivePillar(PILLARS.EXCELLENCE)} className="h-28 border-4 border-[#1C1C1E] rounded-[2rem] flex items-center px-8 hover:bg-[#47D1C4] transition-all group shadow-[6px_6px_0px_#1C1C1E]">
+                            <span className="miro-italic-header text-2xl">Delivering Excellence</span>
+                            <span className="ml-auto text-3xl group-hover:translate-x-2 transition-transform">→</span>
+                        </button>
+                        <button onClick={() => setActivePillar(PILLARS.EFFICIENCY)} className="h-28 border-4 border-[#1C1C1E] rounded-[2rem] flex items-center px-8 hover:bg-[#867AFF] transition-all group shadow-[6px_6px_0px_#1C1C1E]">
+                            <span className="miro-italic-header text-2xl">Driving Efficiency</span>
+                            <span className="ml-auto text-3xl group-hover:translate-x-2 transition-transform">→</span>
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderPillar = (id) => {
+                const pillar = DATA[id];
+                return (
+                    <div className="flex-1 flex flex-col p-8 animate-in slide-in-from-right duration-300">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="max-w-4xl">
+                                <h2 className="miro-italic-header text-[54px] text-[#1C1C1E] mb-2 leading-none">{pillar.title}</h2>
+                                <p className="text-sm font-bold leading-tight text-[#1C1C1E]/70">{pillar.description}</p>
+                            </div>
+                            <div className="w-16 h-16 rounded-2xl border-4 border-[#1C1C1E] shadow-[4px_4px_0px_#1C1C1E] flex-shrink-0" style={{ backgroundColor: pillar.color }}></div>
+                        </div>
+
+                        <div className="flex flex-col gap-6 flex-1 min-h-0">
+                            <div>
+                                <h3 className="miro-italic-header text-xs mb-3 text-[#1C1C1E]/50 tracking-wider">TEAM EXPECTATIONS</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {pillar.expectations.map((exp, i) => (
+                                        <div key={i} className="flex gap-3 items-center p-2.5 bg-white border-2 border-[#1C1C1E] rounded-xl shadow-[3px_3px_0px_#1C1C1E]">
+                                            <div className="w-5 h-5 rounded bg-[#1C1C1E] text-white flex items-center justify-center font-black text-[9px] shrink-0">{i+1}</div>
+                                            <span className="font-bold text-[11px] leading-tight text-[#1C1C1E]">{exp}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex-1 min-h-0">
+                                <h3 className="miro-italic-header text-xs mb-3 text-[#1C1C1E]/50 tracking-wider">ROLE SPECIFIC EXPECTATIONS</h3>
+                                <div className="grid grid-cols-4 gap-3 h-full pb-4">
+                                    {pillar.roles.map((role, i) => (
+                                        <div key={i} className="role-card">
+                                            <div className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-2 border-[#1C1C1E] w-fit rounded-lg mb-3" style={{ backgroundColor: pillar.color, color: '#1C1C1E' }}>
+                                                {role.title}
+                                            </div>
+                                            <ul className="space-y-2">
+                                                {role.bullets.map((bullet, bi) => (
+                                                    <li key={bi} className="flex gap-2 items-start">
+                                                        <div className="bullet-dot"></div>
+                                                        <span className="text-[10.5px] font-bold leading-tight text-[#1C1C1E]/80">{bullet}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="canvas-bg select-none">
+                    <div className="h-16 bg-white border-b-2 border-[#1C1C1E] flex items-center px-10 gap-8 relative z-20">
+                        <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setActivePillar(PILLARS.OVERVIEW)}>
+                            <div className="w-8 h-8 bg-[#FFDD33] rounded-lg border-2 border-[#1C1C1E] flex items-center justify-center shadow-[2px_2px_0px_#1C1C1E]">
+                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />
+                                </svg>
+                            </div>
+                            <span className="miro-italic-header text-xl tracking-tighter">PS FY27</span>
+                        </div>
+                        
+                        <div className="flex h-9 border-2 border-[#1C1C1E] rounded-xl overflow-hidden ml-auto shadow-[2px_2px_0px_#1C1C1E]">
+                            <button onClick={() => setActivePillar(PILLARS.OVERVIEW)} className={`nav-tab px-4 text-[9px] font-black uppercase tracking-widest ${activePillar === PILLARS.OVERVIEW ? 'active' : ''}`}>Home</button>
+                            {Object.keys(DATA).map(key => (
+                                <button key={key} onClick={() => setActivePillar(key)} className={`nav-tab px-4 text-[9px] font-black uppercase tracking-widest border-l-2 border-[#1C1C1E] ${activePillar === key ? 'active' : ''}`}>{key}</button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                        {activePillar === PILLARS.OVERVIEW ? renderOverview() : renderPillar(activePillar)}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
