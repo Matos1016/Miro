@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miro Dynamic Slide Builder 2.0 | User Guide Infographic</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        miroBlack: '#1C1C1E',
+                        miroYellow: '#FFDD33',
+                        miroCyan: '#47D1C4',
+                        miroViolet: '#867AFF',
+                        miroGray: '#F2F2F2',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            /* Dot grid pattern simulation using CSS gradients */
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+
+        /* Chart Container Strict Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 280px;
+            }
+        }
+
+        /* Utility for strictly wrapping text in charts */
+        .card-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body class="text-miroBlack font-sans antialiased overflow-x-hidden">
+
+    <!-- Header Section -->
+    <header class="w-full bg-miroBlack text-white py-16 px-6 mb-12 border-b-8 border-miroYellow">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="inline-block bg-miroYellow text-miroBlack px-4 py-1 rounded-full font-bold text-sm mb-4 tracking-wide uppercase">
+                User Guide
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black italic uppercase tracking-tighter mb-4">
+                Miro Dynamic <span class="text-miroCyan">Slide Builder</span> 2.0
+            </h1>
+            <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto font-light">
+                Generate high-impact, interactive, and "Miro-native" infographics directly from simple text descriptions.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-6 pb-20 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
+
+        <!-- Section 1: Introduction & Intent -->
+        <div class="md:col-span-12 mb-8">
+            <div class="max-w-3xl mx-auto text-center mb-10">
+                <h2 class="text-3xl font-black italic uppercase text-miroBlack mb-4">
+                    Why Go Dynamic?
+                </h2>
+                <p class="text-lg text-gray-600">
+                    Static slides like PDFs feel disconnected from the collaborative energy of Miro. 
+                    The Dynamic Slide Builder bypasses these limitations by introducing three core design philosophies.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <!-- Text Cards -->
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl card-shadow border-l-8 border-miroCyan">
+                        <h3 class="font-bold text-xl mb-2">1. Living Content</h3>
+                        <p class="text-sm text-gray-600">Lightweight HTML/React code that supports subtle animations and interactive hover states.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl card-shadow border-l-8 border-miroYellow">
+                        <h3 class="font-bold text-xl mb-2">2. Miro-First Design</h3>
+                        <p class="text-sm text-gray-600">Styled strictly with the Miro Bright Edition system (Workspace White, Breakthrough Black) to feel native.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl card-shadow border-l-8 border-miroViolet">
+                        <h3 class="font-bold text-xl mb-2">3. iFrame Optimization</h3>
+                        <p class="text-sm text-gray-600">Engineered with a custom "AutoScaler" to ensure sharp visuals and no scrollbars.</p>
+                    </div>
+                </div>
+
+                <!-- Visualization: Polar Area Chart -->
+                <div class="bg-white p-6 rounded-xl card-shadow">
+                    <h4 class="text-center font-bold text-sm uppercase tracking-widest text-gray-400 mb-4">Core Feature Impact</h4>
+                    <div class="chart-container">
+                        <canvas id="coreFeaturesChart"></canvas>
+                    </div>
+                    <p class="text-center text-xs text-gray-400 mt-4">
+                        Visualizing the relative impact of core features on user experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Getting Started (Access & Prompting) -->
+        <div class="md:col-span-12 bg-miroGray/50 p-8 rounded-3xl mb-8">
+            <h2 class="text-3xl font-black italic uppercase text-miroBlack mb-8 text-center">
+                Creation Workflow
+            </h2>
+
+            <!-- Step 1: Access (Process Diagram - HTML/CSS) -->
+            <div class="mb-12">
+                <h3 class="text-xl font-bold mb-6 text-center">Phase 1: Accessing the Gem</h3>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+                    <div class="bg-miroBlack text-white px-6 py-4 rounded-lg font-bold text-center w-full md:w-auto">
+                        1. Open Gemini Panel
+                    </div>
+                    <div class="text-miroBlack text-2xl font-black hidden md:block">&rarr;</div>
+                    <div class="text-miroBlack text-2xl font-black block md:hidden">&darr;</div>
+                    <div class="bg-miroBlack text-white px-6 py-4 rounded-lg font-bold text-center w-full md:w-auto">
+                        2. Navigate to Gems
+                    </div>
+                    <div class="text-miroBlack text-2xl font-black hidden md:block">&rarr;</div>
+                    <div class="text-miroBlack text-2xl font-black block md:hidden">&darr;</div>
+                    <div class="bg-miroCyan text-miroBlack px-6 py-4 rounded-lg font-bold text-center w-full md:w-auto border-2 border-miroBlack">
+                        3. Select Slide Builder
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Prompting (Chart) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container">
+                    <canvas id="promptQualityChart"></canvas>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Phase 2: Prompt Engineering</h3>
+                    <p class="text-gray-600 mb-6">
+                        The quality of the output depends heavily on the specificity of your prompt. 
+                        Vague prompts yield generic templates, while specific prompts utilizing color and structure details yield production-ready dashboards.
+                    </p>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-sm">
+                        <span class="font-bold text-red-500">Bad Prompt:</span> "Make a slide about projects."<br><br>
+                        <span class="font-bold text-green-600">Good Prompt:</span> "Create a 4-card dashboard for 'Innovation Hub'. Include Project Tracker (Cyan) and TimeCop (Purple). Use a 2x2 grid."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Deployment Pathways -->
+        <div class="md:col-span-12 mb-8">
+            <div class="max-w-3xl mx-auto text-center mb-10">
+                <h2 class="text-3xl font-black italic uppercase text-miroBlack mb-4">
+                    Deployment Strategy
+                </h2>
+                <p class="text-lg text-gray-600">
+                    Choose the deployment route that fits your needs. The "Interactive" route is recommended for the full experience.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Chart Column -->
+                <div class="md:col-span-1 bg-white p-6 rounded-xl card-shadow flex flex-col justify-center">
+                    <h4 class="text-center font-bold text-sm uppercase tracking-widest text-gray-400 mb-4">Recommended Method</h4>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="deploymentSplitChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Text Content Columns -->
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Interactive Route -->
+                    <div class="bg-white rounded-xl card-shadow overflow-hidden border-t-8 border-miroCyan">
+                        <div class="p-6 bg-miroCyan/10">
+                            <h3 class="font-black italic text-xl uppercase">Interactive Route</h3>
+                            <p class="text-xs font-bold tracking-widest uppercase opacity-60">Via GitHub Pages</p>
+                        </div>
+                        <div class="p-6 text-sm space-y-3">
+                            <p class="font-bold text-gray-800">1. Hosting on GitHub:</p>
+                            <ol class="list-decimal pl-5 space-y-1 text-gray-600">
+                                <li>Copy HTML code from Gem.</li>
+                                <li>Create Public Repo & index.html.</li>
+                                <li>Enable GitHub Pages (Deploy from Main).</li>
+                                <li>Copy the generated live URL.</li>
+                            </ol>
+                            <div class="h-px bg-gray-200 my-2"></div>
+                            <p class="font-bold text-gray-800">2. Embedding in Miro:</p>
+                            <ol class="list-decimal pl-5 space-y-1 text-gray-600">
+                                <li>Click More Tools (+).</li>
+                                <li>Select <strong>iFrame Embed</strong>.</li>
+                                <li>Paste URL & Resize.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Static Route -->
+                    <div class="bg-white rounded-xl card-shadow overflow-hidden border-t-8 border-miroGray">
+                        <div class="p-6 bg-gray-100">
+                            <h3 class="font-black italic text-xl uppercase">Static Route</h3>
+                            <p class="text-xs font-bold tracking-widest uppercase opacity-60">Via PDF / Image</p>
+                        </div>
+                        <div class="p-6 text-sm space-y-3">
+                            <p class="text-gray-600 mb-4">Best if you cannot host code online but still want superior design.</p>
+                            <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                                <li>Save code as <code>.html</code> locally.</li>
+                                <li>Open in Chrome/Edge.</li>
+                                <li><strong>Print to PDF</strong> (Vector quality).</li>
+                                <li>Or use <strong>GoFullPage</strong> extension (PNG).</li>
+                                <li>Drag & drop file onto Miro board.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Pro Tips -->
+        <div class="md:col-span-12 bg-miroBlack text-white rounded-3xl p-8 md:p-12 relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-miroYellow rounded-full blur-3xl opacity-10 -mr-20 -mt-20"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-miroViolet rounded-full blur-3xl opacity-10 -ml-20 -mb-20"></div>
+
+            <h2 class="text-3xl font-black italic uppercase mb-8 text-center relative z-10">
+                Creator Pro-Tips
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                <div class="bg-white/10 p-6 rounded-xl backdrop-blur-sm border border-white/10">
+                    <div class="text-miroYellow text-2xl mb-2">✦</div>
+                    <h3 class="font-bold text-xl mb-2">Maximize Text Clarity</h3>
+                    <p class="text-gray-300 text-sm">
+                        I use a "Snapshot" principle for animations. This prevents the dreaded "Miro Blur" that occurs when browsers render sub-pixel text during movement inside iframes.
+                    </p>
+                </div>
+                <div class="bg-white/10 p-6 rounded-xl backdrop-blur-sm border border-white/10">
+                    <div class="text-miroViolet text-2xl mb-2">☾</div>
+                    <h3 class="font-bold text-xl mb-2">Dark Mode Boards</h3>
+                    <p class="text-gray-300 text-sm">
+                        Using a dark background board? Simply ask me to "Switch the canvas theme to Breakthrough Black" for seamless visual integration.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-8 text-gray-400 text-sm">
+        <p>Miro Dynamic Slide Builder 2.0 User Guide Infographic</p>
+        <p class="mt-2">Generated by Canvas Infographics</p>
+    </footer>
+
+    <!-- Scripts for Chart Logic -->
+    <script>
+        // --- Utility: Label Wrapper for Chart.js (Strict 16 char limit) ---
+        function wrapLabel(label) {
+            if (typeof label !== 'string' || label.length <= 16) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if ((currentLine + " " + words[i]).length <= 16) {
+                    currentLine += " " + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // --- Utility: Tooltip Configuration ---
+        const commonTooltipOptions = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        // --- Chart 1: Core Feature Impact (Polar Area) ---
+        // Justification: "Inform" goal. Shows contribution of parts to the whole experience.
+        const ctx1 = document.getElementById('coreFeaturesChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'polarArea',
+            data: {
+                labels: ['Living Content', 'Miro-Native Design', 'iFrame AutoScaler'],
+                datasets: [{
+                    data: [90, 85, 95], // Mock "Impact Score"
+                    backgroundColor: [
+                        'rgba(71, 209, 196, 0.7)', // Cyan
+                        'rgba(255, 221, 51, 0.7)', // Yellow
+                        'rgba(134, 122, 255, 0.7)'  // Violet
+                    ],
+                    borderColor: [
+                        '#47D1C4',
+                        '#FFDD33',
+                        '#867AFF'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        ticks: { display: false },
+                        grid: { color: '#e5e5e5' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Inter', size: 10 },
+                            boxWidth: 10
+                        }
+                    },
+                    tooltip: commonTooltipOptions
+                }
+            }
+        });
+
+        // --- Chart 2: Prompt Quality (Bar Chart) ---
+        // Justification: "Compare" goal. Visualizes the difference between bad and good prompts.
+        const ctx2 = document.getElementById('promptQualityChart').getContext('2d');
+        const labels2 = ['Context Detail', 'Structure Info', 'Visual Specs', 'Result Quality'];
+        // Apply wrapper
+        const wrappedLabels2 = labels2.map(wrapLabel);
+
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: wrappedLabels2,
+                datasets: [
+                    {
+                        label: 'Generic Prompt',
+                        data: [20, 10, 5, 30],
+                        backgroundColor: '#d1d5db', // Gray
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Optimized Prompt',
+                        data: [90, 85, 95, 100],
+                        backgroundColor: '#867AFF', // Violet
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { display: false },
+                        ticks: { display: false }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Inter', size: 10 } }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { family: 'Inter' } }
+                    },
+                    tooltip: commonTooltipOptions
+                }
+            }
+        });
+
+        // --- Chart 3: Deployment Split (Donut Chart) ---
+        // Justification: "Inform/Compare". Shows the recommended distribution of use.
+        const ctx3 = document.getElementById('deploymentSplitChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'doughnut',
+            data: {
+                labels: ['Interactive Route', 'Static Route'],
+                datasets: [{
+                    data: [80, 20],
+                    backgroundColor: [
+                        '#47D1C4', // Cyan (Recommended)
+                        '#1C1C1E'  // Black
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Inter', size: 11 },
+                            boxWidth: 10
+                        }
+                    },
+                    tooltip: commonTooltipOptions
+                }
+            }
+        });
+
+    </script>
+    
+    <!-- Comment confirming Constraints -->
+    <!-- 
+        Constraints Verification:
+        - Palette: Miro Bright (#FFDD33, #47D1C4, #867AFF, #1C1C1E).
+        - No SVG used.
+        - No Mermaid JS used.
+        - Chart.js used with label wrapping and tooltip callbacks.
+    -->
+</body>
+</html>
