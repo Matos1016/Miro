@@ -52,6 +52,14 @@
             backface-visibility: hidden;
         }
 
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 8s linear infinite;
+        }
+
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1C1C1E; border-radius: 10px; }
@@ -116,7 +124,7 @@
 
             return (
                 <div className="canvas-bg select-none">
-                    {/* Header Section - Increased Height and Top Padding for spacing */}
+                    {/* Header Section */}
                     <div className="h-[150px] px-12 pt-12 flex justify-between items-end relative z-20 shrink-0 pb-4">
                         <div className="sharp-text">
                             <div className="flex items-center gap-3 mb-2">
@@ -129,15 +137,26 @@
                                 GLOBAL CUSTOMER <span className="bg-[#FFDD33] px-3 py-0.5 rounded-lg shadow-[4px_4px_0px_#1C1C1E]">MOMENTUM</span>
                             </h1>
                         </div>
-                        <div className="text-right pb-1">
-                            <div className="text-[40px] font-[900] italic text-[#1C1C1E] leading-none tracking-tighter">23</div>
+                        <div className="text-right pb-1 flex flex-col items-end">
+                            <div className="flex items-center gap-3">
+                                <svg 
+                                    className="animate-spin-slow text-[#FFDD33] drop-shadow-[2px_2px_0px_#1C1C1E]" 
+                                    width="28" 
+                                    height="28" 
+                                    viewBox="0 0 24 24" 
+                                    fill="currentColor"
+                                >
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                                <div className="text-[40px] font-[900] italic text-[#1C1C1E] leading-none tracking-tighter">23</div>
+                            </div>
                             <div className="text-[10px] font-black uppercase tracking-widest text-[#1C1C1E]/40 italic">
                                 Customers signed up in Q4 FY26
                             </div>
                         </div>
                     </div>
 
-                    {/* Main Content Grid - Adjusted py to account for increased header height */}
+                    {/* Main Content Grid */}
                     <div className="flex-1 px-12 pb-8 pt-2 grid grid-cols-12 gap-6 overflow-hidden">
                         
                         {/* Left Column: Regional Heatmap */}
