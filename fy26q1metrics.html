@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY27 Q1 Compensation - Implementation Services</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #F4F4F4;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root-container {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .canvas-bg {
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF;
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column; 
+            border: 4px solid #FFDD33;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .miro-highlight {
+            background-color: #FFDD33;
+            padding: 0 12px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 4px 4px 0px #1C1C1E;
+        }
+
+        .card-container {
+            background-color: #FFFFFF;
+            border: 4px solid #1C1C1E;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.1s steps(2);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card-container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 0px 0px #1C1C1E;
+        }
+
+        .metric-weight {
+            background-color: #1C1C1E;
+            color: #FFDD33;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: 14px;
+            width: fit-content;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F1F1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1C1C1E;
+            border-radius: 10px;
+        }
+
+        .view-transition {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root-container">
+        <div id="root" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const useAutoScaler = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const container = document.getElementById('root-container');
+                    if (container) {
+                        const scale = Math.min(window.innerWidth / 1320, window.innerHeight / 760);
+                        container.style.transform = `scale(${scale})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+        };
+
+        const Icon = ({ type, color, size = "32" }) => {
+            const icons = {
+                csat: (
+                    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                ),
+                time: (
+                    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14" />
+                    </svg>
+                ),
+                contribution: (
+                    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 5v14M5 12h14" />
+                        <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="4 4" />
+                    </svg>
+                ),
+                back: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                )
+            };
+            return <div style={{ color }}>{icons[type]}</div>;
+        };
+
+        const MetricCard = ({ metric, onClick }) => {
+            return (
+                <div 
+                    className="card-container rounded-[2.5rem] p-8 flex flex-col h-full overflow-hidden"
+                    onClick={() => onClick(metric)}
+                >
+                    <div className="flex justify-between items-start mb-4">
+                        <div className={`p-4 rounded-xl border-2 border-[#1C1C1E] shadow-[4px_4px_0px_#1C1C1E]`} style={{ backgroundColor: metric.color }}>
+                            <Icon type={metric.iconType} color="#1C1C1E" size="32" />
+                        </div>
+                        <div className="metric-weight">{metric.weight}</div>
+                    </div>
+                    
+                    <h2 className="text-3xl font-[900] italic uppercase leading-tight tracking-tighter mb-1 text-[#1C1C1E]">{metric.title}</h2>
+                    <p className="text-[#1C1C1E]/60 font-bold text-xs mb-4 tracking-widest uppercase">Goal: {metric.goal}</p>
+                    
+                    <div className="space-y-4 flex-1 overflow-hidden">
+                        <div className="bg-[#1C1C1E]/5 p-4 rounded-xl border border-[#1C1C1E]/10">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#1C1C1E]/40 mb-1">Metric Purpose</p>
+                            <p className="text-sm font-bold text-[#1C1C1E] leading-tight">
+                                {metric.purpose}
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#1C1C1E]/40 mb-1">Key Summary</p>
+                            {metric.summaryDetails.map((d, i) => (
+                                <div key={i} className="flex gap-2 items-start">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#1C1C1E] mt-1.5 shrink-0"></div>
+                                    <span className="text-xs font-bold text-[#1C1C1E]/80 leading-tight">{d}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t-4 border-[#1C1C1E]/5 flex items-center justify-between group">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1C1C1E]/40">Details</span>
+                        <div className="w-8 h-8 rounded-full border-2 border-[#1C1C1E] flex items-center justify-center group-hover:bg-[#1C1C1E] group-hover:text-white transition-colors">
+                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const DetailView = ({ metric, onBack }) => {
+            return (
+                <div className="view-transition flex-1 flex flex-col px-12 pb-6 overflow-hidden">
+                    <div className="mb-4 flex items-center gap-6 shrink-0">
+                        <button 
+                            onClick={onBack}
+                            className="flex items-center gap-2 bg-[#1C1C1E] text-white px-3 py-1.5 rounded-lg text-xs font-black hover:bg-[#1C1C1E]/80 transition-all shadow-[3px_3px_0px_#FFDD33]"
+                        >
+                            <Icon type="back" color="white" size="16" />
+                            BACK TO DASHBOARD
+                        </button>
+                        <div className="h-1 flex-1 bg-[#1C1C1E]/5 rounded-full"></div>
+                    </div>
+
+                    <div className="grid grid-cols-12 gap-5 flex-1 overflow-hidden">
+                        {/* Column 1: Header & Definition */}
+                        <div className="col-span-4 flex flex-col gap-5 overflow-hidden">
+                            <div className="card-container rounded-[1.5rem] p-5 shrink-0" style={{ backgroundColor: metric.color }}>
+                                <Icon type={metric.iconType} color="#1C1C1E" size="40" />
+                                <h2 className="text-3xl font-[900] italic uppercase leading-none tracking-tighter mt-3 mb-1">{metric.title}</h2>
+                                <p className="text-base font-black opacity-60 italic">{metric.weight} Total Weight</p>
+                            </div>
+
+                            <div className="card-container rounded-[1.5rem] p-5 flex-1 bg-white border-4 border-[#1C1C1E] flex flex-col overflow-hidden">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-[#1C1C1E]/40 mb-2 shrink-0">Metric Definition</h3>
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-base font-bold leading-tight text-[#1C1C1E]">
+                                        {metric.fullDefinition}
+                                    </p>
+                                </div>
+                                <div className="pt-3 border-t border-[#1C1C1E]/10 shrink-0">
+                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-[#1C1C1E]/40 mb-1">Measurement Method</h3>
+                                    <p className="text-xs font-bold opacity-80 leading-relaxed italic">{metric.measurementMethod}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 2: Rules & Payout */}
+                        <div className="col-span-5 flex flex-col gap-4 overflow-hidden">
+                            <div className="card-container rounded-[1.5rem] p-4 bg-white border-4 border-[#1C1C1E] flex flex-col flex-1 overflow-hidden">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-[#1C1C1E]/40 mb-2 shrink-0">Rules & Measurement</h3>
+                                <div className="space-y-1.5 flex-1 overflow-hidden">
+                                    {metric.fullRules.map((rule, idx) => (
+                                        <div key={idx} className="bg-[#F9F9F9] p-2 rounded-xl border-2 border-[#EAEAEA] flex gap-3 items-center">
+                                            <div className="w-7 h-7 rounded bg-[#1C1C1E] text-white flex items-center justify-center shrink-0 font-black italic text-xs">{idx + 1}</div>
+                                            <p className="text-[13px] font-bold text-[#1C1C1E] leading-tight">{rule}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="card-container rounded-[1.5rem] p-4 bg-[#1C1C1E] text-white shrink-0">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Quarterly Payout Tiers</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {metric.payoutRules.map((tier, idx) => (
+                                        <div key={idx} className="flex justify-between items-center bg-white/10 p-2 rounded-lg border border-white/10">
+                                            <span className="text-[10px] font-black italic">{tier.label}</span>
+                                            <span className="text-[11px] font-black text-[#FFDD33]">{tier.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 3: Checklist */}
+                        <div className="col-span-3 flex flex-col overflow-hidden">
+                            <div className="card-container rounded-[1.5rem] p-6 bg-[#FFDD33] border-4 border-[#1C1C1E] flex flex-col h-full shadow-[6px_6px_0px_#1C1C1E] overflow-hidden">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-[#1C1C1E]/40 mb-6 shrink-0">Critical Checklist</h3>
+                                <div className="space-y-10 flex-1">
+                                    {metric.checklist.map((item, idx) => (
+                                        <div key={idx} className="flex gap-4">
+                                            <div className="w-6 h-6 rounded-lg border-2 border-[#1C1C1E] bg-white flex items-center justify-center shrink-0 mt-0.5">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-[15px] font-black uppercase leading-tight mb-1">{item.label}</p>
+                                                <p className="text-[13px] font-bold leading-snug opacity-80">{item.desc}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            useAutoScaler();
+            const [view, setView] = useState('overview'); 
+            const [selectedMetric, setSelectedMetric] = useState(null);
+
+            const metrics = [
+                {
+                    id: 'm1',
+                    title: "CSAT",
+                    weight: "35%",
+                    goal: "4.6/5 Average",
+                    purpose: "Maintains high-quality delivery standards for customer onboarding engagements.",
+                    iconType: "csat",
+                    color: "#47D1C4",
+                    summaryDetails: [
+                        "Automated surveys per account",
+                        "Overperformance cap at 120%",
+                        "Score calculated as quarterly average"
+                    ],
+                    fullDefinition: "Calculated based on the average of all CSAT survey responses received for managing engagements. Focuses on quality of delivery.",
+                    measurementMethod: "Individual performance metric based on automated post-engagement feedback loops.",
+                    fullRules: [
+                        "Automated CSAT sending; no minimum response count required.",
+                        "Only one CSAT counted per account per quarter.",
+                        "Multiple responses from same account are averaged.",
+                        "Accelerated payout for 4.7-5.0 (+5% per 0.1 increment)."
+                    ],
+                    payoutRules: [
+                        { label: "<3.6 Score", value: "0%" },
+                        { label: "3.6 - 4.0 Score", value: "50%" },
+                        { label: "4.1 - 4.5 Score", value: "75%" },
+                        { label: "4.6 Score", value: "100%" },
+                        { label: "4.7+ Score", value: "105%+" }
+                    ],
+                    checklist: [
+                        { label: "Engagement", desc: "Applies to all managed engagement types." },
+                        { label: "Timing", desc: "Reflects active closing dates." },
+                        { label: "Cap", desc: "Multiplier capped at 1.2x weight." }
+                    ]
+                },
+                {
+                    id: 'm2',
+                    title: "Compliance",
+                    weight: "35%",
+                    goal: ">80% Weekly",
+                    purpose: "Ensures operational discipline and integrity of resource data for organizational planning.",
+                    iconType: "time",
+                    color: "#867AFF",
+                    summaryDetails: [
+                        "Weekly submission by Friday",
+                        "Supports forecasting & capacity",
+                        "No more than 2 separate weeks missed"
+                    ],
+                    fullDefinition: "Measures consistent, on-time time tracking to support resource forecasting and operational decision-making.",
+                    measurementMethod: "Calculated as (# of compliant weeks ÷ total weeks in the quarter).",
+                    fullRules: [
+                        "Submission required by the defined weekly deadline.",
+                        "Time must be entered by Friday for that week.",
+                        "Quarterly target is >80% compliance rate.",
+                        "100% payout if no more than 2 separate weeks are missed."
+                    ],
+                    payoutRules: [
+                        { label: "0-50% Rate", value: "0%" },
+                        { label: "51-79% Rate", value: "50%" },
+                        { label: "80-100% Rate", value: "100%" }
+                    ],
+                    checklist: [
+                        { label: "Deadline", desc: "Every Friday at 11:59 PM Local Time." },
+                        { label: "Accuracy", desc: "Must match forecast targets." },
+                        { label: "Buffer", desc: "Allows for 2 missed instances." }
+                    ]
+                },
+                {
+                    id: 'm3',
+                    title: "Contribution",
+                    weight: "30%",
+                    goal: "Approved & Delivered",
+                    purpose: "Drives the creation of scalable assets that benefit the entire Professional Services ecosystem.",
+                    iconType: "contribution",
+                    color: "#FFDD33",
+                    summaryDetails: [
+                        "Individual or Joint (max 2 people)",
+                        "Scaling delivery & growth tools",
+                        "Must include artifacts and usage guide"
+                    ],
+                    fullDefinition: "Reward contributions that scale delivery, enable growth, or increase operational leverage across the ProServ organization.",
+                    measurementMethod: "Individual (Binary/Pass-Fail) based on artifact delivery and manager approval.",
+                    fullRules: [
+                        "Eligible: frameworks, automation tools, or AI workflows.",
+                        "Must be delivered by quarter-end at quality standards.",
+                        "Must be pre-approved by a manager to ensure impact.",
+                        "Joint submissions allowed for 2 people with clear scope."
+                    ],
+                    payoutRules: [
+                        { label: "Not Completed", value: "0%" },
+                        { label: "Completed & Approved", value: "100%" }
+                    ],
+                    checklist: [
+                        { label: "Artifacts", desc: "Miro board and documentation." },
+                        { label: "Enablement", desc: "Includes instructions for reuse." },
+                        { label: "Impact", desc: "Focuses on efficiency or excellence." }
+                    ]
+                }
+            ];
+
+            const handleMetricClick = (metric) => {
+                setSelectedMetric(metric);
+                setView('detail');
+            };
+
+            const handleBack = () => {
+                setView('overview');
+                setSelectedMetric(null);
+            };
+
+            return (
+                <div className="canvas-bg select-none">
+                    <div className="h-[100px] px-12 flex items-center justify-between relative z-20 mt-2 shrink-0">
+                        <div>
+                            <div className="flex items-center gap-3 mb-1">
+                                <div className="bg-[#1C1C1E] text-[#FFDD33] px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">Implementation Services</div>
+                                <div className="w-12 h-[2px] bg-[#1C1C1E]/10"></div>
+                            </div>
+                            <h1 className="text-[48px] font-[900] italic uppercase leading-none tracking-tighter text-[#1C1C1E]">
+                                FY27 Q1 <span className="miro-highlight">COMPENSATION</span> PLAN
+                            </h1>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-[#1C1C1E]/40 uppercase tracking-widest">Quarter Range</p>
+                            <p className="text-lg font-black italic text-[#1C1C1E]">FEB 2026 - APR 2026</p>
+                        </div>
+                    </div>
+
+                    {view === 'overview' ? (
+                        <div className="view-transition flex-1 px-12 pb-10 grid grid-cols-3 gap-8 overflow-hidden">
+                            {metrics.map((m) => (
+                                <MetricCard key={m.id} metric={m} onClick={handleMetricClick} />
+                            ))}
+                        </div>
+                    ) : (
+                        <DetailView metric={selectedMetric} onBack={handleBack} />
+                    )}
+
+                    <div className="h-[40px] px-12 flex justify-between items-center opacity-40 border-t border-[#1C1C1E]/5 mb-2 shrink-0">
+                        <div className="text-[#1C1C1E] font-black italic uppercase text-[9px] tracking-widest leading-none">
+                            Confidential • Professional Services Incentive Compensation • Sales Comp Terms Apply
+                        </div>
+                        <div className="flex gap-4">
+                             <div className="text-[9px] font-black text-[#1C1C1E]">FY27.Q1.PLAN_V1</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
