@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIRO Optimization - Global Customer Momentum</title>
+    <!-- Core Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #000000;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+            position: absolute;
+        }
+
+        .canvas-bg {
+            width: 1280px;
+            height: 720px;
+            background-color: #1C1C1E; 
+            background-image: radial-gradient(#2A2A2C 1.5px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column; 
+            border: 4px solid #2A2A2C;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sharp-text {
+            transform: none !important;
+            backface-visibility: hidden;
+        }
+
+        .glow-yellow {
+            text-shadow: 0 0 20px rgba(255, 221, 51, 0.4);
+        }
+
+        .customer-card-static {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .region-pill {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const root = document.getElementById('root');
+                    if (root) {
+                        const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+                        root.style.transform = `scale(${scale})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+
+            const regions = [
+                { name: "AMER", count: 10, color: "#FFEA00" },
+                { name: "EMEA", count: 6, color: "#00FFEB" },
+                { name: "JPN", count: 4, color: "#A095FF" },
+                { name: "APAC", count: 2, color: "#FF4D00" },
+                { name: "LATAM", count: 1, color: "#E08CFF" }
+            ];
+
+            const customers = [
+                { name: "BOK Financial", industry: "Financial Services", region: "AMER" },
+                { name: "H&R Block", industry: "Financial Services", region: "AMER" },
+                { name: "Netflix", industry: "Media & Tech", region: "AMER" },
+                { name: "Victoria's Secret", industry: "Retail", region: "AMER" },
+                { name: "ServiceNow", industry: "Tech & SaaS", region: "AMER" },
+                { name: "Airbnb", industry: "Tech & Hospitality", region: "AMER" },
+                { name: "MillerKnoll", industry: "Manufacturing", region: "AMER" },
+                { name: "Workday", industry: "Tech & SaaS", region: "AMER" },
+                { name: "Knitwell Group", industry: "Retail", region: "AMER" },
+                { name: "EPAM Systems", industry: "Professional Services", region: "AMER" },
+                { name: "Ocean Network Express", industry: "Logistics", region: "APAC" },
+                { name: "Flight Centre", industry: "Travel", region: "APAC" },
+                { name: "Boehringer Ingelheim", industry: "Healthcare", region: "EMEA" },
+                { name: "Sanoma", industry: "Media", region: "EMEA" },
+                { name: "Accenture", industry: "Professional Services", region: "EMEA" },
+                { name: "Foster + Partners", industry: "Architecture", region: "EMEA" },
+                { name: "SVA System Vertrieb Alexander", industry: "Tech Services", region: "EMEA" },
+                { name: "Sky Betting & Gaming", industry: "Media & Tech", region: "EMEA" },
+                { name: "KANADEN CORPORATION", industry: "Electronics", region: "JPN" },
+                { name: "FIELDS CORPORATION", industry: "Entertainment", region: "JPN" },
+                { name: "DENSO CORPORATION", industry: "Automotive", region: "JPN" },
+                { name: "NTT DOCOMO BUSINESS, Inc.", industry: "Telecom", region: "JPN" },
+                { name: "LATAM Airlines Group", industry: "Aviation", region: "LATAM" }
+            ];
+
+            return (
+                <div className="canvas-bg select-none">
+                    {/* Header Section */}
+                    <div className="h-[120px] px-12 pt-10 flex justify-between items-center relative z-20 shrink-0">
+                        <div className="sharp-text">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="bg-white/5 text-white/40 px-3 py-0.5 text-[9px] font-black tracking-[0.3em] rounded-md border border-white/5 uppercase">
+                                    MIRO OPTIMIZATION SERVICES & TRAINING
+                                </span>
+                                <div className="h-[1px] w-12 bg-white/10"></div>
+                            </div>
+                            <h1 className="text-[48px] font-[900] italic uppercase leading-none text-white tracking-tighter">
+                                GLOBAL CUSTOMER <span className="text-[#FFEA00] glow-yellow">MOMENTUM</span>
+                            </h1>
+                        </div>
+                        
+                        <div className="flex items-center gap-6 bg-white/[0.03] px-6 py-2 rounded-2xl border border-white/5">
+                            <div className="text-right">
+                                <div className="text-[36px] font-[900] italic text-[#FFEA00] leading-none tracking-tighter glow-yellow">23</div>
+                                <div className="text-[8px] font-black uppercase tracking-widest text-white/30 italic">Sign-ups Q4 FY26</div>
+                            </div>
+                            <svg className="text-[#FFEA00]" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Regional Breakdown Strip */}
+                    <div className="px-12 py-6 shrink-0 flex items-center justify-between gap-4">
+                        {regions.map((reg) => (
+                            <div key={reg.name} className="flex-1 region-pill rounded-xl p-3 flex items-center gap-4">
+                                <div className="flex flex-col">
+                                    <span className="text-[11px] font-black italic uppercase text-white/80">{reg.name}</span>
+                                    <span className="text-[9px] font-bold text-white/30 tracking-widest uppercase">{reg.count} Customers</span>
+                                </div>
+                                <div className="h-1 flex-1 bg-white/5 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full"
+                                        style={{ 
+                                            width: `${(reg.count / 10) * 100}%`, 
+                                            backgroundColor: reg.color,
+                                            boxShadow: `0 0 10px ${reg.color}aa`
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Customer Matrix - Full Width Grid */}
+                    <div className="flex-1 px-12 pb-6 pt-2 flex flex-col overflow-hidden">
+                        <div className="flex items-center gap-3 mb-6 shrink-0 opacity-40">
+                            <span className="text-white text-[9px] font-black tracking-[0.3em] uppercase italic">Customer Wins so far</span>
+                            <div className="h-[1px] flex-1 bg-white/10"></div>
+                        </div>
+                        
+                        <div className="grid grid-cols-7 gap-3 content-start">
+                            {customers.map((cust, i) => {
+                                const regColor = regions.find(r => r.name === cust.region)?.color || '#FFF';
+                                
+                                // Adaptive Font Sizing Logic for Names
+                                let nameSizeClass = "text-[15px]";
+                                if (cust.name.length > 22) {
+                                    nameSizeClass = "text-[10px]";
+                                } else if (cust.name.length > 16) {
+                                    nameSizeClass = "text-[12px]";
+                                }
+
+                                // Adaptive sizing for Industry labels to prevent truncation
+                                let industrySizeClass = "text-[9px]";
+                                if (cust.industry.length > 20) {
+                                    industrySizeClass = "text-[7px]";
+                                }
+
+                                return (
+                                    <div 
+                                        key={i} 
+                                        className="customer-card-static relative px-3 py-4 rounded-xl flex flex-col justify-center h-[82px] overflow-hidden"
+                                    >
+                                        <div 
+                                            className="absolute top-0 left-3 right-3 h-[3px] rounded-b-full"
+                                            style={{ 
+                                                backgroundColor: regColor,
+                                                boxShadow: `0 0 10px ${regColor}88` 
+                                            }}
+                                        ></div>
+                                        
+                                        <div className="flex flex-col">
+                                            <h4 className={`${nameSizeClass} font-[900] italic uppercase leading-tight text-white tracking-tighter truncate`}>
+                                                {cust.name}
+                                            </h4>
+                                            <p className={`${industrySizeClass} font-bold text-white/20 uppercase truncate tracking-wide mt-1.5`}>
+                                                {cust.industry}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Footer Bar */}
+                    <div className="h-[50px] px-12 flex justify-between items-center shrink-0 border-t border-white/5 opacity-40">
+                        <div className="text-white font-black italic uppercase text-[9px] tracking-[0.3em]">
+                            Confidential • MOST
+                        </div>
+                        <div className="text-white font-black italic uppercase text-[9px] tracking-[0.3em]">
+                            MIRO Global ProServ © 2026
+                        </div>
+                    </div>
+
+                    {/* Background Stylized "M" */}
+                    <div className="absolute -bottom-20 -left-20 text-[350px] font-[900] italic uppercase text-white/[0.01] tracking-tighter pointer-events-none">
+                        MIRO
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
