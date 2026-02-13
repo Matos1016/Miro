@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miro MOST - Strategic Hub</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #F4F4F4;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root-container {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .canvas-bg {
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF;
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column; 
+            border: 4px solid #FFDD33;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sharp-text {
+            transform: none !important;
+            backface-visibility: hidden;
+        }
+
+        .miro-highlight {
+            background-color: #FFDD33;
+            padding: 2px 12px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 4px 4px 0px #1C1C1E;
+        }
+
+        .blueprint-card {
+            background-color: #FFFFFF;
+            border: 4px solid #1C1C1E;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .blueprint-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 0px 0px #1C1C1E;
+        }
+
+        .blueprint-card.active {
+            background-color: #1C1C1E;
+            color: white;
+            box-shadow: 0 8px 0px 0px #FFDD33;
+        }
+
+        .outcome-tag {
+            background-color: #FFDD33;
+            color: #1C1C1E;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            box-shadow: 2px 2px 0px #1C1C1E;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .animate-slide {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1C1C1E;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root-container">
+        <div id="root" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const useAutoScaler = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const container = document.getElementById('root-container');
+                    if (container) {
+                        const scale = Math.min(window.innerWidth / 1320, window.innerHeight / 760);
+                        container.style.transform = `scale(${scale})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+        };
+
+        const Icon = ({ name, color = "currentColor", size = 24 }) => {
+            const icons = {
+                tech: <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
+                product: <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" />,
+                pm: (
+                    <React.Fragment>
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </React.Fragment>
+                ),
+                ai: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
+                migrate: <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />,
+                modern: (
+                    <React.Fragment>
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </React.Fragment>
+                ),
+                chevron: <polyline points="9 18 15 12 9 6" />
+            };
+            return (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {icons[name]}
+                </svg>
+            );
+        };
+
+        const FRAMEWORKS = [
+            {
+                id: 1,
+                title: "Technical Foundations",
+                subtitle: "& DATA GOVERNANCE",
+                focus: "Operational Efficiency & Risk Mitigation",
+                icon: "tech",
+                color: "#FFDD33",
+                impact: "Unify disparate teams into a single, governed ecosystem to reduce tool sprawl and eliminate architectural debt.",
+                outcomes: [
+                    "Achieve 100% visibility into workspace costs and security compliance.",
+                    "Streamline onboarding by 40% with automated, standardized project templates.",
+                    "Reduce administrative overhead by consolidating ad-hoc instances into a single secure hub.",
+                    "Ensure sustainable scalability with a future-proofed permission and role structure."
+                ],
+                workstreams: [
+                    { name: "Workspace Consolidation & Cleanup", hrs: 45 },
+                    { name: "Governance Framework & Standards", hrs: 30 },
+                    { name: "Custom Templates for Cross-Functional Processes", hrs: 50 },
+                    { name: "Integrations (Confluence, Slack, Google Drive)", hrs: 35 },
+                    { name: "Change Management & Rollout Enablement", hrs: 30 },
+                    { name: "Quarterly Usage & Governance Reviews", hrs: 50 }
+                ]
+            },
+            {
+                id: 2,
+                title: "Product & Engineering",
+                subtitle: "OPTIMIZATION",
+                focus: "Cycle Time & Delivery Reliability",
+                icon: "product",
+                color: "#867AFF",
+                impact: "Remove manual friction from the software development lifecycle by automating ceremonies and data syncing.",
+                outcomes: [
+                    "Eliminate dual-entry fatigue through high-fidelity Jira and Azure DevOps syncing.",
+                    "Accelerate PI Planning from days to hours with repeatable, automated dependency boards.",
+                    "Strengthen architectural alignment with a shared, live-updated system diagram library.",
+                    "Improve cycle time by identifying and removing cross-team blockers through AI insights."
+                ],
+                workstreams: [
+                    { name: "Jira + Azure DevOps Integration Cleanup", hrs: 35 },
+                    { name: "System Architecture Blueprint Library", hrs: 55 },
+                    { name: "Unified Agile Ceremony Framework", hrs: 40 },
+                    { name: "AI Sidekicks for Engineering Insights", hrs: 30 },
+                    { name: "Quarterly Planning Support", hrs: 60 },
+                    { name: "Change Management & Enablement Plan", hrs: 20 }
+                ]
+            },
+            {
+                id: 3,
+                title: "Project Management",
+                subtitle: "& STRATEGY EXCELLENCE",
+                focus: "Executive Visibility & Priority Alignment",
+                icon: "pm",
+                color: "#47D1C4",
+                impact: "Connect high-level corporate strategy to day-to-day delivery, ensuring every hour spent aligns with top-line goals.",
+                outcomes: [
+                    "Provide leadership with real-time portfolio dashboards—zero manual slides needed.",
+                    "Standardize roadmap visualization across all business units for consistent reporting.",
+                    "Automate status reporting using AI-powered board summaries for project managers.",
+                    "Enable faster prioritization by visualizing resource constraints against strategic initiatives."
+                ],
+                workstreams: [
+                    { name: "Portfolio Management Board Design", hrs: 40 },
+                    { name: "Roadmapping Templates for Product & Ops", hrs: 30 },
+                    { name: "AI Flows for Status Reporting", hrs: 35 },
+                    { name: "Executive Dashboards", hrs: 40 },
+                    { name: "Monthly Portfolio Operations Coaching", hrs: 70 },
+                    { name: "Change Management & Communications", hrs: 25 }
+                ]
+            },
+            {
+                id: 4,
+                title: "AI-First Workflow",
+                subtitle: "ACCELERATION",
+                focus: "Productivity & High-ROI Automation",
+                icon: "ai",
+                color: "#CE70FC",
+                impact: "Empower teams to safely adopt AI within Miro to synthesize massive amounts of data and automate repetitive research.",
+                outcomes: [
+                    "Reduce data synthesis time by 60% with custom AI 'Sidekicks' for research.",
+                    "Drive faster decision-making with AI-powered meeting summaries and action logs.",
+                    "Future-proof the organization by embedding AI into every high-value template.",
+                    "Automate the extraction of actionable insights from hundreds of scattered customer stickies."
+                ],
+                workstreams: [
+                    { name: "AI Readiness Assessment", hrs: 20 },
+                    { name: "Build Sidekick Bots for Key Workflows", hrs: 50 },
+                    { name: "Create 4 AI-Powered Templates", hrs: 40 },
+                    { name: "Integrate AI Flows With Jira & Slack", hrs: 45 },
+                    { name: "AI Enablement & Training Program", hrs: 35 },
+                    { name: "Quarterly Optimization Cycles", hrs: 50 }
+                ]
+            },
+            {
+                id: 5,
+                title: "Platform Migration",
+                subtitle: "+ NEW WAYS OF WORKING",
+                focus: "Seamless Transition & User Retention",
+                icon: "migrate",
+                color: "#F24822",
+                impact: "Minimize downtime and productivity loss during tool transitions by modernizing workflows while migrating content.",
+                outcomes: [
+                    "Ensure a zero-loss transfer of business-critical assets from Mural or Lucid.",
+                    "Increase day-one adoption with tailored onboarding that respects legacy habits.",
+                    "Optimize migrated boards to be 2x more usable than their original versions.",
+                    "Establish a clear governance model to prevent sprawl in the new environment from day one."
+                ],
+                workstreams: [
+                    { name: "Migration Assessment & Workspace Architecture", hrs: 40 },
+                    { name: "Mural/Lucid Migration Support", hrs: 60 },
+                    { name: "Rebuild or Optimize High-Value Boards", hrs: 55 },
+                    { name: "Key Integrations Setup", hrs: 30 },
+                    { name: "Change Management & Communications", hrs: 20 },
+                    { name: "Adoption Monitoring & Quarterly Optimization", hrs: 35 }
+                ]
+            },
+            {
+                id: 6,
+                title: "Enterprise Consolidation",
+                subtitle: "& MODERN COLLABORATION",
+                focus: "Standardization & Cultural Transformation",
+                icon: "modern",
+                color: "#050038",
+                impact: "Scale world-class collaboration practices across thousands of users by building a reusable library of ways-of-working.",
+                outcomes: [
+                    "Eliminate shadow IT risks by consolidating fragmented enterprise instances.",
+                    "Establish a sustainable 'Center of Excellence' for continuous collaboration growth.",
+                    "Reduce cross-team friction with a standardized library of blueprints and guides.",
+                    "Drive cultural transformation through a structured, data-informed enablement program."
+                ],
+                workstreams: [
+                    { name: "Consolidation of Environments", hrs: 45 },
+                    { name: "Identity, Access, and Admin Operating Model", hrs: 20 },
+                    { name: "Integrations With Microsoft and Atlassian", hrs: 45 },
+                    { name: "Use Case Design + Custom Templates", hrs: 80 },
+                    { name: "Portfolio & Cross-Team Visibility Layer", hrs: 25 },
+                    { name: "Enablement and Change Management Program", hrs: 50 }
+                ]
+            }
+        ];
+
+        const App = () => {
+            useAutoScaler();
+            const [selectedId, setSelectedId] = useState(1);
+            const activeData = FRAMEWORKS.find(f => f.id === selectedId);
+
+            return (
+                <div className="canvas-bg select-none">
+                    {/* Header Section */}
+                    <div className="h-[110px] px-12 flex items-end justify-between pb-3 sharp-text shrink-0">
+                        <div>
+                            <div className="flex items-center gap-4 mb-1">
+                                <span className="bg-[#1C1C1E] text-[#FFDD33] px-3 py-0.5 text-[9px] font-black uppercase tracking-[0.3em] rounded border border-[#FFDD33]/20">MOST STRATEGIC HUB</span>
+                                <div className="h-[1px] w-16 bg-[#1C1C1E]/10"></div>
+                            </div>
+                            <h1 className="text-[50px] font-[900] italic uppercase leading-[0.9] text-[#1C1C1E] tracking-tighter">
+                                Get the <span className="miro-highlight">MOST</span> out of Miro
+                            </h1>
+                        </div>
+                        <div className="text-right pb-1">
+                            <p className="text-[10px] font-black text-[#1C1C1E]/40 uppercase tracking-widest mb-1">PROVEN FRAMEWORKS FOR INNOVATION EXCELLENCE</p>
+                            <div className="flex justify-end">
+                                <div className="h-[3px] w-12 bg-[#FFDD33] rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content Area */}
+                    <div className="flex-1 px-12 pb-6 flex gap-6 overflow-hidden">
+                        
+                        {/* LEFT NAV: Framework Cards */}
+                        <div className="w-[360px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+                            {FRAMEWORKS.map((f) => (
+                                <div 
+                                    key={f.id}
+                                    onClick={() => setSelectedId(f.id)}
+                                    className={`blueprint-card rounded-xl p-3.5 flex items-center gap-4 ${selectedId === f.id ? 'active' : ''}`}
+                                >
+                                    <div 
+                                        className={`w-9 h-9 rounded-lg flex items-center justify-center border-2 border-[#1C1C1E] shrink-0 shadow-[2px_2px_0px_#1C1C1E]`}
+                                        style={{ 
+                                            backgroundColor: selectedId === f.id ? f.color : '#FFFFFF' 
+                                        }}
+                                    >
+                                        <Icon 
+                                            name={f.icon} 
+                                            color={selectedId === f.id && (f.id === 6) ? "#FFDD33" : "#1C1C1E"} 
+                                            size={20} 
+                                        />
+                                    </div>
+                                    <div className="sharp-text">
+                                        <h3 className="text-[11px] font-black uppercase leading-tight">{f.title}</h3>
+                                        <p className={`text-[7px] font-black tracking-widest leading-none mt-1 ${selectedId === f.id ? 'text-[#FFDD33]' : 'text-[#1C1C1E]/40]'}`}>
+                                            {f.subtitle}
+                                        </p>
+                                    </div>
+                                    <div className="ml-auto opacity-30">
+                                        <Icon name="chevron" size={12} color={selectedId === f.id ? "#FFFFFF" : "#1C1C1E"} />
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            <div className="mt-4 p-4 bg-[#FFDD33] rounded-xl border-4 border-[#1C1C1E] shadow-[4px_4px_0px_#1C1C1E]">
+                                <h4 className="text-[9px] font-black uppercase tracking-widest mb-1 text-[#1C1C1E]">Strategy Tip</h4>
+                                <p className="text-[10px] font-bold leading-tight text-[#1C1C1E]/80">
+                                    Combine workstreams across blueprints to create a custom roadmap tailored to your specific Q1 priorities.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* RIGHT CONTENT: Drill-down View */}
+                        <div className="flex-1 bg-white border-4 border-[#1C1C1E] rounded-[2rem] p-7 flex flex-col relative overflow-hidden animate-slide" key={selectedId}>
+                            
+                            {/* Visual Background Accent */}
+                            <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none">
+                                <Icon name={activeData.icon} size={280} color="#1C1C1E" />
+                            </div>
+
+                            <div className="flex justify-between items-start mb-4 relative z-10 shrink-0">
+                                <div className="max-w-[85%]">
+                                    <h2 className="text-3xl font-[900] italic uppercase leading-none tracking-tighter mb-2 text-[#1C1C1E]">
+                                        {activeData.title}
+                                    </h2>
+                                    <p className="text-[13px] font-bold text-[#1C1C1E] leading-tight italic bg-[#F4F4F4] p-3 border-l-4 border-[#FFDD33] rounded-r-lg">
+                                        “{activeData.impact}”
+                                    </p>
+                                </div>
+                                <div className="outcome-tag text-[9px]">Game Plan 0{activeData.id}</div>
+                            </div>
+
+                            <div className="grid grid-cols-12 gap-6 flex-1 relative z-10 overflow-hidden">
+                                {/* Outcomes Section */}
+                                <div className="col-span-4 flex flex-col overflow-hidden h-full">
+                                    <h4 className="text-[8px] font-black uppercase tracking-[0.3em] text-[#1C1C1E]/40 mb-3 shrink-0">Strategic Outcomes</h4>
+                                    <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-4">
+                                        {activeData.outcomes.map((o, idx) => (
+                                            <div key={idx} className="flex gap-3 items-start group">
+                                                <div className="w-5 h-5 rounded bg-[#1C1C1E] flex items-center justify-center shrink-0 mt-0.5">
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFDD33" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </div>
+                                                <p className="text-[11px] font-bold text-[#1C1C1E]/80 leading-tight">{o}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Workstreams Section */}
+                                <div className="col-span-8 flex flex-col overflow-hidden h-full">
+                                    <h4 className="text-[8px] font-black uppercase tracking-[0.3em] text-[#1C1C1E]/40 mb-3 shrink-0">Investment Areas</h4>
+                                    <div className="space-y-1.5 overflow-y-auto pr-3 custom-scrollbar flex-1 pb-2">
+                                        {activeData.workstreams.map((w, idx) => (
+                                            <div key={idx} className="flex justify-between items-center bg-[#F9F9F9] border-2 border-[#1C1C1E]/5 p-2 rounded-xl hover:border-[#1C1C1E] transition-all">
+                                                <span className="text-[10px] font-black uppercase tracking-tight text-[#1C1C1E]/70">{w.name}</span>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <span className="bg-[#1C1C1E] text-[#FFDD33] px-2 py-0.5 rounded text-[9px] font-black italic">{w.hrs} HRS</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-auto pt-3 border-t-4 border-[#1C1C1E] flex flex-col shrink-0">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex flex-col">
+                                                <span className="text-[7px] font-black uppercase tracking-widest text-[#1C1C1E]/40">Total Strategic Investment</span>
+                                                <span className="text-xs font-black italic uppercase tracking-widest text-[#1C1C1E]">Quarterly Allocation</span>
+                                            </div>
+                                            <span className="text-2xl font-[900] italic text-[#1C1C1E]">240 HRS</span>
+                                        </div>
+                                        <p className="text-[7.5px] font-bold text-[#1C1C1E]/50 mt-1 italic leading-tight">
+                                            *Hour allocations shown are illustrative examples and may vary based on customer needs, complexity, and priorities
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Utility Bar */}
+                    <div className="h-[40px] px-12 flex justify-between items-center opacity-30 pointer-events-none sharp-text">
+                        <div className="text-[#1C1C1E] font-black italic uppercase text-[8px] tracking-[0.2em]">Excellence - Velocity - Impact</div>
+                        <div className="flex items-center gap-6">
+                            <div className="text-[#1C1C1E] font-black italic uppercase text-[8px] tracking-[0.2em]">© FY26 MIRO PROFESSIONAL SERVICES</div>
+                            <div className="w-12 h-[3px] bg-[#1C1C1E] rounded-full"></div>
+                        </div>
+                    </div>
+
+                    {/* Big Watermark */}
+                    <div className="absolute -bottom-16 -right-16 text-[280px] font-[900] italic uppercase text-[#1C1C1E]/[0.02] tracking-tighter pointer-events-none">
+                        MOST
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
