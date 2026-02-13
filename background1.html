@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steven - Miro Virtual Stage</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,800;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #F4F4F4;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root-container {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .canvas-bg {
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF; 
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column; 
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #FFDD33;
+        }
+
+        .metric-tag {
+            background-color: #1C1C1E;
+            color: #FFDD33;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: 14px;
+            width: fit-content;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+
+        /* Matches Screenshot Proportions and Colors */
+        .cursor-pill {
+            border: 2.5px solid #005F41; /* forest green border */
+            padding: 10px 36px;
+            border-radius: 9999px;
+            background: #C9EBDF; /* aura cyan fill */
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .sharp-text {
+            -webkit-font-smoothing: antialiased;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+
+        .decoration-node {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid #1C1C1E;
+            border-radius: 40px;
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        /* Adjusted cursor to hover closer and symmetrically off the shoulder */
+        .cursor-arrow {
+            position: absolute;
+            top: -28px; /* Moved up slightly from -24px to balance gap */
+            right: -28px; 
+            transform: rotate(85deg); 
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1));
+        }
+    </style>
+</head>
+<body>
+    <div id="root-container">
+        <div id="root" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useEffect } = React;
+
+        const useAutoScaler = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const container = document.getElementById('root-container');
+                    if (container) {
+                        const scale = Math.min(window.innerWidth / 1320, window.innerHeight / 760);
+                        container.style.transform = `scale(${scale})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+        };
+
+        const App = () => {
+            useAutoScaler();
+
+            return (
+                <div className="canvas-bg select-none">
+                    <div className="decoration-node -top-20 -left-20 rotate-12"></div>
+                    <div className="decoration-node -bottom-20 -right-20 -rotate-12"></div>
+
+                    <div className="h-[120px] px-12 flex items-center justify-between relative z-20 mt-4">
+                        {/* Header Area Cleared */}
+                    </div>
+
+                    <div className="flex-1"></div>
+
+                    <div className="h-[140px] px-12 pb-16 flex items-end justify-between z-20">
+                        <div className="flex flex-col gap-6">
+                            <div className="cursor-pill">
+                                <div className="cursor-arrow">
+                                    <svg width="48" height="48" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path 
+                                            d="M7 7L13.5 25.5L17.5 17.5L25.5 13.5L7 7Z" 
+                                            fill="#31D391" 
+                                            stroke="#005F41" 
+                                            strokeWidth="2.5" 
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                                
+                                <span className="text-[32px] font-[900] text-[#1C1C1E] tracking-tight leading-none sharp-text">
+                                    Steven
+                                </span>
+                            </div>
+                            
+                            <div className="flex gap-3">
+                                <div className="metric-tag">Professional Services</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Large Background Watermark */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
+                         <span className="text-[320px] font-black italic tracking-tighter text-[#1C1C1E]">MIRO</span>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
