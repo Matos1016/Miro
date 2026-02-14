@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIRO Optimization - Global Customer Momentum</title>
+    <title>MIRO Optimization - FY26 PS ARR Dashboard</title>
     <!-- Core Dependencies -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -59,11 +59,37 @@
         .customer-card-static {
             background: rgba(255, 255, 255, 0.015);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 0; 
+        }
+
+        .customer-card-static:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .region-pill {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .offering-tag {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            line-height: 1; 
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -71,7 +97,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         const App = () => {
             useEffect(() => {
@@ -87,82 +113,117 @@
                 return () => window.removeEventListener('resize', scaler);
             }, []);
 
-            const regions = [
-                { name: "AMER", count: 10, color: "#FFEA00" },
-                { name: "EMEA", count: 6, color: "#00FFEB" },
-                { name: "JPN", count: 4, color: "#A095FF" },
-                { name: "APAC", count: 2, color: "#FF4D00" },
-                { name: "LATAM", count: 1, color: "#E08CFF" }
+            // Sorted by Region (AMER -> EMEA -> JPN -> APAC -> LATAM) then Name
+            const rawData = [
+                // AMER
+                { name: "Airbnb", region: "AMER", product: "MOST" },
+                { name: "Amazon", region: "AMER", product: "TAM" },
+                { name: "Amgen", region: "AMER", product: "TAM" },
+                { name: "BOK Financial", region: "AMER", product: "MOST" },
+                { name: "Danaher", region: "AMER", product: "TAM" },
+                { name: "EPAM Systems", region: "AMER", product: "MOST" },
+                { name: "Ford Motor Company", region: "AMER", product: "TAM" },
+                { name: "GE Aerospace", region: "AMER", product: "TAM" },
+                { name: "H&R Block", region: "AMER", product: "MOST" },
+                { name: "J.Crew", region: "AMER", product: "TAM" },
+                { name: "Knitwell Group", region: "AMER", product: "MOST" },
+                { name: "Kohl's", region: "AMER", product: "TAM" },
+                { name: "MercadoLibre", region: "AMER", product: "TAM" },
+                { name: "MillerKnoll", region: "AMER", product: "MOST" },
+                { name: "Netflix", region: "AMER", product: "MOST" },
+                { name: "PayPal", region: "AMER", product: "TAM" },
+                { name: "Pfizer", region: "AMER", product: "TAM" },
+                { name: "ServiceNow", region: "AMER", product: "MOST" },
+                { name: "Stryker", region: "AMER", product: "TAM" },
+                { name: "Take-Two Interactive", region: "AMER", product: "TAM" },
+                { name: "Victoria's Secret", region: "AMER", product: "MOST" },
+                { name: "Workday", region: "AMER", product: "MOST" },
+                // EMEA
+                { name: "Accenture", region: "EMEA", product: "MOST" },
+                { name: "Adevinta", region: "EMEA", product: "TAM" },
+                { name: "Boehringer Ingelheim", region: "EMEA", product: "MOST" },
+                { name: "Buro Happold", region: "EMEA", product: "TAM" },
+                { name: "Endava", region: "EMEA", product: "TAM" },
+                { name: "Foster + Partners", region: "EMEA", product: "MOST" },
+                { name: "If Skadeförsäkring", region: "EMEA", product: "TAM" },
+                { name: "Philips", region: "EMEA", product: "TAM" },
+                { name: "PwC", region: "EMEA", product: "TAM" },
+                { name: "Sanoma", region: "EMEA", product: "MOST" },
+                { name: "SAP SE", region: "EMEA", product: "MOST" },
+                { name: "Sky Betting & Gaming", region: "EMEA", product: "MOST" },
+                { name: "SVA System Vertrieb", region: "EMEA", product: "MOST" },
+                { name: "WPP IT", region: "EMEA", product: "TAM" },
+                // JPN
+                { name: "DENSO CORP", region: "JPN", product: "MOST" },
+                { name: "FIELDS CORP", region: "JPN", product: "MOST" },
+                { name: "KANADEN CORP", region: "JPN", product: "MOST" },
+                { name: "NEC Corporation", region: "JPN", product: "TAM" },
+                { name: "NTT DOCOMO BIZ", region: "JPN", product: "MOST" },
+                // APAC
+                { name: "Flight Centre", region: "APAC", product: "MOST" },
+                { name: "Ocean Network One", region: "APAC", product: "MOST" },
+                { name: "Woolworths Group", region: "APAC", product: "TAM" },
+                // LATAM
+                { name: "LATAM Airlines", region: "LATAM", product: "MOST" }
             ];
 
-            const customers = [
-                { name: "BOK Financial", industry: "Financial Services", region: "AMER" },
-                { name: "H&R Block", industry: "Financial Services", region: "AMER" },
-                { name: "Netflix", industry: "Media & Tech", region: "AMER" },
-                { name: "Victoria's Secret", industry: "Retail", region: "AMER" },
-                { name: "ServiceNow", industry: "Tech & SaaS", region: "AMER" },
-                { name: "Airbnb", industry: "Tech & Hospitality", region: "AMER" },
-                { name: "MillerKnoll", industry: "Manufacturing", region: "AMER" },
-                { name: "Workday", industry: "Tech & SaaS", region: "AMER" },
-                { name: "Knitwell Group", industry: "Retail", region: "AMER" },
-                { name: "EPAM Systems", industry: "Professional Services", region: "AMER" },
-                { name: "Ocean Network Express", industry: "Logistics", region: "APAC" },
-                { name: "Flight Centre", industry: "Travel", region: "APAC" },
-                { name: "Boehringer Ingelheim", industry: "Healthcare", region: "EMEA" },
-                { name: "Sanoma", industry: "Media", region: "EMEA" },
-                { name: "Accenture", industry: "Professional Services", region: "EMEA" },
-                { name: "Foster + Partners", industry: "Architecture", region: "EMEA" },
-                { name: "SVA System Vertrieb Alexander", industry: "Tech Services", region: "EMEA" },
-                { name: "Sky Betting & Gaming", industry: "Media & Tech", region: "EMEA" },
-                { name: "KANADEN CORPORATION", industry: "Electronics", region: "JPN" },
-                { name: "FIELDS CORPORATION", industry: "Entertainment", region: "JPN" },
-                { name: "DENSO CORPORATION", industry: "Automotive", region: "JPN" },
-                { name: "NTT DOCOMO BUSINESS, Inc.", industry: "Telecom", region: "JPN" },
-                { name: "LATAM Airlines Group", industry: "Aviation", region: "LATAM" }
+            const regionConfig = [
+                { id: "AMER", color: "#FFEA00" },
+                { id: "EMEA", color: "#00FFEB" },
+                { id: "JPN", color: "#A095FF" },
+                { id: "APAC", color: "#FF4D00" },
+                { id: "LATAM", color: "#E08CFF" }
             ];
+
+            const stats = useMemo(() => {
+                return regionConfig.map(reg => ({
+                    ...reg,
+                    count: rawData.filter(d => d.region === reg.id).length
+                }));
+            }, []);
 
             return (
                 <div className="canvas-bg select-none">
                     {/* Header Section */}
-                    <div className="h-[120px] px-12 pt-10 flex justify-between items-center relative z-20 shrink-0">
+                    <div className="h-[90px] px-12 pt-8 flex justify-between items-center relative z-20 shrink-0">
                         <div className="sharp-text">
-                            <div className="flex items-center gap-3 mb-2">
-                                <span className="bg-white/5 text-white/40 px-3 py-0.5 text-[9px] font-black tracking-[0.3em] rounded-md border border-white/5 uppercase">
-                                    MIRO OPTIMIZATION SERVICES & TRAINING
+                            <div className="flex items-center gap-3 mb-1">
+                                <span className="bg-white/5 text-white/40 px-3 py-0.5 text-[8px] font-black tracking-[0.3em] rounded-md border border-white/5 uppercase">
+                                    PS ARR ACCOUNTS PORTFOLIO FY26
                                 </span>
                                 <div className="h-[1px] w-12 bg-white/10"></div>
                             </div>
-                            <h1 className="text-[48px] font-[900] italic uppercase leading-none text-white tracking-tighter">
-                                GLOBAL CUSTOMER <span className="text-[#FFEA00] glow-yellow">MOMENTUM</span>
+                            <h1 className="text-[42px] font-[900] italic uppercase leading-none text-white tracking-tighter">
+                                SERVICES <span className="text-[#FFEA00] glow-yellow">MOMENTUM</span> DASHBOARD
                             </h1>
                         </div>
                         
-                        <div className="flex items-center gap-6 bg-white/[0.03] px-6 py-2 rounded-2xl border border-white/5">
+                        <div className="flex items-center gap-4 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/5">
                             <div className="text-right">
-                                <div className="text-[36px] font-[900] italic text-[#FFEA00] leading-none tracking-tighter glow-yellow">23</div>
-                                <div className="text-[8px] font-black uppercase tracking-widest text-white/30 italic">Sign-ups Q4 FY26</div>
+                                <div className="text-[28px] font-[900] italic text-[#FFEA00] leading-none tracking-tighter glow-yellow">{rawData.length}</div>
+                                <div className="text-[7px] font-black uppercase tracking-widest text-white/30 italic">Unique Accounts</div>
                             </div>
-                            <svg className="text-[#FFEA00]" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <svg className="text-[#FFEA00]" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                             </svg>
                         </div>
                     </div>
 
                     {/* Regional Breakdown Strip */}
-                    <div className="px-12 py-6 shrink-0 flex items-center justify-between gap-4">
-                        {regions.map((reg) => (
-                            <div key={reg.name} className="flex-1 region-pill rounded-xl p-3 flex items-center gap-4">
+                    <div className="px-12 py-3 shrink-0 flex items-center justify-between gap-3">
+                        {stats.map((reg) => (
+                            <div key={reg.id} className="flex-1 region-pill rounded-lg p-2.5 flex items-center gap-3">
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-black italic uppercase text-white/80">{reg.name}</span>
-                                    <span className="text-[9px] font-bold text-white/30 tracking-widest uppercase">{reg.count} Customers</span>
+                                    <span className="text-[10px] font-black italic uppercase text-white/80 leading-none">{reg.id}</span>
+                                    <span className="text-[7px] font-bold text-white/30 tracking-widest uppercase mt-1">{reg.count} Accounts</span>
                                 </div>
                                 <div className="h-1 flex-1 bg-white/5 rounded-full overflow-hidden">
                                     <div 
                                         className="h-full"
                                         style={{ 
-                                            width: `${(reg.count / 10) * 100}%`, 
+                                            width: `${(reg.count / 22) * 100}%`, 
                                             backgroundColor: reg.color,
-                                            boxShadow: `0 0 10px ${reg.color}aa`
+                                            boxShadow: `0 0 8px ${reg.color}88`
                                         }}
                                     />
                                 </div>
@@ -170,51 +231,39 @@
                         ))}
                     </div>
 
-                    {/* Customer Matrix - Full Width Grid */}
+                    {/* Customer Matrix */}
                     <div className="flex-1 px-12 pb-6 pt-2 flex flex-col overflow-hidden">
-                        <div className="flex items-center gap-3 mb-6 shrink-0 opacity-40">
-                            <span className="text-white text-[9px] font-black tracking-[0.3em] uppercase italic">Customer Wins so far</span>
+                        <div className="flex items-center gap-3 mb-4 shrink-0 opacity-40">
+                            <span className="text-white text-[8px] font-black tracking-[0.3em] uppercase italic">Regional Momentum View</span>
                             <div className="h-[1px] flex-1 bg-white/10"></div>
                         </div>
                         
-                        <div className="grid grid-cols-7 gap-3 content-start">
-                            {customers.map((cust, i) => {
-                                const regColor = regions.find(r => r.name === cust.region)?.color || '#FFF';
-                                
-                                // Adaptive Font Sizing Logic for Names
-                                let nameSizeClass = "text-[15px]";
-                                if (cust.name.length > 22) {
-                                    nameSizeClass = "text-[10px]";
-                                } else if (cust.name.length > 16) {
-                                    nameSizeClass = "text-[12px]";
-                                }
-
-                                // Adaptive sizing for Industry labels to prevent truncation
-                                let industrySizeClass = "text-[9px]";
-                                if (cust.industry.length > 20) {
-                                    industrySizeClass = "text-[7px]";
-                                }
+                        <div className="grid grid-cols-6 gap-2.5 flex-1 overflow-hidden">
+                            {rawData.map((cust, i) => {
+                                const regColor = stats.find(r => r.id === cust.region)?.color || '#FFF';
+                                const nameSize = cust.name.length > 20 ? "text-[10px]" : "text-[11px]";
 
                                 return (
                                     <div 
                                         key={i} 
-                                        className="customer-card-static relative px-3 py-4 rounded-xl flex flex-col justify-center h-[82px] overflow-hidden"
+                                        className="customer-card-static relative pt-3 pb-3 px-3 rounded-xl overflow-hidden"
                                     >
                                         <div 
-                                            className="absolute top-0 left-3 right-3 h-[3px] rounded-b-full"
+                                            className="absolute top-0 left-3 right-3 h-[2px] rounded-b-full"
                                             style={{ 
                                                 backgroundColor: regColor,
-                                                boxShadow: `0 0 10px ${regColor}88` 
+                                                boxShadow: `0 0 8px ${regColor}66` 
                                             }}
                                         ></div>
                                         
                                         <div className="flex flex-col">
-                                            <h4 className={`${nameSizeClass} font-[900] italic uppercase leading-tight text-white tracking-tighter truncate`}>
+                                            <h4 className={`${nameSize} font-[900] italic uppercase leading-[1.1] text-white tracking-tighter mb-1.5`}>
                                                 {cust.name}
                                             </h4>
-                                            <p className={`${industrySizeClass} font-bold text-white/20 uppercase truncate tracking-wide mt-1.5`}>
-                                                {cust.industry}
-                                            </p>
+                                        </div>
+
+                                        <div className="offering-tag">
+                                            {cust.product}
                                         </div>
                                     </div>
                                 );
@@ -223,11 +272,11 @@
                     </div>
 
                     {/* Footer Bar */}
-                    <div className="h-[50px] px-12 flex justify-between items-center shrink-0 border-t border-white/5 opacity-40">
-                        <div className="text-white font-black italic uppercase text-[9px] tracking-[0.3em]">
-                            Confidential • MOST
+                    <div className="h-[40px] px-12 flex justify-between items-center shrink-0 border-t border-white/5 opacity-40">
+                        <div className="text-white font-black italic uppercase text-[8px] tracking-[0.3em]">
+                            Global Professional Services • FY26 Momentum
                         </div>
-                        <div className="text-white font-black italic uppercase text-[9px] tracking-[0.3em]">
+                        <div className="text-white font-black italic uppercase text-[8px] tracking-[0.3em]">
                             MIRO Global ProServ © 2026
                         </div>
                     </div>
