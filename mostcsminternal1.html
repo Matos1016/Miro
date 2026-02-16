@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOST Strategic Architect Hub - Internal</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .miro-canvas {
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
+            background-size: 24px 24px;
+            min-height: 100vh;
+        }
+
+        .miro-header {
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 0.85;
+        }
+
+        .flyout-panel {
+            box-shadow: -10px 0px 30px rgba(0,0,0,0.15);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .timeline-spine {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #1C1C1E;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .card-pop {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            max-width: 460px;
+        }
+        .card-pop:hover {
+            transform: translateY(-5px);
+            box-shadow: 16px 16px 0px #1C1C1E;
+        }
+
+        .miro-highlight {
+            background-color: #FFDD33;
+            box-shadow: 3px 3px 0px #1C1C1E;
+        }
+
+        .no-scroll { overflow: hidden; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const LIFECYCLE_DATA = [
+            {
+                id: 0,
+                phase: "PRE-SALE",
+                title: "Discovery & Scoping",
+                owner: "CSM & AE",
+                color: "#47D1C4",
+                summary: "Qualifying accounts (<$400k) and mapping high-level goals to potential MOST workstreams.",
+                icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
+                playbook: {
+                    objective: "Anchor on transformation velocity. Identify if the account is undergoing significant structural change (M&A) requiring flexible support.",
+                    csmActions: [
+                        "Anchor on Business Goals: Digital transformation, M&A, or tool modernization.",
+                        "Diagnose friction: Manual syncs, board sprawl, or uneven tool adoption.",
+                        "Translate symptoms into outcomes (e.g. 'Standardize Agile across 10 squads').",
+                        "Verify Segment: Primarily Enterprise spending <$400k ARR."
+                    ],
+                    mechanics: [
+                        { label: "Target Profile", value: "Enterprise <$400k spend" },
+                        { label: "Pricing Model", value: "$60,000 / 240 Hours ARR SKU" },
+                        { label: "Internal Goal", value: "Quota Retiring event" }
+                    ],
+                    proTip: "Listen for 'Integration Debt.' If they use Jira or Azure DevOps, MOST is the primary engine to clean up their sync logic."
+                }
+            },
+            {
+                id: 1,
+                phase: "TRANSITION",
+                title: "Handover & Blueprint",
+                owner: "Sales → ProServ",
+                color: "#867AFF",
+                summary: "Internal handshake post-activation. PS sets up the MOST Blueprint as the 24/7 engagement hub.",
+                icon: "M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100-8 4 4 0 000 8zM19 8l-2 2 2 2m-2-2h6",
+                playbook: {
+                    objective: "Ensure context transfer and establish a single source of truth for all deliverables and history.",
+                    csmActions: [
+                        "Facilitate Handover: Share Discovery notes and known ROI blockers with the assigned PS expert.",
+                        "Access the Blueprint: Review the workspace architecture before the customer kickoff.",
+                        "Audit Baseline: Ensure priorities and success metrics sections are prepopulated."
+                    ],
+                    mechanics: [
+                        { label: "Trigger", value: "Salesforce Deal Activation" },
+                        { label: "Artifact", value: "Miro MOST Blueprint" },
+                        { label: "Architecture", value: "Standardized Methodology" }
+                    ],
+                    proTip: "The Blueprint is your home. Stop sending status decks—send the Blueprint link for every monthly or quarterly sync."
+                }
+            },
+            {
+                id: 2,
+                phase: "POST-SALE",
+                title: "Program Kickoff",
+                owner: "CSM",
+                color: "#FFDD33",
+                summary: "Setting expectations on pacing. Moving the customer from 'buying hours' to 'architecting outcomes'.",
+                icon: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2",
+                playbook: {
+                    objective: "Act as the Strategic Architect. Guide the 'What' and 'Why' while ProServ experts handle the execution.",
+                    csmActions: [
+                        "Lead Kickoff: Align on the pooled expert model and the 15h/week max pacing rule.",
+                        "Limit Requesters: Identify max 3 pre-approved contacts authorized to submit work.",
+                        "Establish Backlog: Prioritize Q1 workstreams and document success criteria in the Blueprint.",
+                        "Reset Rule: Remind customer that hours reset at Miro's fiscal quarter start."
+                    ],
+                    mechanics: [
+                        { label: "Quarterly Bank", value: "60 Hours per Fiscal Q" },
+                        { label: "Weekly Max", value: "15 Hours Ceiling" },
+                        { label: "Engagement Min", value: "4 Hours per request" }
+                    ],
+                    proTip: "Pick an 'Easy Win' like Jira cleanup or Template Standardisation for Month 1 to build early momentum."
+                }
+            },
+            {
+                id: 3,
+                phase: "EXECUTION",
+                title: "Initiate Work Intake",
+                owner: "CSM",
+                color: "#FF8CDE",
+                summary: "CSM formalizes work requests via Salesforce cases to trigger expert resource matching.",
+                icon: "M12 19l9 2-9-18-9 18 9-2zm0 0v-8",
+                playbook: {
+                    objective: "Ensure high-quality requests to minimize assignment lag and resource mismatch.",
+                    csmActions: [
+                        "Primary Path: CSM submits a Salesforce 'MOST Engagement Case' for each request.",
+                        "Case Quality: Describe the Problem, Desired Outcome, and include relevant Miro links.",
+                        "Review Exceptions: Review requests submitted via the Google Form and add strategic context."
+                    ],
+                    mechanics: [
+                        { label: "Intake Channel", value: "Salesforce (Official Path)" },
+                        { label: "Ack. SLA", value: "24 Business Hours" },
+                        { label: "Assign SLA", value: "5 Business Days" }
+                    ],
+                    proTip: "Specificity saves hours. Don't say 'Build a board.' Say 'Build a workshop board for PI Planning that supports 50 users and Jira sync'."
+                }
+            },
+            {
+                id: 4,
+                phase: "DELIVERY",
+                title: "Expert Execution",
+                owner: "CSM & PS Expert",
+                color: "#2AC7FF",
+                summary: "Expert execution in progress. CSM monitors utilization and ensures work stays aligned to goals.",
+                icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+                playbook: {
+                    objective: "Maintain velocity. Ensure hours are consumed for high-impact work before the quarterly reset.",
+                    csmActions: [
+                        "Track Utilization: Drive toward the 70%+ quarterly target for health and renewal readiness.",
+                        "Strategic Constant: Attend monthly check-ins to ensure expert delivery maps to goals.",
+                        "Blueprint Hygiene: Ensure final artifacts ( Blueprints, Configs) are logged clearly."
+                    ],
+                    mechanics: [
+                        { label: "Resource Model", value: "Pooled Specialists (IC, TA, IA)" },
+                        { label: "Utilization Goal", value: "70% Cumulative Target" },
+                        { label: "Pacing", value: "Sustainable weekly consumption" }
+                    ],
+                    proTip: "Encourage consistent weekly use. Saving 40 hours for the final month creates resource bottlenecks."
+                }
+            },
+            {
+                id: 5,
+                phase: "STRATEGY",
+                title: "Review & Pivot",
+                owner: "CSM",
+                color: "#FFDD33",
+                summary: "Measuring ROI every 90 days. Resetting the bank and pivoting surplus hours to hygiene.",
+                icon: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z",
+                playbook: {
+                    objective: "Reset priorities for the next 60 hours. Use surplus to reduce environment technical debt.",
+                    csmActions: [
+                        "Lead Strategic Review: Evaluate outcomes against the Q1 success criteria.",
+                        "The Surplus Pivot: If hours remain, propose an **Account Structure Review** or **Team Consolidation**.",
+                        "Upsell Signals: Identify needs for Advanced AI or Prototypes to tee up AEs.",
+                        "Renewal Proof: Use the Blueprint's history to build the business case for annual renewal."
+                    ],
+                    mechanics: [
+                        { label: "Hour Reset", value: "Start of Q (Unused do not roll)" },
+                        { label: "Add-on Rate", value: "$275/hr (20h blocks)" },
+                        { label: "Tipping Point", value: "Transition to TAM after 2 blocks" }
+                    ],
+                    proTip: "Account hygiene (consolidation) is the best 'filler' work. Propose it early if the project backlog is low."
+                }
+            }
+        ];
+
+        const App = () => {
+            const [selectedStep, setSelectedStep] = useState(null);
+
+            const openFlyout = (step) => {
+                setSelectedStep(step);
+                document.body.classList.add('no-scroll');
+            };
+
+            const closeFlyout = () => {
+                setSelectedStep(null);
+                document.body.classList.remove('no-scroll');
+            };
+
+            return (
+                <div className="miro-canvas relative min-h-screen pb-48">
+                    
+                    {/* FIXED HEADER: LOWERED BLACK BAR & EXPANDED HEIGHT */}
+                    <div className="fixed top-0 left-0 right-0 h-40 bg-white border-b-8 border-[#1C1C1E] z-[40] flex items-end px-12 pb-6 justify-between shadow-2xl">
+                        <div className="flex flex-col mb-1">
+                            <div className="flex items-center gap-3 mb-3">
+                                <span className="bg-[#1C1C1E] text-[#FFDD33] px-3 py-1 text-[11px] font-black uppercase tracking-[0.3em] rounded">INTERNAL COMMAND CENTER</span>
+                                <div className="h-px w-32 bg-[#1C1C1E]/20"></div>
+                            </div>
+                            <h1 className="miro-header text-[48px] text-[#1C1C1E] tracking-tighter leading-[0.8]">
+                                STRATEGIC <span className="text-[#47D1C4]">ARCHITECT</span> <br/>HUB
+                            </h1>
+                        </div>
+                        
+                        <div className="flex gap-12 items-center mb-1">
+                            <div className="text-center px-10 border-r-2 border-black/10">
+                                <p className="text-[11px] font-black uppercase text-black/40 mb-1">Utilization Target</p>
+                                <p className="text-[32px] font-black italic text-[#1C1C1E] leading-none">70%+</p>
+                            </div>
+                            <div className="text-center px-10 border-r-2 border-black/10">
+                                <p className="text-[11px] font-black uppercase text-black/40 mb-1">Weekly Ceiling</p>
+                                <p className="text-[32px] font-black italic text-[#1C1C1E] leading-none">15H</p>
+                            </div>
+                            <div className="bg-[#1C1C1E] text-white p-5 rounded-2xl shadow-[6px_6px_0px_#FFDD33] shrink-0">
+                                <p className="text-[10px] font-black uppercase tracking-[0.4em] leading-none mb-1.5 text-[#FFDD33]">Version Date</p>
+                                <p className="text-[16px] font-black italic leading-none whitespace-nowrap uppercase">FEB 16, 2026</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* TIMELINE CONTAINER: INCREASED TOP PADDING */}
+                    <div className="max-w-6xl mx-auto pt-72 relative px-8">
+                        <div className="timeline-spine"></div>
+                        
+                        {LIFECYCLE_DATA.map((step, index) => (
+                            <div key={step.id} className="relative mb-36 flex items-center z-10 w-full">
+                                
+                                {/* Step Node indicator */}
+                                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-2xl border-4 border-[#1C1C1E] bg-white flex items-center justify-center shadow-lg transform rotate-45 z-20">
+                                    <div className="w-5 h-5 rounded transform -rotate-45" style={{ backgroundColor: step.color }}></div>
+                                </div>
+
+                                {/* ALTERNATING CONTENT LAYOUT */}
+                                <div className={`flex w-full items-start ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}>
+                                    
+                                    {/* THE CARD */}
+                                    <div className="w-[45%] flex flex-col items-center">
+                                        <div 
+                                            className="bg-white p-10 rounded-[3.5rem] border-4 border-[#1C1C1E] card-pop cursor-pointer hover:border-[#FFDD33] shadow-md"
+                                            onClick={() => openFlyout(step)}
+                                        >
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: step.color }}></div>
+                                                <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-30">{step.phase} Phase</span>
+                                            </div>
+                                            <h3 className="miro-header text-5xl mb-4 text-[#1C1C1E] leading-tight">{step.title}</h3>
+                                            <p className="text-[17px] font-bold text-black/60 italic leading-snug mb-8">
+                                                "{step.summary}"
+                                            </p>
+                                            <button className="miro-highlight px-8 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
+                                                Learn More →
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* THE LABEL SECTION (ON OPPOSITE SIDE) */}
+                                    <div className={`w-[45%] flex flex-col pt-4 ${index % 2 === 0 ? 'pl-20 items-start' : 'pr-20 items-end'}`}>
+                                        <div className="relative">
+                                            {/* PRONOUNCED STEP TEXT */}
+                                            <span className="text-[96px] font-black italic text-[#1C1C1E] leading-none tracking-tighter block mb-4">
+                                                STEP <span className="bg-[#FFDD33] px-3 rounded-xl shadow-[6px_6px_0px_#1C1C1E]">0{index}</span>
+                                            </span>
+                                            
+                                            {/* OWNER BOX - VERTICALLY OFFSET TO PREVENT OVERLAP */}
+                                            <div className="bg-[#1C1C1E] text-white p-5 rounded-2xl shadow-xl flex items-center gap-5 border-2 border-[#FFDD33] inline-flex min-w-[240px]">
+                                                <div className="w-2 h-12 bg-[#FFDD33] rounded-full shrink-0"></div>
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FFDD33] mb-1">Primary Owner</p>
+                                                    <p className="text-[24px] font-black italic uppercase leading-none">{step.owner}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* FLYOUT PANEL */}
+                    <div 
+                        className={`fixed inset-0 z-[100] transition-opacity duration-300 ${selectedStep ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                        style={{ backgroundColor: 'rgba(28, 28, 30, 0.4)', backdropFilter: 'blur(10px)' }}
+                        onClick={closeFlyout}
+                    >
+                        <div 
+                            className={`flyout-panel absolute top-0 right-0 h-full w-full max-w-[700px] bg-white border-l-[12px] border-[#1C1C1E] p-16 overflow-y-auto`}
+                            style={{ transform: selectedStep ? 'translateX(0)' : 'translateX(100%)' }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {selectedStep && (
+                                <div className="animate-fade">
+                                    <div className="flex justify-between items-start mb-12">
+                                        <div className="flex items-center gap-8">
+                                            <div className="w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 border-[#1C1C1E] shadow-[8px_8px_0px_#1C1C1E]" style={{ backgroundColor: selectedStep.color }}>
+                                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d={selectedStep.icon} />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <span className="text-[14px] font-black uppercase tracking-[0.25em] text-black/30 block mb-1">{selectedStep.phase} OPERATION</span>
+                                                <h2 className="miro-header text-5xl text-[#1C1C1E]">{selectedStep.title}</h2>
+                                            </div>
+                                        </div>
+                                        <button onClick={closeFlyout} className="w-14 h-14 rounded-full border-4 border-black/10 flex items-center justify-center hover:bg-black/5 transition-colors">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </button>
+                                    </div>
+
+                                    <div className="bg-[#1C1C1E] text-white p-12 rounded-[3.5rem] shadow-[14px_14px_0px_#FFDD33] mb-14 relative overflow-hidden">
+                                        <h4 className="text-[#FFDD33] font-black uppercase text-[12px] tracking-[0.5em] mb-4">CSM CORE MISSION</h4>
+                                        <p className="text-[22px] font-bold italic leading-snug">"{selectedStep.playbook.objective}"</p>
+                                    </div>
+
+                                    <div className="space-y-14 pb-20">
+                                        <section>
+                                            <h4 className="text-[13px] font-black uppercase tracking-[0.2em] text-black/40 mb-8 pb-3 border-b-4 border-black/5">The Architect's Checklist</h4>
+                                            <ul className="space-y-8">
+                                                {selectedStep.playbook.csmActions.map((action, i) => (
+                                                    <li key={i} className="flex gap-8 group">
+                                                        <div className="w-10 h-10 rounded-2xl bg-[#1C1C1E] text-white flex items-center justify-center shrink-0 mt-0.5 text-[14px] font-black shadow-[5px_5px_0px_#47D1C4] group-hover:shadow-[5px_5px_0px_#FF8CDE] transition-all">0{i+1}</div>
+                                                        <p className="text-[18px] font-bold text-black/70 leading-relaxed">{action}</p>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </section>
+
+                                        <section className="bg-[#F9F9F9] p-12 rounded-[3rem] border-4 border-black/5">
+                                            <h4 className="text-[12px] font-black uppercase tracking-widest text-black/40 mb-8">Internal Logistics</h4>
+                                            <div className="grid grid-cols-1 gap-6">
+                                                {selectedStep.playbook.mechanics.map((m, i) => (
+                                                    <div key={i} className="flex justify-between items-center border-b-2 border-black/5 pb-4 last:border-0">
+                                                        <span className="text-[15px] font-black text-black/40 italic uppercase tracking-tight">{m.label}</span>
+                                                        <span className="text-[16px] font-black text-[#1C1C1E]">{m.value}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+
+                                        <section className="p-12 border-[6px] border-dashed border-[#FF8CDE] rounded-[4rem] bg-[#FF8CDE]/5 relative">
+                                            <div className="absolute -top-5 left-12 bg-[#FF8CDE] text-white px-6 py-2 text-[11px] font-black uppercase rounded shadow-lg">PROSERV STRATEGY TIP</div>
+                                            <p className="text-[19px] font-bold italic text-black/80 leading-relaxed">
+                                                <span className="text-[#FF8CDE] text-3xl font-black mr-2">“</span>
+                                                {selectedStep.playbook.proTip}
+                                                <span className="text-[#FF8CDE] text-3xl font-black ml-2">”</span>
+                                            </p>
+                                        </section>
+                                    </div>
+
+                                    <div className="mt-8 pt-12 border-t-4 border-black/5 text-center">
+                                        <p className="text-[12px] font-black italic tracking-[0.4em] uppercase text-black/20">Miro Professional Services Operations © FY26</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <footer className="text-center mt-48 opacity-10 pointer-events-none pb-24">
+                        <div className="text-[250px] font-black italic tracking-tighter leading-none select-none">MIRO</div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
