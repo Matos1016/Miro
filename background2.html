@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steven - Miro Virtual Stage (Dark Mode)</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,800;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: #000000;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root-container {
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .canvas-bg {
+            width: 100%;
+            height: 100%;
+            background-color: #1C1C1E; /* Miro Dark Mode Background */
+            background-image: radial-gradient(#333333 1.5px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column; 
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #333333;
+        }
+
+        .top-accent-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFDD33 0%, #47D1C4 25%, #867AFF 50%, #F24822 75%, #FFDD33 100%);
+            opacity: 0.8;
+            z-index: 100;
+        }
+
+        .cursor-pill {
+            border: 2.5px solid #005F41;
+            padding: 10px 36px;
+            border-radius: 9999px;
+            background: #C9EBDF;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Style for the professional services tag - Updated back to Black bg / Yellow text + Yellow border */
+        .professional-tag {
+            background-color: #000000;
+            color: #FFDD33;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 14px;
+            border: 2px solid #FFDD33; /* Prominent yellow border */
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .sharp-text {
+            -webkit-font-smoothing: antialiased;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+
+        .decoration-node {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            pointer-events: none;
+        }
+
+        .cursor-arrow {
+            position: absolute;
+            top: -28px; 
+            right: -28px; 
+            transform: rotate(85deg); 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .momentum-glow-cyan {
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(71, 209, 196, 0.1) 0%, transparent 70%);
+        }
+
+        .momentum-glow-violet {
+            position: absolute;
+            bottom: -150px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(134, 122, 255, 0.08) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body>
+    <div id="root-container">
+        <div id="root" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useEffect } = React;
+
+        const useAutoScaler = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const container = document.getElementById('root-container');
+                    if (container) {
+                        const scale = Math.min(window.innerWidth / 1320, window.innerHeight / 760);
+                        container.style.transform = `scale(${scale})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+        };
+
+        const App = () => {
+            useAutoScaler();
+
+            return (
+                <div className="canvas-bg select-none">
+                    <div className="top-accent-bar"></div>
+                    
+                    <div className="momentum-glow-cyan"></div>
+                    <div className="momentum-glow-violet"></div>
+
+                    <div className="decoration-node -top-20 -left-20 rotate-12"></div>
+                    <div className="decoration-node -bottom-20 -right-20 -rotate-12"></div>
+
+                    <div className="h-[120px] px-12 flex items-center justify-between relative z-20 mt-4">
+                    </div>
+
+                    <div className="flex-1"></div>
+
+                    <div className="h-[140px] px-12 pb-16 flex items-end justify-between z-20">
+                        <div className="flex flex-col gap-3">
+                            <div className="cursor-pill">
+                                <div className="cursor-arrow">
+                                    <svg width="48" height="48" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path 
+                                            d="M7 7L13.5 25.5L17.5 17.5L25.5 13.5L7 7Z" 
+                                            fill="#31D391" 
+                                            stroke="#005F41" 
+                                            strokeWidth="2.5" 
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                                <span className="text-[32px] font-[900] text-[#1C1C1E] tracking-tight leading-none sharp-text">
+                                    Steven
+                                </span>
+                            </div>
+                            
+                            <div className="flex">
+                                <div className="professional-tag">
+                                    Professional Services
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.02]">
+                         <span className="text-[320px] font-black italic tracking-tighter text-white uppercase">MIRO</span>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
