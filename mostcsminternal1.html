@@ -162,16 +162,18 @@
                 playbook: {
                     objective: "Maintain quality intake to minimize assignment delays and resource mismatch.",
                     csmActions: [
-                        "Primary Intake: CSM submits a Salesforce 'MOST Engagement Case' for each request.",
-                        "Exception Path: Monitor submissions via the Google Form and add strategic context.",
-                        "Case Quality: Ensure the case captures: Objective, Problem Statement, and Success Metrics."
+                        "Primary Intake: Submit a Salesforce 'MOST Engagement Case' strictly at the ACCOUNT LEVEL (avoiding the subscription level).",
+                        "Selection: You must select 'Create a Services Request' when creating the new case record.",
+                        "Scoping Detail: Provide any discovery or scoping work already completed. Review the Frameworks Sheet to help scope estimated hours.",
+                        "Good Case Example (Estimated Effort: 32 Hours):\n• Objective: Standardize PI Planning for 'Project Alpha' (12 squads).\n• Context: Customer manually copies 200+ cards/month. Access verified for PS Specialist.\n• Technical Scope: Deploy Jira-Miro Sync for projects ORN & SKY; map 'Story Points' and 'Epic Link'.\n• Deliverables: 1 Master Program Board with auto-populating epics + 12 individual Team Boards.\n• Success Criteria: Zero manual card creation for next PI; data parity verified in Miro vs Jira.",
+                        "Case Quality: Ensure the case captures: Specific Business Objective, Problem Statement, and measurable Success Metrics."
                     ],
                     mechanics: [
                         { label: "Intake Channel", value: "Salesforce (Primary)" },
                         { label: "Ack. SLA", value: "24 Business Hours" },
                         { label: "Assign SLA", value: "5 Business Days" }
                     ],
-                    proTip: "Specificity saves hours. Don't say 'Build a board.' Say 'Build a kit that supports Jira sync'."
+                    proTip: "Specificity saves hours. Linking requests to the Account level ensures historical context is preserved across different subscription cycles."
                 }
             },
             {
@@ -209,7 +211,7 @@
                     objective: "Reset the strategic priorities every 90 days. Pivot surplus hours to high-value environment cleanup.",
                     csmActions: [
                         "Lead Strategic Review: Evaluate previous outcomes and reset Q2+ priorities.",
-                        "Surplus Pivot: Propose **Account Structure Review** or **Team Consolidation**.",
+                        "Surplus Pivot: Propose Account Structure Review or Team Consolidation.",
                         "Expansion Engine: Identify needs for Advanced AI or Insights—tee up upsell.",
                         "Renewal Prep: Build the business case for annual renewal."
                     ],
@@ -239,7 +241,7 @@
             return (
                 <div className="miro-canvas relative pb-20">
                     
-                    {/* STICKY HEADER - FIXES OVERLAP & ELLIPSIS */}
+                    {/* STICKY HEADER */}
                     <div className="sticky top-0 w-full bg-white border-b-8 border-[#1C1C1E] z-[40] flex flex-col md:flex-row items-center md:items-end px-6 md:px-12 py-6 md:pb-8 justify-between gap-6 shadow-xl">
                         <div className="flex flex-col text-center md:text-left">
                             <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
@@ -261,8 +263,8 @@
                                 <p className="text-[24px] md:text-[32px] font-black italic text-[#1C1C1E] leading-none">15H</p>
                             </div>
                             <div className="bg-[#1C1C1E] text-white p-4 md:p-5 rounded-2xl shadow-[6px_6px_0px_#FFDD33] shrink-0">
-                                <p className="text-[10px] font-black uppercase tracking-[0.4em] leading-none mb-1.5 text-[#FFDD33]">Version Date</p>
-                                <p className="text-[14px] md:text-[16px] font-black italic leading-none whitespace-nowrap uppercase">FEB 16, 2026</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.4em] mb-1.5 text-[#FFDD33]">Version Date</p>
+                                <p className="text-[14px] md:text-[16px] font-black italic leading-none whitespace-nowrap uppercase">FEB 18, 2026</p>
                             </div>
                         </div>
                     </div>
@@ -365,7 +367,17 @@
                                                 {selectedStep.playbook.csmActions.map((action, i) => (
                                                     <li key={i} className="flex gap-6 group">
                                                         <div className="w-10 h-10 rounded-2xl bg-[#1C1C1E] text-white flex items-center justify-center shrink-0 mt-0.5 text-[14px] font-black shadow-[5px_5px_0px_#47D1C4] group-hover:shadow-[5px_5px_0px_#FF8CDE] transition-all">0{i+1}</div>
-                                                        <p className="text-[17px] font-bold text-black/70 leading-relaxed">{action}</p>
+                                                        <p className={`text-[17px] font-bold whitespace-pre-line leading-relaxed ${action.includes('ACCOUNT LEVEL') || action.includes('Services Request') || action.includes('Good Case Example') || action.includes('Estimated Effort') || action.includes('Frameworks Sheet') ? 'text-[#1C1C1E]' : 'text-black/70'}`}>
+                                                            {action.split(/(ACCOUNT LEVEL|Create a Services Request|Good Case Example|Estimated Effort: 32 Hours|Frameworks Sheet)/).map((part, index) => {
+                                                                if (part === 'ACCOUNT LEVEL' || part === 'Create a Services Request' || part === 'Good Case Example' || part === 'Estimated Effort: 32 Hours') {
+                                                                    return <span key={index} className="bg-[#FFDD33] px-1 rounded shadow-sm text-[#1C1C1E] font-black italic">{part}</span>;
+                                                                }
+                                                                if (part === 'Frameworks Sheet') {
+                                                                    return <a key={index} href="https://docs.google.com/spreadsheets/d/1-x3-A1EWIuRFE1gINIvapQ7jYKDytsuBzYbz9dnF4fk/edit?usp=sharing" target="_blank" className="text-[#867AFF] underline decoration-2 underline-offset-4 hover:text-[#47D1C4] transition-colors">{part}</a>;
+                                                                }
+                                                                return part;
+                                                            })}
+                                                        </p>
                                                     </li>
                                                 ))}
                                             </ul>
