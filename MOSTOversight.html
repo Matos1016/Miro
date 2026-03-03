@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOST PS Oversight Model - Professional Hub</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,900&display=swap');
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background-color: #F4F4F4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #root-container {
+            width: 1920px;
+            transform-origin: top center;
+            flex-shrink: 0;
+            position: relative;
+            margin-bottom: 100px;
+        }
+
+        .canvas-bg {
+            width: 100%;
+            min-height: 1400px;
+            background-color: #FFFFFF;
+            background-image: radial-gradient(#EAEAEA 1.5px, transparent 0);
+            background-size: 24px 24px;
+            display: flex;
+            flex-direction: column; 
+            border: 8px solid #FFDD33;
+            position: relative;
+            padding: 80px;
+        }
+
+        .miro-title {
+            font-size: 72px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: -0.04em;
+            line-height: 0.9;
+            color: #1C1C1E;
+        }
+
+        .miro-highlight {
+            background-color: #FFDD33;
+            padding: 0 16px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 6px 6px 0px #1C1C1E;
+        }
+
+        .step-card {
+            background: white;
+            border: 4px solid #1C1C1E;
+            box-shadow: 10px 10px 0px #1C1C1E;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            border-radius: 40px;
+            transition: transform 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .ps-action-pill {
+            background-color: #47D1C4;
+            color: #1C1C1E;
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: 13px;
+            margin-top: auto;
+            border: 2px solid #1C1C1E;
+            text-align: center;
+            box-shadow: 4px 4px 0px #1C1C1E;
+            position: relative;
+            z-index: 10;
+        }
+
+        .action-link {
+            background-color: #1C1C1E;
+            color: #FFDD33;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 0px #47D1C4;
+            text-decoration: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        .action-link:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0px #47D1C4;
+        }
+
+        .matrix-cell {
+            border: 2px solid #1C1C1E;
+            border-radius: 20px;
+            padding: 18px 26px;
+        }
+
+        .csm-bg { background-color: rgba(134, 122, 255, 0.08); }
+        .ps-bg { background-color: rgba(71, 209, 196, 0.08); }
+
+        @keyframes pulse-yellow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 221, 51, 0.6); }
+            70% { box-shadow: 0 0 0 25px rgba(255, 221, 51, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 221, 51, 0); }
+        }
+
+        .target-pulse {
+            animation: pulse-yellow 2s infinite;
+        }
+
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            background-color: #1C1C1E;
+            color: #FFDD33;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .ghost-number {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 140px;
+            font-weight: 900;
+            font-style: italic;
+            color: rgba(28, 28, 30, 0.15);
+            line-height: 1;
+            z-index: 0;
+            pointer-events: none;
+            letter-spacing: -0.05em;
+        }
+    </style>
+</head>
+<body>
+    <div id="root-container">
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const useAutoScaler = () => {
+            useEffect(() => {
+                const scaler = () => {
+                    const container = document.getElementById('root-container');
+                    if (container) {
+                        const scale = window.innerWidth / 1980;
+                        container.style.transform = `scale(${Math.min(scale, 1)})`;
+                    }
+                };
+                window.addEventListener('resize', scaler);
+                scaler();
+                return () => window.removeEventListener('resize', scaler);
+            }, []);
+        };
+
+        const StepIcon = ({ type }) => {
+            const icons = {
+                sf: (
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                ),
+                blueprint: (
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                ),
+                pod: (
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                ),
+                kickoff: (
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 10l-4 4l6 6l4-16l-18 7l4 2l2 6l3-4"/>
+                    </svg>
+                ),
+                monitor: (
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                )
+            };
+            return <div className="icon-container">{icons[type]}</div>;
+        };
+
+        const App = () => {
+            useAutoScaler();
+
+            const lifecycleSteps = [
+                { 
+                    id: 1, 
+                    type: "sf", 
+                    title: "SF Assignment", 
+                    details: "Assigned to the main Salesforce MOST Case immediately following the Closed Won marker.", 
+                    action: "Verify ownership & discovery" 
+                },
+                { 
+                    id: 2, 
+                    type: "blueprint", 
+                    title: "Blueprint Prep", 
+                    details: "Review notes to draft roadmap. URL MUST be added to 'Blueprint Link' on SF Case. Set up Hours Integration setup so used hours appear.", 
+                    action: "Draft roadmap & framework",
+                    links: [
+                        { label: "Blueprint Template", url: "https://miro.com/app/board/uXjVGewbhus=/" },
+                        { label: "Hours Integration Guide", url: "#" }
+                    ]
+                },
+                { 
+                    id: 3, 
+                    type: "pod", 
+                    title: "Pod Coordination", 
+                    details: "Reach out to the CSM. Assist them in building the framework and coordinate your attendance at the Kickoff Call.", 
+                    action: "Align with Strategic Architect" 
+                },
+                { 
+                    id: 4, 
+                    type: "kickoff", 
+                    title: "The Kickoff Call", 
+                    details: "CSM leads strategy. PS supports with technical validation. GOAL: Have at least the first quarter planned by call end.", 
+                    action: "Validate Scope & Q1 Plan" 
+                },
+                { 
+                    id: 5, 
+                    type: "monitor", 
+                    title: "Continued Monitoring", 
+                    details: "Assess usage against 70% threshold. Schedule monthly alignment calls for Q1. Report: Projects & Hours.", 
+                    action: "Monthly Calls & Hour Audits",
+                    links: [
+                        { label: "Account Projects & Hours Report", url: "https://miro.lightning.force.com/lightning/r/Report/00O6S000006L2yLUAS/view" }
+                    ]
+                }
+            ];
+
+            const matrixRows = [
+                { label: "Account Strategy", csm: "LEAD: Owns the Joint Success Plan (JSP) and business outcomes.", ps: "SUPPORT: Provides technical inputs to align framework with Miro best practices." },
+                { label: "MOST Roadmap", csm: "Defines the 'What' and 'Why' for the customer relationship.", ps: "Helps build the technical framework to map goals to hours." },
+                { label: "Engagement Requests", csm: "LEAD: Responsible for submitting all Service Cases in Salesforce.", ps: "SUPPORT: Helps inform and scope cases to ensure they are 'ready for work'." },
+                { label: "Utilization Tracking", csm: "Owns renewal and commercial health.", ps: "Monitors consumption trends and flags low-usage risks to the CSM pod." },
+                { label: "Project Delivery", csm: "High-level project awareness.", ps: "Actual work is performed by the Pooled Expert Team." }
+            ];
+
+            return (
+                <div className="canvas-bg select-none">
+                    {/* Header Section */}
+                    <div className="flex justify-between items-end mb-20">
+                        <div>
+                            <div className="flex items-center gap-4 mb-4">
+                                <span className="bg-[#1C1C1E] text-white px-5 py-2 text-sm font-black uppercase tracking-[0.3em] rounded-lg">Operational Oversight Rhythm</span>
+                                <div className="h-[3px] w-48 bg-[#1C1C1E]/10"></div>
+                            </div>
+                            <h1 className="miro-title">
+                                THE MOST <span className="miro-highlight">PS OVERSIGHT</span> MODEL
+                            </h1>
+                        </div>
+
+                        <div className="bg-[#1C1C1E] text-white px-10 py-8 rounded-[3rem] border-[6px] border-[#FFDD33] target-pulse text-center">
+                            <p className="text-[12px] font-black uppercase tracking-widest text-[#FFDD33] mb-2">Intervention Threshold</p>
+                            <p className="text-6xl font-[900] italic leading-none tracking-tighter uppercase">70% <span className="text-3xl">MIN.</span></p>
+                            <p className="text-sm font-black mt-2 uppercase italic tracking-widest text-[#FFDD33]">Raise Alarm Below 42 Hours</p>
+                        </div>
+                    </div>
+
+                    {/* Operational Lifecycle Section */}
+                    <div className="flex gap-8 mb-24 h-[620px]">
+                        {lifecycleSteps.map((step) => (
+                            <div key={step.id} className="flex-1 step-card">
+                                <div className="ghost-number">0{step.id}</div>
+                                <StepIcon type={step.type} />
+                                <h3 className="text-2xl font-[900] italic uppercase leading-tight tracking-tighter mb-4 text-[#1C1C1E] relative z-10">{step.title}</h3>
+                                <p className="text-xl font-bold text-[#1C1C1E]/60 leading-snug mb-4 flex-1 relative z-10">
+                                    {step.details}
+                                </p>
+                                
+                                <div className="space-y-1 mb-4 relative z-10">
+                                    {step.links && step.links.map((link, idx) => (
+                                        <a key={idx} href={link.url} target="_blank" className="action-link">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                            </svg>
+                                            {link.label}
+                                        </a>
+                                    ))}
+                                </div>
+
+                                <div className="ps-action-pill">
+                                    PS TASK: {step.action}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Bottom Content Area */}
+                    <div className="grid grid-cols-12 gap-10 items-stretch">
+                        {/* Responsibility Comparison Matrix */}
+                        <div className="col-span-9 bg-white border-4 border-[#1C1C1E] rounded-[4rem] p-12 flex flex-col shadow-[16px_16px_0px_#1C1C1E]">
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-xl font-black uppercase tracking-widest text-[#1C1C1E]/40 italic underline decoration-2 underline-offset-8">Accountability Matrix: CSM vs PS</h3>
+                                <div className="flex gap-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-5 h-5 rounded-full bg-[#867AFF] border-2 border-[#1C1C1E]"></div>
+                                        <span className="text-base font-black uppercase tracking-widest">CSM Role</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-5 h-5 rounded-full bg-[#47D1C4] border-2 border-[#1C1C1E]"></div>
+                                        <span className="text-base font-black uppercase tracking-widest">PS Role</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                {matrixRows.map((row, i) => (
+                                    <div key={i} className="grid grid-cols-12 gap-6 items-center">
+                                        <div className="col-span-3 text-2xl font-black uppercase italic tracking-tighter text-[#1C1C1E] leading-tight">{row.label}</div>
+                                        <div className="col-span-4 matrix-cell csm-bg h-full flex items-center">
+                                            <p className="text-lg font-bold text-[#1C1C1E] leading-tight">
+                                                <span className="text-xs font-black uppercase text-[#867AFF] block mb-1">CSM Responsibility</span>
+                                                {row.csm}
+                                            </p>
+                                        </div>
+                                        <div className="col-span-5 matrix-cell ps-bg h-full flex items-center">
+                                            <p className="text-lg font-bold text-[#1C1C1E] leading-tight">
+                                                <span className="text-xs font-black uppercase text-[#47D1C4] block mb-1">PS Responsibility</span>
+                                                {row.ps}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Firm Messaging Block */}
+                        <div className="col-span-3 bg-[#1C1C1E] rounded-[4rem] p-10 flex flex-col justify-center border-[6px] border-white shadow-[16px_16px_0px_#FFDD33]">
+                            <span className="text-[#FFDD33] font-black uppercase tracking-widest text-xs mb-4">Critical Boundary</span>
+                            <h2 className="text-white text-5xl font-[900] italic uppercase leading-[0.85] tracking-tighter mb-6">WE ARE NOT "TAM-LITE"</h2>
+                            <p className="text-white/70 text-base font-bold leading-tight italic">
+                                We provide Process Oversight for a specific subscription. We are technical validators, not multi-year strategic advocates.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {/* Bottom Signature */}
+                    <div className="mt-24 pt-10 border-t-4 border-[#1C1C1E]/5 flex justify-between opacity-30 italic">
+                        <div className="text-sm font-black uppercase tracking-[0.5em]">Oversight Rhythm Engine v3.6</div>
+                        <div className="text-sm font-black uppercase tracking-[0.3em]">© 2025 MIRO PROFESSIONAL SERVICES</div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
