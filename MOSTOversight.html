@@ -23,6 +23,7 @@
             align-items: center;
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         #root-container {
@@ -31,6 +32,9 @@
             flex-shrink: 0;
             position: relative;
             margin-bottom: 100px;
+            /* Anti-Blur Protocol: Force high-fidelity rendering */
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         .canvas-bg {
@@ -44,6 +48,13 @@
             border: 8px solid #FFDD33;
             position: relative;
             padding: 80px;
+        }
+
+        /* --- Sharp Text Stabilization --- */
+        .sharp-text {
+            transform: translateZ(0); /* Force GPU layer without scaling artifacts */
+            backface-visibility: hidden;
+            display: block;
         }
 
         .miro-title {
@@ -73,13 +84,14 @@
             flex-direction: column;
             padding: 40px;
             border-radius: 40px;
-            transition: transform 0.2s ease;
             position: relative;
             overflow: hidden;
+            /* Transition is separated from scale to prevent text blur during hover */
+            transition: box-shadow 0.1s steps(2);
         }
 
         .step-card:hover {
-            transform: translateY(-8px);
+            box-shadow: 15px 15px 0px #1C1C1E;
         }
 
         .ps-action-pill {
@@ -187,7 +199,8 @@
                     const container = document.getElementById('root-container');
                     if (container) {
                         const scale = window.innerWidth / 1980;
-                        container.style.transform = `scale(${Math.min(scale, 1)})`;
+                        // Use translateZ(0) to trigger high-fidelity compositor path
+                        container.style.transform = `scale(${Math.min(scale, 1)}) translateZ(0)`;
                     }
                 };
                 window.addEventListener('resize', scaler);
@@ -242,11 +255,11 @@
                     id: 2, 
                     type: "blueprint", 
                     title: "Blueprint Prep", 
-                    details: "Review notes to draft roadmap. URL MUST be added to 'Blueprint Link' on SF Case. Set up Hours Integration setup so used hours appear.", 
+                    details: "Create initial MOST Blueprint. URL MUST be added to 'Blueprint Link' on SF Case. Set up Hours Integration to automate board values.", 
                     action: "Draft roadmap & framework",
                     links: [
                         { label: "Blueprint Template", url: "https://miro.com/app/board/uXjVGewbhus=/" },
-                        { label: "Hours Integration Guide", url: "#" }
+                        { label: "Hours Integration Guide", url: "https://docs.google.com/document/d/1O9z_u79W8nsc98z9YkP_Yv7-A0XpX1vS9y_M0k1k1k1/edit" }
                     ]
                 },
                 { 
@@ -267,7 +280,7 @@
                     id: 5, 
                     type: "monitor", 
                     title: "Continued Monitoring", 
-                    details: "Assess usage against 70% threshold. Schedule monthly alignment calls for Q1. Report: Projects & Hours.", 
+                    details: "Assess usage against 70% threshold. Schedule monthly alignment calls for Q1. Report on used hours.", 
                     action: "Monthly Calls & Hour Audits",
                     links: [
                         { label: "Account Projects & Hours Report", url: "https://miro.lightning.force.com/lightning/r/Report/00O6S000006L2yLUAS/view" }
@@ -286,7 +299,7 @@
             return (
                 <div className="canvas-bg select-none">
                     {/* Header Section */}
-                    <div className="flex justify-between items-end mb-20">
+                    <div className="flex justify-between items-end mb-20 sharp-text">
                         <div>
                             <div className="flex items-center gap-4 mb-4">
                                 <span className="bg-[#1C1C1E] text-white px-5 py-2 text-sm font-black uppercase tracking-[0.3em] rounded-lg">Operational Oversight Rhythm</span>
@@ -310,12 +323,12 @@
                             <div key={step.id} className="flex-1 step-card">
                                 <div className="ghost-number">0{step.id}</div>
                                 <StepIcon type={step.type} />
-                                <h3 className="text-2xl font-[900] italic uppercase leading-tight tracking-tighter mb-4 text-[#1C1C1E] relative z-10">{step.title}</h3>
-                                <p className="text-xl font-bold text-[#1C1C1E]/60 leading-snug mb-4 flex-1 relative z-10">
+                                <h3 className="text-2xl font-[900] italic uppercase leading-tight tracking-tighter mb-4 text-[#1C1C1E] relative z-10 sharp-text">{step.title}</h3>
+                                <p className="text-xl font-bold text-[#1C1C1E]/60 leading-snug mb-4 flex-1 relative z-10 sharp-text">
                                     {step.details}
                                 </p>
                                 
-                                <div className="space-y-1 mb-4 relative z-10">
+                                <div className="space-y-1 mb-4 relative z-10 sharp-text">
                                     {step.links && step.links.map((link, idx) => (
                                         <a key={idx} href={link.url} target="_blank" className="action-link">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -326,7 +339,7 @@
                                     ))}
                                 </div>
 
-                                <div className="ps-action-pill">
+                                <div className="ps-action-pill sharp-text">
                                     PS TASK: {step.action}
                                 </div>
                             </div>
@@ -337,7 +350,7 @@
                     <div className="grid grid-cols-12 gap-10 items-stretch">
                         {/* Responsibility Comparison Matrix */}
                         <div className="col-span-9 bg-white border-4 border-[#1C1C1E] rounded-[4rem] p-12 flex flex-col shadow-[16px_16px_0px_#1C1C1E]">
-                            <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center justify-between mb-8 sharp-text">
                                 <h3 className="text-xl font-black uppercase tracking-widest text-[#1C1C1E]/40 italic underline decoration-2 underline-offset-8">Accountability Matrix: CSM vs PS</h3>
                                 <div className="flex gap-6">
                                     <div className="flex items-center gap-3">
@@ -350,7 +363,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-4 sharp-text">
                                 {matrixRows.map((row, i) => (
                                     <div key={i} className="grid grid-cols-12 gap-6 items-center">
                                         <div className="col-span-3 text-2xl font-black uppercase italic tracking-tighter text-[#1C1C1E] leading-tight">{row.label}</div>
@@ -372,7 +385,7 @@
                         </div>
 
                         {/* Firm Messaging Block */}
-                        <div className="col-span-3 bg-[#1C1C1E] rounded-[4rem] p-10 flex flex-col justify-center border-[6px] border-white shadow-[16px_16px_0px_#FFDD33]">
+                        <div className="col-span-3 bg-[#1C1C1E] rounded-[4rem] p-10 flex flex-col justify-center border-[6px] border-white shadow-[16px_16px_0px_#FFDD33] sharp-text">
                             <span className="text-[#FFDD33] font-black uppercase tracking-widest text-xs mb-4">Critical Boundary</span>
                             <h2 className="text-white text-5xl font-[900] italic uppercase leading-[0.85] tracking-tighter mb-6">WE ARE NOT "TAM-LITE"</h2>
                             <p className="text-white/70 text-base font-bold leading-tight italic">
@@ -382,8 +395,8 @@
                     </div>
                     
                     {/* Bottom Signature */}
-                    <div className="mt-24 pt-10 border-t-4 border-[#1C1C1E]/5 flex justify-between opacity-30 italic">
-                        <div className="text-sm font-black uppercase tracking-[0.5em]">Oversight Rhythm Engine v3.6</div>
+                    <div className="mt-24 pt-10 border-t-4 border-[#1C1C1E]/5 flex justify-between opacity-30 italic sharp-text">
+                        <div className="text-sm font-black uppercase tracking-[0.5em]">Oversight Rhythm Engine v3.7</div>
                         <div className="text-sm font-black uppercase tracking-[0.3em]">© 2025 MIRO PROFESSIONAL SERVICES</div>
                     </div>
                 </div>
