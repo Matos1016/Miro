@@ -111,7 +111,7 @@
                 owner: "Sales → ProServ",
                 color: "#867AFF",
                 summary: "Internal handshake post-activation. PS sets up the MOST Blueprint as the 24/7 engagement hub.",
-                icon: "M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100-8 4 4 0 000 8zM19 8l-2 2 2 2m-2-2h6",
+                icon: "M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3V7z M9 4v13 M15 7v13",
                 playbook: {
                     objective: "Ensure context transfer and establish a single source of truth for all deliverables and history.",
                     csmActions: [
@@ -141,14 +141,15 @@
                         "Lead the Kickoff Call: Align on the pooled expert model and the 15h/week max pacing rule.",
                         "Limit Requesters: Identify a max of 3 pre-approved contacts authorized to consume hours.",
                         "Establish Backlog: Prioritize workstreams and document success criteria.",
-                        "Set Expectations: Remind the customer that unused hours reset at Miro's fiscal quarter start."
+                        "Set Expectations: Remind the customer that unused hours reset at Miro's fiscal quarter start.",
+                        "Alignment: Review the Oversight Hub for kickoff call guidance and the Responsibility Matrix (CSM vs PS)."
                     ],
                     mechanics: [
                         { label: "Hours per Q", value: "60 Hours (Fiscal Calendar)" },
                         { label: "Weekly Ceiling", value: "15 Hours Max" },
                         { label: "Min Increment", value: "4 Hours per engagement" }
                     ],
-                    proTip: "Pick an 'Easy Win' like Jira cleanup or Template Standardisation for Month 1 to build early momentum."
+                    proTip: "Pick an 'Easy Win' like Jira cleanup or Template Standardization for Month 1 to build early momentum."
                 }
             },
             {
@@ -157,15 +158,14 @@
                 title: "Initiate Work Intake",
                 owner: "CSM",
                 color: "#FF8CDE",
-                summary: "Triggering expert assignment for project execution via Salesforce case management.",
-                icon: "M12 19l9 2-9-18-9 18 9-2zm0 0v-8",
+                summary: "Work with your PS resource to scope out work for at least the first quarter (60 hours) of the program. You can use the \"Most Planning Assistant\" Sidekick to build out your plan!",
                 playbook: {
                     objective: "Maintain quality intake to minimize assignment delays and resource mismatch.",
                     csmActions: [
                         "Primary Intake: Submit a Salesforce 'MOST Engagement Case' strictly at the ACCOUNT LEVEL (avoiding the subscription level).",
                         "Selection: You must select 'Create a Services Request' when creating the new case record.",
                         "Scoping Detail: Provide any discovery or scoping work already completed. Review the Frameworks Sheet to help scope estimated hours.",
-                        "Good Case Example (Estimated Effort: 32 Hours):\n• Objective: Standardize PI Planning for 'Project Alpha' (12 squads).\n• Context: Customer manually copies 200+ cards/month. Access verified for PS Specialist.\n• Technical Scope: Deploy Jira-Miro Sync for projects ORN & SKY; map 'Story Points' and 'Epic Link'.\n• Deliverables: 1 Master Program Board with auto-populating epics + 12 individual Team Boards.\n• Success Criteria: Zero manual card creation for next PI; data parity verified in Miro vs Jira.",
+                        "Intake Criteria: Ensure the following details are included to prepare the delivery resource:\n• Desired Outcomes: Clear definition of what success looks like for the customer and the end-user.\n• Miro Functionality: Specific tools or features required (e.g., Templates, Sidekicks, MCP, diagramming, etc.).\n• Domain Expertise: Required specialist profile (e.g., Agile Coach, Developer, Design Thinker).\n• Timing & Pacing: Expected start date, delivery milestones, and urgency.\n• Technical Context: Links to relevant boards, source data, and existing workflows.",
                         "Case Quality: Ensure the case captures: Specific Business Objective, Problem Statement, and measurable Success Metrics."
                     ],
                     mechanics: [
@@ -342,7 +342,7 @@
                                         <div className="flex items-center gap-8">
                                             <div className="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] flex items-center justify-center border-4 border-[#1C1C1E] shadow-[8px_8px_0px_#1C1C1E]" style={{ backgroundColor: selectedStep.color }}>
                                                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                    <path d={selectedStep.icon} />
+                                                    <path d={selectedStep.icon || "M12 19l9 2-9-18-9 18 9-2zm0 0v-8"} />
                                                 </svg>
                                             </div>
                                             <div>
@@ -367,13 +367,16 @@
                                                 {selectedStep.playbook.csmActions.map((action, i) => (
                                                     <li key={i} className="flex gap-6 group">
                                                         <div className="w-10 h-10 rounded-2xl bg-[#1C1C1E] text-white flex items-center justify-center shrink-0 mt-0.5 text-[14px] font-black shadow-[5px_5px_0px_#47D1C4] group-hover:shadow-[5px_5px_0px_#FF8CDE] transition-all">0{i+1}</div>
-                                                        <p className={`text-[17px] font-bold whitespace-pre-line leading-relaxed ${action.includes('ACCOUNT LEVEL') || action.includes('Services Request') || action.includes('Good Case Example') || action.includes('Estimated Effort') || action.includes('Frameworks Sheet') ? 'text-[#1C1C1E]' : 'text-black/70'}`}>
-                                                            {action.split(/(ACCOUNT LEVEL|Create a Services Request|Good Case Example|Estimated Effort: 32 Hours|Frameworks Sheet)/).map((part, index) => {
-                                                                if (part === 'ACCOUNT LEVEL' || part === 'Create a Services Request' || part === 'Good Case Example' || part === 'Estimated Effort: 32 Hours') {
+                                                        <p className={`text-[17px] font-bold whitespace-pre-line leading-relaxed ${action.includes('ACCOUNT LEVEL') || action.includes('Services Request') || action.includes('Intake Criteria') || action.includes('Estimated Effort') || action.includes('Frameworks Sheet') || action.includes('Oversight Hub') || action.includes('Responsibility Matrix') ? 'text-[#1C1C1E]' : 'text-black/70'}`}>
+                                                            {action.split(/(ACCOUNT LEVEL|Create a Services Request|Intake Criteria|Estimated Effort: 32 Hours|Frameworks Sheet|Oversight Hub|Responsibility Matrix)/).map((part, index) => {
+                                                                if (part === 'ACCOUNT LEVEL' || part === 'Create a Services Request' || part === 'Intake Criteria') {
                                                                     return <span key={index} className="bg-[#FFDD33] px-1 rounded shadow-sm text-[#1C1C1E] font-black italic">{part}</span>;
                                                                 }
                                                                 if (part === 'Frameworks Sheet') {
                                                                     return <a key={index} href="https://docs.google.com/spreadsheets/d/1-x3-A1EWIuRFE1gINIvapQ7jYKDytsuBzYbz9dnF4fk/edit?usp=sharing" target="_blank" className="text-[#867AFF] underline decoration-2 underline-offset-4 hover:text-[#47D1C4] transition-colors">{part}</a>;
+                                                                }
+                                                                if (part === 'Oversight Hub' || part === 'Responsibility Matrix') {
+                                                                    return <a key={index} href="https://matos1016.github.io/Miro/MOSTOversight.html" target="_blank" className="text-[#867AFF] underline decoration-2 underline-offset-4 hover:text-[#47D1C4] transition-colors">{part}</a>;
                                                                 }
                                                                 return part;
                                                             })}
